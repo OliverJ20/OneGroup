@@ -4,7 +4,7 @@
 DIR=/etc/openvpn;
 ERSA=$DIR/easy-rsa;
 KEYS=$DIR/keys
-HOME=/usr/share/onegroup/keys
+HOME=/usr/local/onegroup/keys
 
 #Get client's dir
 CLIENT=$1;

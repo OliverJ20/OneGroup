@@ -18,6 +18,7 @@ source ./vars
 CLIENT_CONF="$CLIENT.conf";
 CLIENT_CERT="$CLIENT.crt";
 CLIENT_KEY="$CLIENT.key";
+CLIENT_CSR="$CLIENT.csr";
 
 #Create new config file and change key and cert sections
 cp $DIR/client.conf $DIR/$CLIENT_CONF;
@@ -28,7 +29,7 @@ sudo sed -i -e 's,key client.key,key '"$CLIENT_KEY"',g' $DIR/$CLIENT_CONF;
 
 #create directory and move key/certs into it
 mkdir $KEYS/$CLIENT
-mv $CLIENT_CERT $CLIENT_KEY $CLIENT_CONF $KEYS/$CLIENT 
-
+mv $DIR/$CLIENT_CONF $KEYS/$CLIENT_CERT $KEYS/$CLIENT_KEY $KEYS/$CLIENT_CSR $KEYS/$CLIENT
+ 
 #Exit gracefully
 exit 0;
