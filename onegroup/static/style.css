@@ -1,0 +1,263 @@
+*   {
+    font-family: Tahoma, sans-serif;
+}
+
+statustext    {
+    color: RED;
+    font-weight: bold;
+    background-color: #e0e0e0;
+    padding: 3px 3px 3px 0;
+}
+
+td    {
+    background-color: #e0e0e0;
+}
+
+tr:first-child    {
+    background-color: #00979d;
+}
+
+th    {
+    width:10%;
+    color: #ffffff;
+}
+
+input    {
+    margin-bottom: 2%;
+}
+
+button    {
+    display:inline-block;
+    color: #ffffff;
+    background-color: #00979d;
+    font-weight: bolder;
+    border: none;
+    padding: 15px 32px;
+    font-size: 14px;
+}
+
+button:hover    {
+    color:#000000;
+    background-color: #ffffff;
+}
+
+.button-wide    {
+    width: 100%;
+}
+
+footer    {
+    color: #ffffff;
+    clear: both;
+    text-align: center;
+    background-color: #006e72;
+    width: 101%;
+    margin: 0 auto;
+    position: relative;
+    margin-left: -7px;
+    padding: 5px 1px 5px 1px;
+    margin-bottom: -8px;
+}
+
+#headContainer    {
+    margin-left: -8px;
+    margin-top: -8px;
+    width:101%;
+    padding-right: 3px;
+    height:150px;
+    clear:both;
+    background-color: #00979d;
+    color: #ffffff;
+}
+
+#headCenter h1    {
+   font-size: 36pt;
+   letter-spacing: -0.05em;
+   z-index: 1;
+   color: #ffffff;
+   text-align: center;
+}
+
+#headCenter h1 a:link    {
+    text-decoration: none;
+    border-bottom: 3px solid #ffffff;
+}
+
+#headCenter h1 a:hover    {
+   border-bottom-color: green;
+}
+
+#headLeft    {
+    margin-right: 4%;
+    vertical-align: bottom;
+    width:30%;
+    height: inherit;
+    float:left;
+}
+
+#headCenter p    {
+    margin-top: -5%;
+    text-align: center;
+}
+
+#headLeft img    {
+    position: relative;
+    padding-top: 10%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+#headCenter    {
+    margin-right: 4%;
+    width:30%;
+    height: inherit;
+    float:left;
+}
+
+#headRight    {
+    margin-left: 2%;
+    width:30%;
+    text-align: left;
+    height: inherit;
+    float:left;
+    background-color: #006e72;
+}
+
+#headRight p, statustext    {
+    padding-left: 10%;
+}
+
+
+#headRight button    {
+    margin-left: 10%;
+}
+
+#headRight a {
+	color: #ffffff;
+	text-decoration: none;
+}
+
+#headRight h5 {
+	margin-top:-2%;
+	margin-left:10%;
+	font-size:20px;
+}
+
+#headRight .inner {
+  float:left;
+  width:50%;
+  height:50%;
+}
+
+#headRight .inner button{
+	margin-top:10px;
+}
+
+
+nav ul    {
+    margin-left: -8px;
+    margin-top: -5%;
+    background-color: #006e72;
+    text-align: center;
+    list-style: none;
+    overflow: auto;
+    height: 50px;
+    width: 98%;
+    padding-right: 3px;
+}
+
+nav ul li a:hover    {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+nav ul li a    {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: bolder;
+    display: inline-block;
+    float: left;
+    width: 24%;
+    text-decoration: none;
+}
+
+body .contentDiv    {
+    width: 100%;
+    margin-bottom: 3%;
+}
+
+body .contentDiv h1    {
+    margin-top: 15%;
+}
+
+body .contentDiv #bodydiv    {
+    text-align: center;
+}
+
+body .contentDiv .bodydiv #SecPolicy    {
+
+}
+
+body .contentDiv .bodydiv #UserPaths    {
+
+}
+
+body .contentDiv #bodydivleft    {
+    float: left;
+    margin-right: 10%;
+    width: 45%;
+}
+
+body .contentDiv #bodydivright    {
+    float: left;
+    width: 45%;
+}
+
+body .contentDiv #logSettings    {
+    margin-left: 10%;
+    margin-right: 10%;
+    width: 80%;
+    height: 60%;
+    text-align: center;
+}
+
+body .contentDiv #logSettings #infoDiv   {
+    float: left;
+    width: 60%;
+    height: 100%;
+}
+
+body .contentDiv #logSettings #exportSettings    {
+    float: left;
+    width: 40%;
+    height: 100%;
+}
+
+body .contentDiv #midDiv    {
+    width: 100%;
+}
+
+body .contentDiv #formDivleft    {
+    display: none;
+    float: left;
+    margin-left: -10%;
+    text-align: center;
+    width: 50%;
+}
+
+body .tableTitleDiv    {
+    background-color: #00979d;
+    width: 33%;
+    float: left;
+}
+
+body .tableContentDiv    {
+    width: 33%;
+    float: left;
+}
+
+body .loginDiv    {
+    
+}

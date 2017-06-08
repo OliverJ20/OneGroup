@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div id= "formDiv">
+        <div class="contentDiv">
+            <div class= "bodydiv">
+                <div class= "bodydiv" id= "formDiveft">
+                    <h2>Enter User Details</h2>
+                    <form form action="/userforms.html" id="detailsLeft" method="POST">
+                        <p>Name</p>
+                        <input type="text" name="name1" maxlength="40" required value="{{ name }}"> </input>
+
+                        <p>Email</p>
+                        <input type="text" name="email1" maxlength="40"> </input>
+
+                        <p>Password</p>
+                        <input type="text" name="pass1" maxlength="40"> </input>
+
+                        <p>(Altenrative) Security Key</p>
+                        <input type="text" name="key1" maxlength="15"> </input>
+                        <br>
+                        <input type="submit" name="userforms" value="Send">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br  />
+    <br  />
+{% endblock %}

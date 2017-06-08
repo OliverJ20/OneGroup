@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel= "stylesheet" type = text/css href =  "{{ url_for('static', filename='style.css') }}">
+        <script type="text/javascript" src="{{ url_for('static', filename='script.js') }}"></script>
+        <meta charset="utf-8" />
+        <meta name="description" content= "Ernest Foo gonna bring it to you" />
+        <meta name="viewport" content="width=device-width, initial-scale=0.5" />
+        <title>OneGroup OpenVPN Solution</title>
+    </head>
+
+    {% block header %}
+        <div id="headContainer">
+            <div id="headLeft">
+                <img src="{{ url_for('static', filename = 'logo.png') }}"
+                     width="150" height="75"/>
+            </div>
+            <div id="headCenter">
+                <h1>OneGroup</h1><p>OpenVPN Management Solution</p>
+            </div>
+            <div id="headRight">
+				<div id = "topleft" class="inner" >
+					<p> Network Status:</p> <statustext>OFFLINE </statustext>
+				</div>
+				<div id = "topright" class="inner" >
+					<p> Current Users:</p><h5> <a href="index">10</a> </h5>
+				</div>
+				<div id = "bottomleft" class="inner">
+					<button onclick="myFunction()">Turn On</button>
+				</div>
+				<div id = "bottomright" class="inner">
+					<button><a href="logout">Logout</a></button>
+				</div>
+            </div>
+        </div>
+        <nav>
+            <ul>
+                <li>
+                    <a href="index">Home</a>
+                </li>
+                <li class="alternate">
+                    <a href="logs">Logs</a>
+                </li>
+                <li>
+                    <a href="config">Configuration</a>
+                </li>
+                <li class="alternate">
+                    <a href="users">Users</a>
+                </li>
+            </ul>
+        </nav>
+    {% endblock %}
+
+    {% block body %}
+    {% endblock %}
+
+    <footer>
+        <p> VPN Management</P>
+        <h4>
+          OneGroup.
+        </h4>
+    </footer>
+</html>

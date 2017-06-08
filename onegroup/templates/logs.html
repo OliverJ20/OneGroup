@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block body %}
+    <body>
+        <div class="contentDiv">
+            <div id="logSettings">
+                <h2>Log Settings</h2>
+                <div id="infoDiv">
+                    <h2>Time</h2>
+                    <form action="." name="timeStamp" id="timeBracket" onsubmit="validateForm()" method="POST">
+                        Start Date: <input type="date" name="startDate">
+                        End Date: <input type="date" name="endDate">
+                    </form>
+                </div>
+                <div id="exportSettings">
+                    <h2>Export Settings</h2>
+                    <form action="." name="settings" id="fileSettings" onsubmit="validateForm()" method="POST">
+                    </form>
+                </div>
+            </div>
+            <br  />
+            <br  />
+            <br  />
+            <br  />
+            <br  />
+            <br  />
+            <div id="midDiv">
+                <center>
+                    <button id="preview">Preview Logs</button>
+                    <button id="export">Export Logs</button>
+                </center>
+            </div>
+            {% if False %}
+            <div class="" id="previewDiv">
+            </div>
+            {% endif %}
+        </div>
+    </body>
+{% endblock %}
+
+

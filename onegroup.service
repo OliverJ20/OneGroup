@@ -1,0 +1,10 @@
+[Unit]
+Description=Test Script
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python3 -c "from onegroup.views import run_server; run_server()"
+
+[Install]
+WantedBy=multi-user.target

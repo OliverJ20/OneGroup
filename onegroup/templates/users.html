@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+{% block body %}
+    <body>
+        <center>
+        <div class="contentDiv" >
+            <div class= "contentDiv" id= "bodydiv">
+                <h2>User Information</h2>
+            </div>
+            <div id= "bodydivleft">
+                <h2>User Permissions</h2>
+                <div class="tableTitleDiv">
+                    <p>User</p>
+                </div>
+                <div class="tableTitleDiv">
+                    <p>Group</p>
+                </div>
+                <div class="tableTitleDiv">
+                    <p>Deny Access</p>
+                </div>
+                <div class="tableContentDiv">
+                    <p>Search Users:</p> <input type="text">
+                    <button onclick="myFunction()">Search</button>
+                </div>
+                <div class="tableContentDiv">
+                    <p>Select Group</p>
+                    <select>
+                        <option value="1">Group 1</option>
+                        <option value="2">Group 2</option>
+                    </select>
+                </div>
+                <div class="tableContentDiv">
+                    <p>Deny Access?</p>
+                    <input type="checkbox" name="deny" value="denied">
+                </div>
+                <button onclick="myFunction()">Confirm Changes</button>
+            </div>
+            <div id= "bodydivright">
+                <h2>Group Permissions</h2>
+                <div class="tableTitleDiv">
+                    <p>User</p>
+                </div>
+                <div class="tableTitleDiv">
+                    <p>Group</p>
+                </div>
+                <div class="tableTitleDiv">
+                    <p>Deny Access</p>
+                </div>
+                <div class="tableContentDiv">
+                    <p>Search Users:</p> <input type="text">
+                    <button onclick="myFunction()">Search</button>
+                </div>
+                <div class="tableContentDiv">
+                    <p>Select Group</p>
+                    <select>
+                        <option value="1">Group 1</option>
+                        <option value="2">Group 2</option>
+                    </select>
+                </div>
+                <div class="tableContentDiv">
+                    <p>Deny Access?</p>
+                    <input type="checkbox" name="deny" value="denied">
+                </div>
+                <button onclick="myFunction()">Confirm Changes</button>
+                <br>
+                <br>
+                <br>
+                <br>
+
+            </div>
+            <h1> Current Activity </h1>
+            <table>
+                <tr>
+                    <th>Users</th>
+                    <th>Address</th>
+                    <th>Rules/Filtering</th>
+                    <th>Connection Type</th>
+                    <th>Connection Expires</th>
+
+                </tr>
+                <tr>
+                    <td>SebShery</td>
+                    <td>192.168.0.1</td>
+                    <td>Check Rules</td>
+                    <td>Bridge</td>
+                    <td>10/05/2017</td>
+                </tr>
+                <tr>
+                    <td>JaysTurn</td>
+                    <td>192.168.0.1</td>
+                    <td>Check Rules</td>
+                    <td>Route</td>
+                    <td>11/05/2017</td>
+                </tr>
+                <tr>
+                    <td>OlivJohn</td>
+                    <td>192.168.0.1</td>
+                    <td>Check Rules</td>
+                    <td>Route</td>
+                    <td>12/05/2017</td>
+                </tr>
+            </table>
+        </div>
+        </center>
+    </body>
+{% endblock %}
+
