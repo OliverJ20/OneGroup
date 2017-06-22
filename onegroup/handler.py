@@ -46,7 +46,7 @@ def createUser(name, passwd, email):
     user = {"Name" : name, "Email" : email, "Password": sha256_crypt.hash(passwd), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : createUserFilename(name), "Key_Distributed" : 0}
 
     #create the users key/cert pair
-    #subprocess.call(shlex.split('scripts/gen_user.sh {}'.format(user["Keys"])))
+    subprocess.call(shlex.split('scripts/user_gen.sh {}'.format(user["Keys"])))
 
     #Add user to the database
     db.insert("users",user)
@@ -54,6 +54,17 @@ def createUser(name, passwd, email):
     #close database connection
     db.close()
           
+
+def zipUserKeys(user):
+    """
+        creates a zip file with the client's key/cert pair
+
+        user : str : the filename of the client
+    """
+    #create the users key/cert pair
+    subprocess.call(shlex.split('scripts/user_dist.sh {}'.format(user)))
+
+
 
 def createUserFilename(name):
     """

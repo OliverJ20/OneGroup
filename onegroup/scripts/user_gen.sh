@@ -3,6 +3,7 @@
 #Vars
 DIR=/etc/openvpn;
 ERSA=$DIR/easy-rsa;
+KEYS=$DIR/keys
 #CA="CA.key";
 
 #Create client's filename
@@ -24,6 +25,10 @@ cp $DIR/client.conf $DIR/$CLIENT_CONF;
 #sudo sed -i -e 's,ca ca.crt,ca '"$CA"',g' $DIR/$CLIENT_CONF;
 sudo sed -i -e 's,cert client.crt,cert '"$CLIENT_CERT"',g' $DIR/$CLIENT_CONF;
 sudo sed -i -e 's,key client.key,key '"$CLIENT_KEY"',g' $DIR/$CLIENT_CONF;
+
+#create directory and move key/certs into it
+mkdir $KEYS/$CLIENT
+mv $CLIENT_CERT $CLIENT_KEY $CLIENT_CONF $KEYS/$CLIENT 
 
 #Exit gracefully
 exit 0;
