@@ -1,6 +1,6 @@
 #Cherrypy imports
-#import cherrypy
-#from paste.translogger import TransLogger
+import cherrypy
+from paste.translogger import TransLogger
 
 from flask import Flask, render_template, redirect, url_for, request, session, abort
 from functools import wraps
@@ -149,24 +149,24 @@ def userforms():
 #
 #Cherrypy server base
 #
-#def run_server():
+def run_server():
     #Enable WSGI access logging with paste
-#    app_logged = TransLogger(app)
+    app_logged = TransLogger(app)
 
     #Mount app on the root directory
-#    cherrypy.tree.graft(app_logged,'/')
+    cherrypy.tree.graft(app_logged,'/')
 
     #Configure web server
-#    cherrypy.config.update({
-#	'engine.autoreload_on': True,
-#	'log.screen': True,
-#	'server.socket_port': 80,
-#	'server.socket_host': '0.0.0.0'
-#   })
+    cherrypy.config.update({
+	'engine.autoreload_on': True,
+	'log.screen': True,
+	'server.socket_port': 80,
+	'server.socket_host': '0.0.0.0'
+    })
 
     #Start WSGI web server
-#    cherrypy.engine.start()
-#    cherrypy.engine.block()
+    cherrypy.engine.start()
+    cherrypy.engine.block()
 
 if __name__ == '__main__':
     #Initalise database

@@ -13,17 +13,23 @@ class PostDevelopCommand(develop):
     """Post-Installation for development mode"""
     def run(self):
         develop.run(self)
+        postInstallProcedure()
 
 class PostInstallCommand(install):
     """Post-Installation for install"""
     def run(self):
         install.run(self)
-        #print(os.path.dirname(os.path.realpath(__file__)))
-        subprocess.call(shlex.split('mkdir {}'.format(DIR)))
-        subprocess.call(shlex.split('mv {} {}'.format(SERVICE,SYSTEM)))
-        subprocess.call(shlex.split('chmod {} {}'.format("644",SYSTEM+"/"+SERVICE)))
-        subprocess.call(shlex.split('systemctl {}'.format("daemon-reload")))
-        subprocess.call(shlex.split('systemctl {} {}'.format("enable",SERVICE))) 
+        postInstallProcedure()
+
+def postInstallProcedure():
+    """ 
+        Global post install procedure
+    """
+    subprocess.call(shlex.split('mkdir {}'.format(DIR)))
+    subprocess.call(shlex.split('mv {} {}'.format(SERVICE,SYSTEM)))
+    subprocess.call(shlex.split('chmod {} {}'.format("644",SYSTEM+"/"+SERVICE)))
+    subprocess.call(shlex.split('systemctl {}'.format("daemon-reload")))
+    subprocess.call(shlex.split('systemctl {} {}'.format("enable",SERVICE))) 
 
 setup(
     name = 'OneGroup',
@@ -41,7 +47,7 @@ setup(
         'Programming Language :: Python :: 3.5',
     ],
     keywords='OpenVPN web management client',
-    url= 'https://github.com/SebSherry/CapstoneTeam1',
+    url= 'https://github.com/SebSherry/OneGroup',
     author='Capstone Group One',
     author_email='CapstoneGroupOne@gmail.com',
     license='MIT',
@@ -49,7 +55,8 @@ setup(
     install_requires=[
         'flask',
         'cherrypy',
-        'passlib'
+        'passlib',
+        'paste'
     ],
     cmdclass={
         'develop': PostDevelopCommand,
