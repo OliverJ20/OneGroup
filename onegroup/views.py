@@ -2,7 +2,7 @@
 import cherrypy
 from paste.translogger import TransLogger
 
-from flask import Flask, render_template, redirect, url_for, request, session, abort
+from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash
 from functools import wraps
 try:
     import onegroup.handler as hl
@@ -81,6 +81,18 @@ def show_logs():
     return render_template('logs.html')
 
 
+@app.route('/test')
+def test():
+    return send_file('static\\' + 'test' + '.txt')
+    ##return send_file('static\\' + session.get('Name') + '.txt') TO BE ADDED WHEN I GET LOGINS WORKING
+
+
+@app.route('/download')
+@client_required
+def download():
+    return render_template('download.html')
+	
+	
 @app.route('/clients/<username>')
 @client_required
 def show_user_keys(username):
@@ -102,6 +114,7 @@ def login():
         password = request.form['psw']
         if not hl.confirmLogin(email, password):
             error = "Invalid Username or Password"
+            flash(error)
         else:
             session['logged_in'] = True
             if hl.confirmUser(email) and hl.confirmClient(email):
@@ -138,6 +151,11 @@ def confirm():
     
     return render_template('confirm.html', confirmed=confirmed)
 
+	
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('error.html'), 404
+	
 
 def userforms():
     if request.method == 'POST':

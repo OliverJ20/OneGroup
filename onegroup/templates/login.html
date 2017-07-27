@@ -5,6 +5,17 @@
         <center>
             <img src="static/logoblue.png"
                  width="150" height="75"/>
+            <div id="alertDiv">
+            {% with messages = get_flashed_messages() %}
+             {% if messages %}
+               <ul class=flashes>
+               {% for message in messages %}
+                 <li>{{ message }}</li>
+               {% endfor %}
+               </ul>
+             {% endif %}
+           {% endwith %}
+         </div>
             <form action="{{ url_for('login') }}" method=post>
                 <div id="loginDiv">
                     <h3> Login Details</h3>
@@ -15,7 +26,7 @@
                     <button type="submit" value="Login">Login</button>
                     <br  />
                     <br  />
-                    <a href = "#"> Lost Certificate?</a>
+                    <a href = "{{ url_for('download') }}"> Lost Certificate?</a>
                 </div>
             </form>
         </center>

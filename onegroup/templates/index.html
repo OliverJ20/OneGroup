@@ -10,7 +10,6 @@
                     <th>Rules/Filtering</th>
                     <th>Connection Type</th>
                     <th>Connection Expires</th>
-                    <th></th>
                 </tr>
                 <tr><td>SebShery</td><td>192.168.0.1</td><td>Check Rules</td><td>Bridge</td><td>10/05/2017</td></tr>
                 <tr><td>JaysTurn</td><td>192.168.0.1</td><td>Check Rules</td><td>Route</td><td>11/05/2017</td></tr>
@@ -20,17 +19,32 @@
             <div id= "bodydiv">
                 <div class= "bodydiv" id= "formDivleft">
                     <h2>Enter User Details</h2>
-                    <form action="{{ url_for('home') }}" name="userForm" id="detailsLeft" method=post>
+                    <form action="{{ url_for('home') }}" vname="userForm" id="detailsLeft" method=post>
                         <p>Name</p>
                         <input type="text" name="name1" placeholder="Enter Name" maxlength="40" > </input>
 
                         <p>Email</p>
-                        <input type="text" name="email1" placeholder="Enter Email" maxlength="40"> </input>
+                        <input type="text" name="email1" placeholder="Enter Email" onkeyup="checkForm()" maxlength="40"> </input>
 
                         <p>Password</p>
                         <input type="text" name="pass1" placeholder="Enter Password" maxlength="40"> </input>
 
-                        <input type="submit" name="userforms" value="Send">
+                        <p>Account Type</p>
+                        <select name="accountType1">
+                            <option value="Client">Client</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+
+                        <p>Authentication Type</p>
+                        <select name="authType1">
+                            <option value="Password">Username & Password</option>
+                            <option value="Radius">Radius</option>
+                            <option value="Phone">Phone</option>
+                        </select>
+                        <br></br>
+                        <div class= "bodydiv" div id = "submitDiv">
+                          <input type="submit" onclick="submitForm()" name="userforms" value="Send"></input>
+                        </div>
                     </form>
                 </div>
                 <h2>VPN Status</h2>
