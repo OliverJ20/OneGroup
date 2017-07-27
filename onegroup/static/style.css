@@ -2,15 +2,30 @@
     font-family: Tahoma, sans-serif;
 }
 
+html,body
+{
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    overflow-x: hidden;
+}
+
+body center img{
+  padding-top: 5%;
+}
+
 statustext    {
-    color: RED;
     font-weight: bold;
-    background-color: #e0e0e0;
     padding: 3px 3px 3px 0;
+    margin-left: 10%;
+    color: #db2727;
+    /*color: #37f925; GREEN*/
 }
 
 td    {
     background-color: #e0e0e0;
+    font-size: 12px;
 }
 
 tr:first-child    {
@@ -32,8 +47,8 @@ button    {
     background-color: #00979d;
     font-weight: bolder;
     border: none;
-    padding: 15px 32px;
-    font-size: 14px;
+    padding: 10px 20px;
+    font-size: 11px;
 }
 
 button:hover    {
@@ -45,36 +60,46 @@ button:hover    {
     width: 100%;
 }
 
+.contentPush
+{
+    min-height: 70%;
+    min-height: -webkit-calc(100% - 320px);
+    min-height: -moz-calc(100% - 320px);
+    min-height: calc(100% - 320px);
+    margin: 0 10% 0 10%
+}
+
 footer    {
     color: #ffffff;
     clear: both;
     text-align: center;
     background-color: #006e72;
-    width: 101%;
+    width: 100%;
     margin: 0 auto;
     position: relative;
-    margin-left: -7px;
-    padding: 5px 1px 5px 1px;
+    padding: 5px 0 5px 0;
     margin-bottom: -8px;
 }
 
 #headContainer    {
     margin-left: -8px;
     margin-top: -8px;
-    width:101%;
-    padding-right: 3px;
-    height:150px;
+    height:140px;
     clear:both;
     background-color: #00979d;
     color: #ffffff;
 }
 
 #headCenter h1    {
-   font-size: 36pt;
+   font-size: 30pt;
    letter-spacing: -0.05em;
    z-index: 1;
    color: #ffffff;
    text-align: center;
+   padding-top: 1%;
+}
+#headCenter p {
+  font-size: 12pt;
 }
 
 #headCenter h1 a:link    {
@@ -120,16 +145,11 @@ footer    {
     text-align: left;
     height: inherit;
     float:left;
-    background-color: #006e72;
 }
-
-#headRight p, statustext    {
-    padding-left: 10%;
-}
-
 
 #headRight button    {
-    margin-left: 10%;
+    background-color: #006e72;
+    margin-left: 5%;
 }
 
 #headRight a {
@@ -140,7 +160,17 @@ footer    {
 #headRight h5 {
 	margin-top:-2%;
 	margin-left:10%;
-	font-size:20px;
+	font-size:16px;
+}
+
+#headRight p {
+  font-size: 11pt;
+  padding-top: 5%;
+  margin-bottom: -1%;
+}
+
+#headRight h5 a{
+  margin-left:7%;
 }
 
 #headRight .inner {
@@ -161,8 +191,7 @@ nav ul    {
     text-align: center;
     list-style: none;
     overflow: auto;
-    height: 50px;
-    width: 98%;
+    width: 100%;
     padding-right: 3px;
 }
 
@@ -175,7 +204,7 @@ nav ul li a    {
     padding-top: 12px;
     padding-bottom: 12px;
     color: #ffffff;
-    font-size: 20px;
+    font-size: 14px;
     font-weight: bolder;
     display: inline-block;
     float: left;
@@ -189,7 +218,16 @@ body .contentDiv    {
 }
 
 body .contentDiv h1    {
-    margin-top: 15%;
+    padding-top: 22%;
+    font-size: 16pt;
+}
+
+body .contentDiv p   {
+  font-size: 10pt;
+}
+
+body .contentDiv h2   {
+  font-size: 14pt;
 }
 
 body .contentDiv #bodydiv    {
@@ -247,6 +285,24 @@ body .contentDiv #formDivleft    {
     width: 50%;
 }
 
+body .contentDiv #formDivleft  {
+    display: none;
+    float: left;
+    margin-left: -10%;
+    text-align: center;
+    width: 50%;
+}
+body .contentDiv #formDivleft #submitDiv  {
+    display: none;
+}
+
+body center .flashes li{
+  list-style-type: none;
+  color: #ff0000;
+  margin-left: -3%;
+  font-weight: bold;
+}
+
 body .tableTitleDiv    {
     background-color: #00979d;
     width: 33%;
@@ -258,6 +314,6 @@ body .tableContentDiv    {
     float: left;
 }
 
-body .loginDiv    {
-    
+body center .loginDiv {
+  margin-bottom: 5%;
 }
