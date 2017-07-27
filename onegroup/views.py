@@ -151,7 +151,58 @@ def confirm():
     
     return render_template('confirm.html', confirmed=confirmed)
 
-	
+@app.route('/forgot', methods=['GET','POST'])
+def forgotPassword():
+    if request.method == 'POST':
+        email = request.form['email']
+        #Comnfirm the user exist
+        if hl.confirmUser(email):
+            user = hl.getUser("Email",email)
+            refLink = hl.genUrl(user,"Password")
+            #TODO Send email
+            return redirect(url_for('confirm', confirmed = 'Password reset email has been sent.'))
+        else:
+            flash("User doesn't exists")
+
+    return render_template('.html')
+
+@app.route('/password/<code>', methods=['GET','POST'])
+def passwordCode(code):
+    #Check if code exists and for the correct purpose. Else abort
+    if (hl.checkCode(code,"Password")):
+        user = hl.getUserFromCode(code)
+    else:
+        abort(404)
+
+    if request.method == 'POST':
+        #Get new password and handle
+
+
+        #Mark code as used
+        hl.flagCode(code)
+        #return
+
+
+        
+@app.route('/keys/<code>', methods=['GET','POST'])
+def keysCode(code):
+    #Check if code exists and for the correct purpose. Else abort
+    if (hl.checkCode(code,"Password")):
+        user = hl.getUserFromCode(code)
+    else:
+        abort(404)
+
+    if request.method == 'POST':
+        #Get new password and handle
+
+
+        #Mark code as used
+        hl.flagCode(code)
+        #return
+
+
+
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('error.html'), 404
@@ -189,7 +240,7 @@ def run_server():
 if __name__ == '__main__':
     #Initalise database
     hl.init_database()
-    
+     
     #For debugging
     app.run()
 

@@ -1,5 +1,7 @@
 #Imports
 from passlib.hash import sha256_crypt
+import hashlib
+from datetime import datetime
 import subprocess
 import shlex
 
@@ -19,7 +21,7 @@ def init_database():
     #Connect to the database
     db = Database(filename = filen)
 
-    if len(db.retrieveAll("users")) == 0:
+    if len(db.retrieve("users")) == 0:
         #Insert test users
         db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0})
         db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0})
@@ -106,7 +108,7 @@ def getUser(key, value):
     """
     db = Database(filename = filen)
 
-    user = db.retrieve("users", key, value)
+    user = db.retrieve("users", {key : value})
     
     db.close()
     
@@ -160,6 +162,92 @@ def confirmUser(email):
         return True
     else:
         return False
+
+
+def genUrl(user,purpose):
+    """
+        Generates a unique URL for password reset and fecthing keys
+
+        user    : str : The user who owns the url
+        purpose : str : The reason the url is being made 
+
+        returns str fully formed url
+    """
+    db = Database(filename = filen)
+
+    #Create row to insert into the database
+    row = {"Name" : user, "Purpose" : purpose, "Used" : 0}
+    row["Code"] = genCode(user)
+    
+    db.insert("codes",row)
+   
+    db.close()
+
+    return "/user/{}".format(row["Code"])
+
+def genCode(user):
+    """
+        Generates a unique code to be used with URLS
+
+        user : str : the user to generate the code for
+
+        returns str code
+    """
+    secret = "{}{}".format(user,datetime.now().strftime("%Y%m%d%H%M%S%f"))
+    return hashlib.sha512(secret.encode('UTF-8')).hexdigest()
+
+def checkCode(code,purpose):
+    """
+        Checks if a code exists and is for the right purpose
+
+        code    : str : the code to check
+        purpose : str : the intended use for the code
+
+        returns true if correct, else false
+    """
+    db = Database(filename = filen)
+    row = db.retrieve("codes",{"Code" : code, "Purpose" : purpose})
+    db.close()
+
+    if len(row) == 1 and not row["Used"]:
+        return True
+    else:
+        return False
+
+
+def getUserFromCode(code):
+    """
+        Get a user from their unique code
+
+        code : str : unique code
+
+        returns str user name
+    """
+    db = Database(filename = filen)
+    user = db.retrieve("codes",{"Code" : code})
+    db.close()
+
+    return user['Name']
+
+
+def flagCode(code):
+    """
+        Mark a code as used
+
+        code : str : unique code
+    """
+    db = Database(filename = filen)
+    code = db.retrieve("codes",{"Code" : code})
+    db.update("codes",{"Used" : 1},("Code",code))
+    db.close()
+
+    
+
+
+
+
+
+
 
 
 ##

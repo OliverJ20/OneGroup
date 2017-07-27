@@ -16,12 +16,13 @@ class Database:
 
     def check_empty(self):
         #Check if the database is empty. If not the exit
-        cursor = self._db.execute("SELECT name from sqlite_master WHERE type='table';") 
-        if len([x for x in cursor.fetchall()]) > 0:
-            return
+        #cursor = self._db.execute("SELECT name from sqlite_master WHERE type='table';") 
+        #if len([x for x in cursor.fetchall()]) > 0:
+        #    return
         
         #Tables
         self._db.execute('create table IF NOT EXISTS users (ID INTEGER PRIMARY KEY NOT NULL, Name text, Email text, Password text, Auth_Type text, Account_Type text, Keys text, Key_Distributed INTEGER)')
+        self._db.execute('create table IF NOT EXISTS codes (code text PRIMARY KEY NOT NULL, Name text, Purpose text, Used INTEGER)')
 
     def insert(self, table, row):
         keys = sorted(row.keys())
@@ -30,8 +31,18 @@ class Database:
         self._db.execute(q,values)
         self._db.commit()
 
-    def retrieve(self, table, key, val):
-        cursor = self._db.execute('select * from {} where {} = ?'.format(table, key), (val,))
+    def retrieve(self, table, keypairs = None):
+        if keypairs != None:
+            query = 'where'
+            keys = sorted(keypairs.keys())
+            values = tuple([keypairs[k] for k in keys])
+            for key in keys:
+                query += "{} = ? AND".format(key)
+
+            query = query[:-4]
+            cursor = self._db.execute('select * from {} {}'.format(table,query),values)
+        else:
+            cursor = self._db.execute('select * from {}'.format(table))
         
         rows = [dict(row) for row in cursor.fetchall()]
         if len(rows) == 0:
@@ -57,9 +68,9 @@ class Database:
 
         #Remove trailing comma and space
         setStr = setStr[:(len(setStr)-2)]
-        print(setStr) 
+ 
         #execute
-        self._db.execute('update {} set {}  where ID = ?'.format(table,setStr),(ID,))
+        self._db.execute('update {} set {}  where {} = ?'.format(table,setStr,ID[0]),(ID[1],))
         self._db.commit()
 
     def delete(self, table, key, val):
