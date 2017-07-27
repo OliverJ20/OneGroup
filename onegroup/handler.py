@@ -163,14 +163,16 @@ def confirmUser(email):
 
 
 
-def changePassword(userinput):
+def changePassword(name, userinput):
     """
     Changes user password in database
     
+    :param email : user's identifying email
     :param userinput : user's desired password
     :return : 
     """
     db = Database(filename = filen)
-    db.update("users", "Password", sha256_crypt.hash(userinput))
+    user = getUser("Name",name)['ID']
+    db.update("users", {"Password": sha256_crypt.hash(userinput)}, ("ID", user))
     db.close()
   

@@ -68,6 +68,14 @@ def home():
     return render_template('index.html')
 
 
+@app.route('/password', methods=['GET', 'POST'])
+@client_required
+def password():
+    if request.method == 'POST':
+        passwordform()
+        return redirect(url_for('confirm', confirmed = 'Changed Password'))
+    return render_template('password.html')
+
 @app.route('/users')
 @admin_required
 def retrieve_user_page():
@@ -162,9 +170,15 @@ def userforms():
         password = request.form['pass1']
         email = request.form['email1']
         hl.createUser(name,password,email)
-        ##Creates Zip File
         ##user = hl.getUser("Email",email)
         ##hl.zipUserKeys(user['Keys'])
+
+def passwordform():
+    if request.method == 'POST':
+        password = request.form['pass1']
+        confirmPassword = request.form['passconfirm']
+        if password == confirmPassword:
+            hl.changePassword(session['name'],confirmPassword)
 
 #
 #Cherrypy server base
