@@ -7,8 +7,7 @@
     <center>
         <div class="contentDiv">
             <h3> Welcome, {{ username }} </h3>
-            <br  />
-            <img src="static/logoblue.png"
+            <img src="{{ url_for('static', filename = 'logoblue.png') }}"
                 width="150" height="75"/>
             <!--find if keys downloaded!-->
             <!--if keys are not downloaded!-->

@@ -83,8 +83,8 @@ def show_logs():
 
 @app.route('/test')
 def test():
-    return send_file('static\\' + 'test' + '.txt')
-    ##return send_file('static\\' + session.get('Name') + '.txt') TO BE ADDED WHEN I GET LOGINS WORKING
+    return send_file('static\\' + session.get('name') + '.txt')
+
 
 
 @app.route('/download')
@@ -163,6 +163,8 @@ def userforms():
         password = request.form['pass1']
         email = request.form['email1']
         hl.createUser(name,password,email)
+        #user = getUser()
+        #hl.zipUserKeys(user)
 
 #
 #Cherrypy server base
