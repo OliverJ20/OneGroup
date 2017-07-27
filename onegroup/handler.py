@@ -94,11 +94,19 @@ def createUserFilename(name):
     return userFilen
     
 
-def getUser(email):
+def getUser(key, value):
+    """
+        Gets a user from the database based on a single key/value pair
 
+        key   : str : The field to indentify the user by
+        value : str : The value to indentify the user by
+
+        returns dict the user's database entry
+
+    """
     db = Database(filename = filen)
 
-    user = db.retrieve("users", "Email", email)
+    user = db.retrieve("users", key, value)
     
     db.close()
     
@@ -117,7 +125,7 @@ def confirmLogin(email, password):
     """
 
     if confirmUser(email):
-        user = getUser(email)
+        user = getUser("Email",email)
 
         if sha256_crypt.verify(password, user['Password']):
             return True
@@ -134,7 +142,7 @@ def confirmClient(email):
     :return : 
     """
 
-    user = getUser(email)
+    user = getUser("Email",email)
 
     if user['Account_Type'] == "Client":
         return True
@@ -146,7 +154,7 @@ def confirmClient(email):
 
 def confirmUser(email):
 
-    user = getUser(email)
+    user = getUser("Email",email)
 
     if user is not None:
         return True

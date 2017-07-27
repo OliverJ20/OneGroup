@@ -110,7 +110,7 @@ def login():
         else:
             session['logged_in'] = True
             if hl.confirmUser(email) and hl.confirmClient(email):
-                user = hl.getUser(email)
+                user = hl.getUser("Email",email)
                 session['type'] = 'Client'
                 session['name'] = user['Name']
                 return redirect("/clients/" + user['Name'])
