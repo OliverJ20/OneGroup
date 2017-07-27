@@ -125,7 +125,7 @@ def confirmLogin(email, password):
     """
 
     if confirmUser(email):
-        user = getUser(email)
+        user = getUser("Email",email)
 
         if sha256_crypt.verify(password, user['Password']):
             return True
@@ -142,7 +142,7 @@ def confirmClient(email):
     :return : 
     """
 
-    user = getUser(email)
+    user = getUser("Email",email)
 
     if user['Account_Type'] == "Client":
         return True
@@ -154,7 +154,7 @@ def confirmClient(email):
 
 def confirmUser(email):
 
-    user = getUser(email)
+    user = getUser("Email",email)
 
     if user is not None:
         return True
