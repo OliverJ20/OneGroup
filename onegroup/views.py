@@ -84,14 +84,6 @@ def show_logs():
 @app.route('/test')
 def test():
     return send_file('static\\' + session.get('name') + '.txt')
-
-
-
-@app.route('/download')
-@client_required
-def download():
-    return render_template('download.html')
-	
 	
 @app.route('/clients/<username>')
 @client_required
