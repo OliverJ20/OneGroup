@@ -162,31 +162,15 @@ def confirmUser(email):
         return False
 
 
-##
-##
-##def confirmPassword(passwd, userinput):
-##
-##    db = Database(filename = filen)
-##
-##    userpass = db.retrieve("users", "Password", passwd)
-##
-##    if userpass == userinput:
-##        return True
-##    else:
-##        return False
-##
-##
-##def changePassword(userinput):
-##
-##    db = Database(filename = filen)
-##
-##    user = db.retrieve("users", "Password", passwd)
-##
-##    if confirmPassword(password, userinput):
-##      CODE TO CHANGE PASSWORD)
-##      return True
-##    else:
-##      flash("Invalid Password")
-##      return False
-##    
-##  
+
+def changePassword(userinput):
+    """
+    Changes user password in database
+    
+    :param userinput : user's desired password
+    :return : 
+    """
+    db = Database(filename = filen)
+    db.update("users", "Password", sha256_crypt.hash(userinput))
+    db.close()
+  

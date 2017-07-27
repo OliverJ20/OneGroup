@@ -20,9 +20,20 @@
                    <a href = "/index"> Back to Home</a>
                </div>
             {% else %}
+
             <!--if keys are downloaded!-->
             <button>Lost Certificate? Request New Keys</button>
             {% endif %}
+            <h3> Reset Password </h3>
+            <form action="{{ url_for('login') }}" vname="userForm" id="detailsLeft" method=post>
+                <p>Password</p>
+                <input type="text" name="pass1" placeholder="Enter Password" maxlength="40"> </input>
+                <p>Confirm Password</p>
+                <input type="text" name="passconfirm" placeholder="Confirm Password" maxlength="40"> </input>
+                <div class= "bodydiv" div id = "submitDiv">
+                  <input type="submit" name="userforms" value="Send"></input>
+                </div>
+            </form>
         </div>
     </center>
 </body>
