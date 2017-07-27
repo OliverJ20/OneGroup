@@ -94,11 +94,19 @@ def createUserFilename(name):
     return userFilen
     
 
-def getUser(email):
+def getUser(key, value):
+    """
+        Gets a user from the database based on a single key/value pair
 
+        key   : str : The field to indentify the user by
+        value : str : The value to indentify the user by
+
+        returns dict the user's database entry
+
+    """
     db = Database(filename = filen)
 
-    user = db.retrieve("users", "Email", email)
+    user = db.retrieve("users", key, value)
     
     db.close()
     
