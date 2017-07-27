@@ -37,9 +37,10 @@ class Database:
             keys = sorted(keypairs.keys())
             values = tuple([keypairs[k] for k in keys])
             for key in keys:
-                query += "{} = ? AND".format(key)
+                query += " {} = ? AND".format(key)
 
             query = query[:-4]
+            print(query)
             cursor = self._db.execute('select * from {} {}'.format(table,query),values)
         else:
             cursor = self._db.execute('select * from {}'.format(table))
