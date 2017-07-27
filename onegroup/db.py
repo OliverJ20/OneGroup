@@ -63,8 +63,11 @@ class Database:
         #Create set method
         setStr = ""
         for k in row:
-            if k != 'ID':
-                setStr += "{} = {}, ".format(k, row[k])
+            if k != ID[0]:
+                if isinstance(row[k],str):
+                    setStr += "{} = '{}', ".format(k, row[k])
+                else:
+                    setStr += "{} = {}, ".format(k, row[k])
 
         #Remove trailing comma and space
         setStr = setStr[:(len(setStr)-2)]
