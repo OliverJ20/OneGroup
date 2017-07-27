@@ -152,8 +152,6 @@ def confirmClient(email):
         return False
 
 
-
-
 def confirmUser(email):
 
     user = getUser("Email",email)
@@ -241,40 +239,16 @@ def flagCode(code):
     db.update("codes",{"Used" : 1},("Code",code))
     db.close()
 
+
+def changePassword(name, userinput):
+    """
+    Changes user password in database
     
-
-
-
-
-
-
-
-
-##
-##
-##def confirmPassword(passwd, userinput):
-##
-##    db = Database(filename = filen)
-##
-##    userpass = db.retrieve("users", "Password", passwd)
-##
-##    if userpass == userinput:
-##        return True
-##    else:
-##        return False
-##
-##
-##def changePassword(userinput):
-##
-##    db = Database(filename = filen)
-##
-##    user = db.retrieve("users", "Password", passwd)
-##
-##    if confirmPassword(password, userinput):
-##      CODE TO CHANGE PASSWORD)
-##      return True
-##    else:
-##      flash("Invalid Password")
-##      return False
-##    
-##  
+    :param email : user's identifying email
+    :param userinput : user's desired password
+    :return : 
+    """
+    db = Database(filename = filen)
+    user = getUser("Name",name)['ID']
+    db.update("users", {"Password": sha256_crypt.hash(userinput)}, ("ID", user))
+    db.close() 

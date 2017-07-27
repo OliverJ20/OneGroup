@@ -11,10 +11,6 @@ html,body
     overflow-x: hidden;
 }
 
-body center img{
-  padding-top: 5%;
-}
-
 statustext    {
     font-weight: bold;
     padding: 3px 3px 3px 0;
@@ -67,6 +63,15 @@ button:hover    {
     min-height: -moz-calc(100% - 320px);
     min-height: calc(100% - 320px);
     margin: 0 10% 0 10%
+}
+
+.flashes li{
+  list-style-type: none;
+  color: #ff0000;
+  margin-left: -3%;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
 }
 
 footer    {
@@ -294,13 +299,6 @@ body .contentDiv #formDivleft  {
 }
 body .contentDiv #formDivleft #submitDiv  {
     display: none;
-}
-
-body center .flashes li{
-  list-style-type: none;
-  color: #ff0000;
-  margin-left: -3%;
-  font-weight: bold;
 }
 
 body .tableTitleDiv    {
