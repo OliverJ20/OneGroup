@@ -19,10 +19,11 @@ def init_database():
     #Connect to the database
     db = Database(filename = filen)
 
-    #Insert test users
-    db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0})
-    db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0})
-    db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Password", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0})
+    if len(db.retrieveAll("users")) == 0:
+        #Insert test users
+        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0})
+        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0})
+        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Password", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0})
 
     #Close database
     db.close()
@@ -98,6 +99,8 @@ def getUser(email):
     db = Database(filename = filen)
 
     user = db.retrieve("users", "Email", email)
+    
+    db.close()
     
     return user
 
