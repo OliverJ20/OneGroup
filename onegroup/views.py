@@ -72,18 +72,22 @@ def home():
 @admin_required
 def retrieve_user_page():
     ##redirect(url_for('users'))
+    flash("Run")
     return render_template('users.html')
 
 
 @app.route('/logs')
 @admin_required
 def show_logs():
+    flash("Rabbit")
     return render_template('logs.html')
 
 
-@app.route('/test')
-def test():
-    return send_file('static\\' + session.get('name') + '.txt')
+@app.route('/userkey')
+def userkey():
+    return send_file('static\\' + session.get('name') + '.zip')
+    #Possible Zip File Path
+    #return send_file('usr\\local\\onegroup\\keys\\' + session.get('name') + '.txt')
 	
 @app.route('/clients/<username>')
 @client_required
@@ -95,6 +99,8 @@ def show_user_keys(username):
 @app.route('/config')
 @admin_required
 def show_config():
+    flash("Run")
+    flash("Forget the Sun")
     return render_template('config.html')
 
 
@@ -149,14 +155,16 @@ def page_not_found(e):
     return render_template('error.html'), 404
 	
 
+#Function to create user and generate keys into a ZIP folder
 def userforms():
     if request.method == 'POST':
         name = request.form['name1']
         password = request.form['pass1']
         email = request.form['email1']
         hl.createUser(name,password,email)
-        #user = getUser()
-        #hl.zipUserKeys(user)
+        ##Creates Zip File
+        ##user = hl.getUser("Email",email)
+        ##hl.zipUserKeys(user['Keys'])
 
 #
 #Cherrypy server base
