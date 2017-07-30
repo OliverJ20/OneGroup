@@ -232,12 +232,12 @@ def keysCode(code):
         #return
 
 
-def confirmClietnEmail(clientemail, clientpassword):
+def emailMessage(subjectTitle, recipientEmail, bodyMessage):
     msg = Message(
-        "OneGroup account details",
+        subjectTitle,
         sender = "capstoneonegroup@gmail.com",
-        recipients= [clientemail])
-    msg.body ="Your login details are\n Email :" + str(clientemail) + "\nPassword :" + str(clientpassword)
+        recipients= [recipientEmail])
+    msg.body = bodyMessage ##"Your login details are\n Email :" + str(clientemail) + "\nPassword :" + str(clientpassword)
     mail.send(msg)
 
 @app.errorhandler(404)
@@ -252,7 +252,10 @@ def userforms():
         password = request.form['pass1']
         email = request.form['email1']
         hl.createUser(name,password,email)
-        confirmClietnEmail(email, password)
+        subjectTitle = "OneGroup account details"
+        recipientEmail = email
+        bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
+        emailMessage(subjectTitle, recipientEmail, bodyMessage)
         ##user = hl.getUser("Email",email)
         ##hl.zipUserKeys(user['Keys'])
 
