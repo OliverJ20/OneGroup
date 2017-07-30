@@ -130,6 +130,12 @@ def show_config():
     return render_template('config.html')
 
 
+@app.route('/emailsend', methods=['GET', 'POST'])
+def emailsend():
+    emailform()
+    return render_template('emailsend.html')
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
@@ -168,7 +174,7 @@ def confirm():
         if user_type == 'Admin':
             return redirect('/index')
         elif user_type == 'Client':
-            return redirect('/clients/' + session.get('Name'))
+            return redirect('/clients/' + session.get('name'))
         else:
             return redirect('/')
 
@@ -275,6 +281,13 @@ def passwordform(name = None):
         if password == confirmPassword:
             hl.changePassword(name,confirmPassword)
 
+def emailform():
+    if request.method == 'POST':
+        email = request.form['email1']
+        confirmemail = request.form['email2']
+        if email == confirmemail:
+            #EMAIL CODE HERE
+            return True
 #
 #Cherrypy server base
 #
