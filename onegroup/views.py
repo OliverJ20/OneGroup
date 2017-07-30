@@ -1,6 +1,7 @@
 #Cherrypy imports
 import cherrypy
 from paste.translogger import TransLogger
+from flask_mail import Message, Mail
 
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash
 from functools import wraps
@@ -18,6 +19,24 @@ app.config.update(dict(
     SECRET_KEY='development_key',
 ))
 
+app.config.update(
+    DEBUG = True,
+    MAIL_SERVER='smtp.gmail.com',
+	MAIL_PORT=465,
+	MAIL_USE_SSL=True,
+	MAIL_USERNAME = 'capstoneonegroup@gmail.com',
+	MAIL_PASSWORD = 'MaristCollege!'
+)
+mail = Mail(app)
+
+#Message mail structure
+# msg = Message (
+#     "can be some text",  <--- subject title
+#     sender = "capstoneonegroup@gmail.com",
+#     recipients= ['some email here'])
+#     msg.body = "some text here" <--- the body of the email here
+#     mail.send(msg)
+# )
 
 def login_required(f):
     @wraps(f)
@@ -213,6 +232,13 @@ def keysCode(code):
         #return
 
 
+def emailMessage(subjectTitle, recipientEmail, bodyMessage):
+    msg = Message(
+        subjectTitle,
+        sender = "capstoneonegroup@gmail.com",
+        recipients= [recipientEmail])
+    msg.body = bodyMessage ##"Your login details are\n Email :" + str(clientemail) + "\nPassword :" + str(clientpassword)
+    mail.send(msg)
 
 
 @app.errorhandler(404)
@@ -227,6 +253,10 @@ def userforms():
         password = request.form['pass1']
         email = request.form['email1']
         hl.createUser(name,password,email)
+        subjectTitle = "OneGroup account details"
+        recipientEmail = email
+        bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
+        emailMessage(subjectTitle, recipientEmail, bodyMessage)
         ##user = hl.getUser("Email",email)
         ##hl.zipUserKeys(user['Keys'])
 
