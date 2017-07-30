@@ -164,7 +164,7 @@ def forgotPassword():
         #Comnfirm the user exist
         if hl.confirmUser(email):
             user = hl.getUser("Email",email)
-            refLink = hl.genUrl(user,"Password")
+            refLink = "http://"+request.headers['Host']+hl.genUrl(user,"Password")
             #TODO Send email
             return redirect(url_for('confirm', confirmed = 'Password reset email has been sent.'))
         else:
@@ -220,8 +220,11 @@ def userforms():
         ##user = hl.getUser("Email",email)
         ##hl.zipUserKeys(user['Keys'])
 
-def passwordform(name = session['name']):
+def passwordform(name = None):
     if request.method == 'POST':
+        if name == None:
+            name = session['name']
+
         password = request.form['pass1']
         confirmPassword = request.form['passconfirm']
         if password == confirmPassword:

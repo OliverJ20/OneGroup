@@ -26,6 +26,7 @@ def postInstallProcedure():
         Global post install procedure
     """
     subprocess.call(shlex.split('mkdir {}'.format(DIR)))
+    subprocess.call(shlex.split('mkdir {}'.format(DIR+"/keys")))
     subprocess.call(shlex.split('mv {} {}'.format(SERVICE,SYSTEM)))
     subprocess.call(shlex.split('chmod {} {}'.format("644",SYSTEM+"/"+SERVICE)))
     subprocess.call(shlex.split('systemctl {}'.format("daemon-reload")))
@@ -54,6 +55,7 @@ setup(
     packages = ["onegroup"],
     install_requires=[
         'flask',
+        'flask-mail',
         'cherrypy',
         'passlib',
         'paste'
