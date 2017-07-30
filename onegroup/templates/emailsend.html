@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block header %}{% endblock %}
+{% block body %}
+    <body>
+        <center>
+            <img src="static/logoblue.png"
+                 width="150" height="75"/>
+                <div id="loginDiv">
+                  <h2>Enter User Details</h2>
+                  <form action="{{ url_for('emailsend') }}" vname="emailForm" id="detailsLeft" method=post>
+                      <p>Email</p>
+                      <input type="text" name="email1" placeholder="Enter Email" maxlength="40"> </input>
+
+                      <p>Confirm Email</p>
+                      <input type="text" name="email2" placeholder="Confirm Email" maxlength="40"> </input>
+
+                      <div class= "bodydiv" div id = "submitDiv">
+                        <input type="submit" onclick="submitForm()" name="userforms" value="Send"></input>
+                      </div>
+                  </form>
+                    <br  />
+                    <br  />
+                    <a href = "/index"> Back to Home</a>
+                </div>
+        </center>
+    </body>
+{% endblock %}
