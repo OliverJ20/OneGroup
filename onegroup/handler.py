@@ -186,8 +186,14 @@ def genUrl(user,purpose):
     db.insert("codes",row)
    
     db.close()
+    
+    #Create url
+    if purpose == "Password":
+        url = "/reset/{}".format(row["Code"])
+    else:
+        url = "/keys/{}".format(row["Code"])
 
-    return "/user/{}".format(row["Code"])
+    return url
 
 def genCode(user):
     """
@@ -213,7 +219,7 @@ def checkCode(code,purpose):
     row = db.retrieve("codes",{"Code" : code, "Purpose" : purpose})
     db.close()
 
-    if len(row) == 1 and not row["Used"]:
+    if isinstance(row,dict) and not row["Used"]:
         return True
     else:
         return False
@@ -242,7 +248,7 @@ def flagCode(code):
     """
     db = Database(filename = filen)
     code = db.retrieve("codes",{"Code" : code})
-    db.update("codes",{"Used" : 1},("Code",code))
+    db.update("codes",{"Used" : 1},("Code",str(code)))
     db.close()
 
 

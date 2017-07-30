@@ -22,7 +22,7 @@ class Database:
         
         #Tables
         self._db.execute('create table IF NOT EXISTS users (ID INTEGER PRIMARY KEY NOT NULL, Name text, Email text, Password text, Auth_Type text, Account_Type text, Keys text, Key_Distributed INTEGER)')
-        self._db.execute('create table IF NOT EXISTS codes (code text PRIMARY KEY NOT NULL, Name text, Purpose text, Used INTEGER)')
+        self._db.execute('create table IF NOT EXISTS codes (Code text PRIMARY KEY NOT NULL, Name text, Purpose text, Used INTEGER)')
 
     def insert(self, table, row):
         keys = sorted(row.keys())
@@ -65,15 +65,18 @@ class Database:
         for k in row:
             if k != ID[0]:
                 if isinstance(row[k],str):
-                    setStr += "{} = '{}', ".format(k, row[k])
+                    setStr += '{} = "{}", '.format(k, row[k])
                 else:
-                    setStr += "{} = {}, ".format(k, row[k])
+                    setStr += '{} = {}, '.format(k, row[k])
 
         #Remove trailing comma and space
         setStr = setStr[:(len(setStr)-2)]
  
+        #Create Query
+        q = 'update {} set {} where {} = ?'.format(table,setStr,ID[0])  
+            
         #execute
-        self._db.execute('update {} set {}  where {} = ?'.format(table,setStr,ID[0]),(ID[1],))
+        self._db.execute(q, (ID[1],) )
         self._db.commit()
 
     def delete(self, table, key, val):

@@ -1,17 +1,17 @@
-#! /usr/bin/python3
+#! /bin/bash
 
 #GLOBALS
 DIR="/etc/openvpn"
 CONFIGS="/usr/share/doc/openvpn/examples/sample-config-files"
-KEYS=DIR+"/keys"
-ERSA=DIR+"/easy-rsa"
+KEYS="$DIR/keys"
+ERSA="$DIR/easy-rsa"
 
-SERVER_ADR="192.168.1.10"
+SERVER_ADR="192.168.1.11"
 SERVER_PORT=1194
 
 #Install Openvpn and easy-rsa
 #print("Installing Openvpn")
-#sudo apt-get -y install openvpn easy-rsa >> /dev/null;
+sudo apt-get -y install openvpn easy-rsa >> /dev/null;
 
 #Setup CA
 
@@ -42,6 +42,7 @@ sudo sed -i -e 's,export KEY_ORG="Fort-Funston",export KEY_ORG="'"$ORG"'",g' $CA
 sudo sed -i -e 's,export KEY_EMAIL="me@myhost.mydomain",export KEY_EMAIL="'"$EMAIL"'",g' $CAvars
 sudo sed -i -e 's,export KEY_OU="MyOrganizationalUnit",export KEY_OU="'"$OU"'",g' $CAvars
 sudo sed -i -e 's,export KEY_DIR="$EASY_RSA/keys",export KEY_DIR="/etc/openvpn/keys",g' $CAvars
+sudo sed -i -e 's,export KEY_CONFIG=,export KEY_DIR="/etc/openvpn/keys",g' $CAvars
 
 #Change ownership of the openvpn directory
 sudo chown $USER $DIR -R
