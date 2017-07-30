@@ -182,31 +182,27 @@ def passwordCode(code):
 
     if request.method == 'POST':
         #Get new password and handle
-
-
+        passwordform(user)
         #Mark code as used
         hl.flagCode(code)
         #return
+        return redirect(url_for('confirm', confirmed = 'Changed Password'))
 
+    return render_template('password.html')
 
         
-@app.route('/keys/<code>', methods=['GET','POST'])
+@app.route('/keys/<code>', methods=['GET'])
 def keysCode(code):
     #Check if code exists and for the correct purpose. Else abort
-    if (hl.checkCode(code,"Password")):
+    if (hl.checkCode(code,"Keys")):
         user = hl.getUserFromCode(code)
     else:
         abort(404)
-
-    if request.method == 'POST':
-        #Get new password and handle
-
-
-        #Mark code as used
-        hl.flagCode(code)
-        #return
-
-
+    
+    #Mark code as used
+    hl.flagCode(code)
+    #return
+    return send_file('/usr/local/onegroup/keys/' + user + '.zip')
 
 
 @app.errorhandler(404)
@@ -224,17 +220,20 @@ def userforms():
         ##user = hl.getUser("Email",email)
         ##hl.zipUserKeys(user['Keys'])
 
-def passwordform():
+def passwordform(name = session['name']):
     if request.method == 'POST':
         password = request.form['pass1']
         confirmPassword = request.form['passconfirm']
         if password == confirmPassword:
-            hl.changePassword(session['name'],confirmPassword)
+            hl.changePassword(name,confirmPassword)
 
 #
 #Cherrypy server base
 #
 def run_server():
+    #Initalise database
+    hl.init_database()
+    
     #Enable WSGI access logging with paste
     app_logged = TransLogger(app)
 

@@ -40,7 +40,6 @@ class Database:
                 query += " {} = ? AND".format(key)
 
             query = query[:-4]
-            print(query)
             cursor = self._db.execute('select * from {} {}'.format(table,query),values)
         else:
             cursor = self._db.execute('select * from {}'.format(table))

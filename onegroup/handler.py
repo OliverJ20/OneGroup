@@ -4,6 +4,7 @@ import hashlib
 from datetime import datetime
 import subprocess
 import shlex
+import os.path
 
 try:
     from onegroup.db import Database
@@ -11,7 +12,12 @@ except:
     from db import Database
 
 #Globals
+workingDir = "/usr/local/onegroup"
+
 filen = "OneGroup.db"       #Database
+if os.path.isdir(workingDir):
+    filen = workingDir+"/OneGroup.db"       #Database
+
 keys = "/etc/openvpn/keys/" #Key/Cert location
 
 def init_database():
@@ -21,7 +27,7 @@ def init_database():
     #Connect to the database
     db = Database(filename = filen)
 
-    if len(db.retrieve("users")) == 0:
+    if db.retrieve("users") == None:
         #Insert test users
         db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0})
         db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0})
