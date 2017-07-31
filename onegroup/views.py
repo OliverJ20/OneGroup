@@ -288,15 +288,18 @@ def emailform():
             #EMAIL CODE HERE
             return True
 
-def getKeys(name = None)
+def getKeys(name = None):
     """
         Returns a zip file of the user's key/cert pair
     """
     if name == None:
-        name =session.get('name') 
+        name =session.get('name')
+
+    keys = hl.getUser("Name",name)["Keys"]
+    print(keys)
     #If on a production server, use actual path
     if os.path.isdir("/usr/local/onegroup/keys"):
-        return send_file('/usr/local/onegroup/keys/' + name + '.zip')
+        return send_file('/usr/local/onegroup/keys/' + keys + '.zip')
     #Else use relative dev path
     else:
         return send_file('static\\Test_client1.zip')
