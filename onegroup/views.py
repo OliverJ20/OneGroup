@@ -1,5 +1,7 @@
 #Cherrypy imports
 import cherrypy
+import random
+import string
 from paste.translogger import TransLogger
 from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash
@@ -248,7 +250,7 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage):
         subjectTitle,
         sender = "capstoneonegroup@gmail.com",
         recipients= [recipientEmail])
-    msg.body = bodyMessage ##"Your login details are\n Email :" + str(clientemail) + "\nPassword :" + str(clientpassword)
+    msg.body = bodyMessage
     mail.send(msg)
 
 @app.errorhandler(404)
@@ -260,12 +262,13 @@ def page_not_found(e):
 def userforms():
     if request.method == 'POST':
         name = request.form['name1']
-        password = request.form['pass1']
+        # password = request.form['pass1']
+        password = randompassword()
         email = request.form['email1']
         hl.createUser(name,password,email)
         subjectTitle = "OneGroup account details"
         recipientEmail = email
-        bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
+        bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(randompassword())
         emailMessage(subjectTitle, recipientEmail, bodyMessage)
         user = hl.getUser("Email",email)
         hl.zipUserKeys(user['Keys'])
@@ -279,6 +282,11 @@ def passwordform(name = None):
         confirmPassword = request.form['passconfirm']
         if password == confirmPassword:
             hl.changePassword(name,confirmPassword)
+
+def randompassword():
+    characters = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    size = random.randint(8, 12)
+    return ''.join(random.choice(characters) for x in range(size))
 
 def emailform():
     if request.method == 'POST':
