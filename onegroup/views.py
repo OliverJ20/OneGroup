@@ -245,6 +245,20 @@ def keysCode(code):
     #return
     return getKeys(user["Name"])
 
+
+@app.route('/log/<log>', methods=['GET'])
+@admin_required
+def logType(log):
+    filename = "/var/log/"
+    if log == "general":
+        filename += "openvpn.log"
+    elif log == "status":
+        filename += "openvpn-status.log"
+    else:
+        abort(404)
+
+    return jsonify({LogData:hl.getLog(filename)})
+
 def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName, attachmentFilePath):
     msg = Message(
         subjectTitle,
