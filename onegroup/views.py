@@ -1,4 +1,4 @@
-#Cherrypy imports
+`#Cherrypy imports
 import cherrypy
 import random
 import string
@@ -245,12 +245,16 @@ def keysCode(code):
     #return
     return getKeys(user["Name"])
 
-def emailMessage(subjectTitle, recipientEmail, bodyMessage):
+def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName, attachmentFilePath):
     msg = Message(
         subjectTitle,
         sender = "capstoneonegroup@gmail.com",
         recipients= [recipientEmail])
     msg.body = bodyMessage
+
+    if attachmentName is not None and attachmentFilePath is not None:
+        mail.attach(attachmentName, attachmentFilePath, "application/zip")
+
     mail.send(msg)
 
 @app.errorhandler(404)

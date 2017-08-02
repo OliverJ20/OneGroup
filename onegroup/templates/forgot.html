@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block header %}
+<a href = "{{ url_for('logout') }}">Log Out</a>
+{% endblock %}
+{% block body %}
+<body>
+    <center>
+        <div class="contentDiv">
+            <h3> Reset Password </h3>
+            <form action="{{ url_for('forgot') }}" vname="userForm" id="detailsLeft" method=post>
+                
+                <p>Username:</p>
+                <input type="text" name="username" placeholder="Username" maxlength="40"> </input>
+                <div class= "bodydiv" div id = "submitDiv">
+                  <input type="submit" name="submitResetPassword" value="Send"></input>
+                </div>
+
+            </form>
+        </div>
+    </center>
+</body>
+{% endblock %}
