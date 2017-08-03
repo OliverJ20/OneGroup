@@ -4,7 +4,7 @@ import random
 import string
 from paste.translogger import TransLogger
 from flask_mail import Message, Mail
-from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash
+from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
 from functools import wraps
 import os
 
@@ -246,12 +246,30 @@ def keysCode(code):
     #return
     return getKeys(user["Name"])
 
-def emailMessage(subjectTitle, recipientEmail, bodyMessage):
+
+@app.route('/log/<log>', methods=['GET'])
+@admin_required
+def logType(log):
+    filename = "/var/log/"
+    if log == "general":
+        filename += "openvpn.log"
+    elif log == "status":
+        filename += "openvpn-status.log"
+    else:
+        abort(404)
+
+    return jsonify({LogData:hl.getLog(filename)})
+
+def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName, attachmentFilePath):
     msg = Message(
         subjectTitle,
         sender = "capstoneonegroup@gmail.com",
         recipients= [recipientEmail])
     msg.body = bodyMessage
+
+    if attachmentName is not None and attachmentFilePath is not None:
+        mail.attach(attachmentName, attachmentFilePath, "application/zip")
+
     mail.send(msg)
 
 @app.errorhandler(404)

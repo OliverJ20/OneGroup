@@ -271,4 +271,24 @@ def changePassword(name, userinput):
     db = Database(filename = filen)
     user = getUser("Name",name)['ID']
     db.update("users", {"Password": sha256_crypt.hash(userinput)}, ("ID", user))
-    db.close() 
+    db.close()
+
+
+def getLog(filepath):
+    """
+    Retrieves log file from specified path
+
+    :param filepath : file path to log file
+    :return : list of strings containing logs contents
+    """
+
+    log = []
+    try:
+        with open(filepath) as f:
+            for line in f:
+                log.append(line.replace("\n", ""))
+    except: 
+        return None
+    return log
+    
+    
