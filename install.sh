@@ -42,7 +42,7 @@ sudo sed -i -e 's,export KEY_ORG="Fort-Funston",export KEY_ORG="'"$ORG"'",g' $CA
 sudo sed -i -e 's,export KEY_EMAIL="me@myhost.mydomain",export KEY_EMAIL="'"$EMAIL"'",g' $CAvars
 sudo sed -i -e 's,export KEY_OU="MyOrganizationalUnit",export KEY_OU="'"$OU"'",g' $CAvars
 sudo sed -i -e 's,export KEY_DIR="$EASY_RSA/keys",export KEY_DIR="/etc/openvpn/keys",g' $CAvars
-sudo sed -i -e 's,export KEY_CONFIG=,export KEY_DIR="/etc/openvpn/keys",g' $CAvars
+sudo sed -i -e 's,export KEY_CONFIG=`$EASY_RSA/whichopensslcnf $EASY_RSA`,export KEY_CONFIG=$EASY_RSA/openssl-1.0.0.cnf,g' $CAvars
 
 #Change ownership of the openvpn directory
 sudo chown $USER $DIR -R
