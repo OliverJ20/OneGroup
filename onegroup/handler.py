@@ -275,10 +275,12 @@ def getLog(filepath):
     """
 
     log = []
-    with open(filepath) as f:
-        for line in f:
-            log.append(line.replace("\n", ""))
-
+    try:
+        with open(filepath) as f:
+            for line in f:
+                log.append(line.replace("\n", ""))
+    except: 
+        return None
     return log
     
     

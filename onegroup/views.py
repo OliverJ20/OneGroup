@@ -1,10 +1,10 @@
-`#Cherrypy imports
+#Cherrypy imports
 import cherrypy
 import random
 import string
 from paste.translogger import TransLogger
 from flask_mail import Message, Mail
-from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash
+from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
 from functools import wraps
 
 import os.path
