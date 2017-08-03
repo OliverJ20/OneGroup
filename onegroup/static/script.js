@@ -19,3 +19,29 @@ function checkForm() {
       return true;
     }
 }
+
+function addInfo()
+{
+  $.get ("/log/general/", function (data)
+    {
+      logInfo = data.LogData;
+      var main = $('<div>');
+      var logInfo = $('<p>').html(logInfo[0]);
+      div.append(div);
+      div.append(logInfo);
+      $('#FrontLogInfo').html(div.html());
+    })
+}
+// function displayLogInfo()
+// {
+//   var main = $('<div>');
+//
+//
+//   for (int i =0; i<logData.length, i++)
+//   {
+//     var row = $('<tr>');
+//
+//
+//
+//   }
+// }
