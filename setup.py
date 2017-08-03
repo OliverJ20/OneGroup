@@ -7,7 +7,9 @@ import shlex
 
 DIR = "/usr/local/onegroup"
 SYSTEM = "/lib/systemd/system"
+ETC = "/etc/onegroup"
 SERVICE = "onegroup.service"
+CONFIG = "onegroup.conf"
 
 class PostDevelopCommand(develop):
     """Post-Installation for development mode"""
@@ -25,8 +27,16 @@ def postInstallProcedure():
     """ 
         Global post install procedure
     """
+    #Make system dir
     subprocess.call(shlex.split('mkdir {}'.format(DIR)))
     subprocess.call(shlex.split('mkdir {}'.format(DIR+"/keys")))
+
+    #Make config folder and place config
+    subprocess.call(shlex.split('mkdir {}'.format(ETC)))
+    subprocess.call(shlex.split('mv {} {}'.format(CONFIG,DIR)))
+    subprocess.call(shlex.split('cp {} {}'.format(DIR+"/"+CONFIG,ETC)))
+
+    #Create and start service
     subprocess.call(shlex.split('mv {} {}'.format(SERVICE,SYSTEM)))
     subprocess.call(shlex.split('chmod {} {}'.format("644",SYSTEM+"/"+SERVICE)))
     subprocess.call(shlex.split('systemctl {}'.format("daemon-reload")))
@@ -34,7 +44,7 @@ def postInstallProcedure():
 
 setup(
     name = 'OneGroup',
-    version='1.0.0',
+    version='0.0.1',
     description='Webclient for OpenVPN',
     long_description='OpenVPN management client for web',
     classifiers=[

@@ -4,7 +4,7 @@ import hashlib
 from datetime import datetime
 import subprocess
 import shlex
-import os.path
+import os
 
 try:
     from onegroup.db import Database
@@ -17,8 +17,6 @@ workingDir = "/usr/local/onegroup"
 filen = "OneGroup.db"       #Database
 if os.path.isdir(workingDir):
     filen = workingDir+"/OneGroup.db"       #Database
-
-keys = "/etc/openvpn/keys/" #Key/Cert location
 
 def init_database():
     """
@@ -35,6 +33,16 @@ def init_database():
 
     #Close database
     db.close()
+
+def loadConfig():
+    """ 
+        Reads a config file and sets environment variables
+    """
+    
+
+
+
+
 
 #
 # User Methods

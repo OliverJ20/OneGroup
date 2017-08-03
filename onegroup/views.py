@@ -6,8 +6,7 @@ from paste.translogger import TransLogger
 from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash
 from functools import wraps
-
-import os.path
+import os
 
 try:
     import onegroup.handler as hl
@@ -16,22 +15,24 @@ except:
 
 
 app = Flask(__name__)
-app.config.from_object(__name__)
+mail = Mail(app)
+
+#app.config.from_object(__name__)
 
 # Load default config and override config from an environment variable
-app.config.update(dict(
-    SECRET_KEY='development_key',
-))
+#app.config.update(dict(
+#    SECRET_KEY='development_key',
+#))
 
-app.config.update(
-    DEBUG = True,
-    MAIL_SERVER='smtp.gmail.com',
-	MAIL_PORT=465,
-	MAIL_USE_SSL=True,
-	MAIL_USERNAME = 'capstoneonegroup@gmail.com',
-	MAIL_PASSWORD = 'MaristCollege!'
-)
-mail = Mail(app)
+#app.config.update(
+#    DEBUG = True,
+#    MAIL_SERVER='smtp.gmail.com',
+#	MAIL_PORT=465,
+#	MAIL_USE_SSL=True,
+#	MAIL_USERNAME = 'capstoneonegroup@gmail.com',
+#	MAIL_PASSWORD = 'MaristCollege!'
+#)
+#mail = Mail(app)
 
 #Message mail structure
 # msg = Message (
@@ -312,38 +313,64 @@ def getKeys(name = None):
     else:
         return send_file('static\\Test_client1.zip')
 
+def setConfig(debug):
+    """
+        Loads the configuration from the config file 
+        and applies the config to the server
+
+        debug : bool : to turn on the flask debugging flag
+    """
+    #load config 
+    hl.loadConfig()
+
+    #Set debug flag
+    if debug:
+        app.config['DEBUG'] = True
+
+    #Apply config
+    TAG='OG_'
+    if os.environ[TAG+'secret'] == "RANDOM":
+        secret = os.urandom(36)
+        app.config['SECRET_KEY'] = secret 
+    else:
+        app.config['SECRET_KEY'] = os.environ[TAG+'secret'] 
+
+    #Flask-mail config
+    app.config['MAIL_SERVER'] = os.environ[TAG+'mail_server'] 
+    app.config['MAIL_PORT'] = os.environ[TAG+'mail_port']  
+    app.config['MAIL_USE_SSL'] = True
+    app.config['MAIL_USERNAME'] = os.environ[TAG+'email'] 
+    app.config['MAIL_PASSWORD'] = os.environ[TAG+'password'] 
+    mail = Mail(app)
 
 #
 #Cherrypy server base
 #
-def run_server():
+def run_server(development=False):
     #Initalise database
     hl.init_database()
     
-    #Enable WSGI access logging with paste
-    app_logged = TransLogger(app)
+    #Run development server if in development mode
+    if debug:
+        app.run()
+    else:
+        #Enable WSGI access logging with paste
+        app_logged = TransLogger(app)
 
-    #Mount app on the root directory
-    cherrypy.tree.graft(app_logged,'/')
+        #Mount app on the root directory
+        cherrypy.tree.graft(app_logged,'/')
 
-    #Configure web server
-    cherrypy.config.update({
-	'engine.autoreload_on': True,
-	'log.screen': True,
-	'server.socket_port': 80,
-	'server.socket_host': '0.0.0.0'
-    })
+        #Configure web server
+        cherrypy.config.update({
+            'engine.autoreload_on': True,
+            'log.screen': True,
+            'server.socket_port': os.environ['server_port'],
+            'server.socket_host': os.environ['server_host']
+        })
 
-    #Start WSGI web server
-    cherrypy.engine.start()
-    cherrypy.engine.block()
+        #Start WSGI web server
+        cherrypy.engine.start()
+        cherrypy.engine.block()
 
 if __name__ == '__main__':
-    #Initalise database
-    hl.init_database()
-     
-    #For debugging
-    app.run()
-
-    #Cherrypy server
-    #run_server()
+    run_server(True)
