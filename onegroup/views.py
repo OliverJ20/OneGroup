@@ -9,8 +9,10 @@ from functools import wraps
 import os
 
 try:
+    from onegroup.config import *
     import onegroup.handler as hl
 except:
+    from config import *
     import handler as hl
 
 
@@ -183,7 +185,7 @@ def confirm():
 @app.route('/forgot', methods=['GET','POST'])
 def forgotPassword():
     if request.method == 'POST':
-        if emmailform():
+        if emailform():
             email = request.form['email1']
 
             #Confirm the user exist
@@ -250,7 +252,7 @@ def keysCode(code):
 @app.route('/log/<log>', methods=['GET'])
 @admin_required
 def logType(log):
-    filename = "/var/log/"
+    filename = log_location
     if log == "general":
         filename += "openvpn.log"
     elif log == "status":
@@ -263,7 +265,7 @@ def logType(log):
 def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName, attachmentFilePath):
     msg = Message(
         subjectTitle,
-        sender = "capstoneonegroup@gmail.com",
+        sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
         recipients= [recipientEmail])
     msg.body = bodyMessage
 
@@ -325,8 +327,8 @@ def getKeys(name = None):
     keys = hl.getUser("Name",name)["Keys"]
     print(keys)
     #If on a production server, use actual path
-    if os.path.isdir("/usr/local/onegroup/keys"):
-        return send_file('/usr/local/onegroup/keys/' + keys + '.zip')
+    if os.path.isdir(keys_dir):
+        return send_file(keys_dir + keys + '.zip')
     #Else use relative dev path
     else:
         return send_file('static\\Test_client1.zip')
@@ -346,19 +348,18 @@ def setConfig(debug):
         app.config['DEBUG'] = True
 
     #Apply config
-    TAG='OG_'
-    if os.environ[TAG+'secret'] == "RANDOM":
+    if os.getenv(tag+'secret',base_config['secret']) == "RANDOM":
         secret = os.urandom(36)
         app.config['SECRET_KEY'] = secret 
     else:
-        app.config['SECRET_KEY'] = os.environ[TAG+'secret'] 
+        app.config['SECRET_KEY'] = os.getenv(tag+'secret',base_config['secret']) 
 
     #Flask-mail config
-    app.config['MAIL_SERVER'] = os.environ[TAG+'mail_server'] 
-    app.config['MAIL_PORT'] = os.environ[TAG+'mail_port']  
+    app.config['MAIL_SERVER'] = os.getenv(tag+'mail_server',base_config['mail_server'])
+    app.config['MAIL_PORT'] = int(os.getenv(tag+'mail_port',base_config['mail_port'])) 
     app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USERNAME'] = os.environ[TAG+'email'] 
-    app.config['MAIL_PASSWORD'] = os.environ[TAG+'password'] 
+    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
+    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
 
 #
@@ -368,9 +369,17 @@ def run_server(development=False):
     #Initalise database
     hl.init_database()
     
+    #Set the configuration
+    setConfig(development)
+    
     #Run development server if in development mode
-    if debug:
+    if development:
         app.run()
+
+        #Delete config
+        for key in base_config:
+            del os.environ[tag+key]
+
     else:
         #Enable WSGI access logging with paste
         app_logged = TransLogger(app)
@@ -382,8 +391,8 @@ def run_server(development=False):
         cherrypy.config.update({
             'engine.autoreload_on': True,
             'log.screen': True,
-            'server.socket_port': os.environ['server_port'],
-            'server.socket_host': os.environ['server_host']
+            'server.socket_port': int(os.getenv(tag+'server_post',base_config['server_post'])),
+            'server.socket_host': os.getenv(tag+'server_host',base_config['server_host'])        
         })
 
         #Start WSGI web server

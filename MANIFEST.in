@@ -2,3 +2,4 @@ include onegroup/templates/*
 include onegroup/static/*
 include onegroup/scripts/*
 include onegroup.service
+include onegroup.conf

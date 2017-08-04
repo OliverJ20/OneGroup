@@ -22,7 +22,7 @@ function checkForm() {
 
 function addInfo()
 {
-  $.get ("/log/general/", function (data)
+  $.get("/log/general/", function (data)
     {
       logInfo = data.LogData;
       var main = $('<div>');

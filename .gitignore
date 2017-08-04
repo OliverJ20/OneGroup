@@ -102,3 +102,6 @@ ENV/
 
 #db files
 **.db
+
+#ignore development config file
+onegroup/onegroup.conf

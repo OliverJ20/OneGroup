@@ -5,18 +5,21 @@ from datetime import datetime
 import subprocess
 import shlex
 import os
+import logging
+import fileinput
 
+#Database and constants
 try:
+    from onegroup.config import *
     from onegroup.db import Database
 except:
+    from config import *
     from db import Database
 
-#Globals
-workingDir = "/usr/local/onegroup"
-
-filen = "OneGroup.db"       #Database
-if os.path.isdir(workingDir):
-    filen = workingDir+"/OneGroup.db"       #Database
+#Database
+filen = database
+if os.path.isdir(working_dir):
+    filen = working_dir+database
 
 def init_database():
     """
@@ -38,11 +41,47 @@ def loadConfig():
     """ 
         Reads a config file and sets environment variables
     """
+    #base config dictonary 
+    config = base_config
     
+    #Find config file
+    confFile = config_file
+    if os.path.exists(config_path_main):
+        confFile = config_path_main
+    elif os.path.exists(config_path_backup): 
+        confFile = config_path_backup
 
+    #Read in config
+    try:
+        with fileinput.input(files=confFile) as f:
+            for line in f:
+                #Ignore new lines and comments
+                if line == "" or line =="\n" or line[0] == "#":
+                    continue
+                else:
+                    #split by '=' and store in tuple
+                    key, val = line.split("=")
+                    
+                    #checks for empty values
+                    if key == "":
+                        logging.error("Error reading config at line %d: No key\n\t%s",f.lineno(),line)
+                    elif val == "":
+                        logging.error("Error reading config at line %d: No Value\n\t%s",f.lineno(),line)
+                    #check if the key is a valid key
+                    elif key not in base_config.keys(): 
+                        logging.error("Error reading config at line %d: Invalid Key\n\t%s",f.lineno(),line)
+                    #else assign value for given key
+                    else:
+                        config[key] = val
+                    
+                    
+        #Assign Config to environment variables
+        for key in config:
+            os.environ[tag+key] = config[key]
 
-
-
+    except Exception as e:
+        logging.error("Error reading config at line %s",e)
+        
 
 #
 # User Methods
