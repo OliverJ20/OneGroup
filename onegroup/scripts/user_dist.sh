@@ -1,17 +1,14 @@
 #! /bin/bash
 
 #Vars
-DIR=/etc/openvpn;
-ERSA=$DIR/easy-rsa;
-KEYS=$DIR/keys
 HOME=/usr/local/onegroup/keys
 
 #Get client's dir
 CLIENT=$1;
-CLIENT_DIR=$KEYS/$CLIENT
+CLIENT_DIR=${!OG_openvpn_keys}/$CLIENT
 
 #copy ca.crt to the user's dir
-cp $KEYS/ca.crt $CLIENT_DIR
+cp ${!OG_openvpn_keys}/ca.crt $CLIENT_DIR
 
 #Compress client's key/certs
 zip -r $HOME/$CLIENT.zip $CLIENT_DIR

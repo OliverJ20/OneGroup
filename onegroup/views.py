@@ -262,7 +262,7 @@ def logType(log):
 
     return jsonify({LogData:hl.getLog(filename)})
 
-def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName, attachmentFilePath):
+def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = None, attachmentFilePath = None):
     msg = Message(
         subjectTitle,
         sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
@@ -391,7 +391,7 @@ def run_server(development=False):
         cherrypy.config.update({
             'engine.autoreload_on': True,
             'log.screen': True,
-            'server.socket_port': int(os.getenv(tag+'server_post',base_config['server_post'])),
+            'server.socket_port': int(os.getenv(tag+'server_port',base_config['server_port'])),
             'server.socket_host': os.getenv(tag+'server_host',base_config['server_host'])        
         })
 

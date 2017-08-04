@@ -72,7 +72,7 @@ def loadConfig():
                         logging.error("Error reading config at line %d: Invalid Key\n\t%s",f.lineno(),line)
                     #else assign value for given key
                     else:
-                        config[key] = val
+                        config[key] = val.strip("\n")
                     
                     
         #Assign Config to environment variables
