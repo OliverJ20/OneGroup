@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
+           <script type="text/javascript" src="{{ url_for('static', filename='logpage.js') }}"></script>
     <body>
         <div class="contentDiv">
             <div id="logSettings">
@@ -33,8 +34,18 @@
             <div class="" id="previewDiv">
             </div>
             {% endif %}
+
+        <div id="logTable" class="tableScroll" align="center" style="margin-top: 10px">
+                <form>
+
+
+            <input type="button" id = "logButton" , style="background-color: #dddddd; outline-color: #666666; color: black; " value="Logs", onclick = "addInfo()" >
+            </form>
+            </div>
+
         </div>
     </body>
+
 {% endblock %}
 
 

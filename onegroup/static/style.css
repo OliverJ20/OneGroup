@@ -19,6 +19,12 @@ statustext    {
     /*color: #37f925; GREEN*/
 }
 
+
+.tableScroll {
+    overflow:scroll;
+    height:200px;
+}
+
 td    {
     background-color: #e0e0e0;
     font-size: 12px;

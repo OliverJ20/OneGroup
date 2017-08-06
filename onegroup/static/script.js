@@ -1,5 +1,6 @@
 function displayForm() {
    document.getElementById('formDivleft').style.display = "block";
+
 }
 
 function checkForm() {
@@ -20,18 +21,7 @@ function checkForm() {
     }
 }
 
-function addInfo()
-{
-  $.get("/log/general/", function (data)
-    {
-      logInfo = data.LogData;
-      var main = $('<div>');
-      var logInfo = $('<p>').html(logInfo[0]);
-      div.append(div);
-      div.append(logInfo);
-      $('#FrontLogInfo').html(div.html());
-    })
-}
+
 // function displayLogInfo()
 // {
 //   var main = $('<div>');

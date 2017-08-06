@@ -309,6 +309,12 @@ def randompassword():
     size = random.randint(8, 12)
     return ''.join(random.choice(characters) for x in range(size))
 
+@app.route('/logtestdata/', methods=["GET"])
+def logTestData():
+    testLogData = ["friday 12:00pm server hacked", "monday 12:00pm server hacked", "thursday 2:00pm server hacked",
+                   "sunday 1:00pm nerd","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked"];
+    return jsonify({"logData":testLogData});
+
 def emailform():
     if request.method == 'POST':
         email = request.form['email1']
