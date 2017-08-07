@@ -9,7 +9,7 @@
                     <h2>Time</h2>
                     <form action="." name="timeStamp" id="timeBracket" onsubmit="validateForm()" method="POST">
                         Start Date: <input id="dateStart" onkeyup="tableFilter()">
-                        End Date: <input type="date" id="dateEnd" name="endDate" onkeyup="addInfo()">
+                        End Date: <input type="date" id="dateEnd" name="endDate" onkeyup="tableFilter()">
                     </form>
                 </div>
                 <div id="exportSettings">
@@ -35,8 +35,6 @@
             </div>
             {% endif %}
 
-            <img src="{{ url_for('static', filename = 'images.png') }}"
-                 width="75" height="75" onmouseup="addInfo()"/>
         <div id="logTable" class="tableScroll" align="center" style="margin-top: 10px">
                 <form>
 

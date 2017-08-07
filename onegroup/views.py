@@ -312,7 +312,7 @@ def randompassword():
 @app.route('/logtestdata/', methods=["GET"])
 def logTestData():
     testLogData = ["friday 12:00pm server hacked", "monday 12:00pm server hacked", "thursday 2:00pm server hacked",
-                   "sunday 1:00pm nerd","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked"];
+                   "sunday 1:00pm nerd","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm Fire","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked"];
     return jsonify({"logData":testLogData});
 
 def emailform():
