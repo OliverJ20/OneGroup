@@ -34,7 +34,10 @@ def postInstallProcedure():
     #Make config folder and place config
     subprocess.call(shlex.split('mkdir {}'.format(ETC)))
     subprocess.call(shlex.split('mv {} {}'.format(CONFIG,DIR)))
-    subprocess.call(shlex.split('cp {} {}'.format(DIR+"/"+CONFIG,ETC)))
+    
+    #If a config file exists, don't over write
+    if not os.path.exists(ETC+"/"+CONFIG):
+        subprocess.call(shlex.split('cp {} {}'.format(DIR+"/"+CONFIG,ETC)))
 
     #Create and start service
     subprocess.call(shlex.split('mv {} {}'.format(SERVICE,SYSTEM)))
@@ -69,6 +72,11 @@ setup(
         'cherrypy',
         'passlib',
         'paste'
+    ],
+    scripts=[
+        'onegroup/scripts/user_gen.sh',
+        'onegroup/scripts/user_dist.sh',
+        'onegroup/scripts/user_del.sh',
     ],
     cmdclass={
         'develop': PostDevelopCommand,

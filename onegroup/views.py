@@ -7,12 +7,13 @@ from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
 from functools import wraps
 import os
+import logging
 
 try:
-    from onegroup.config import *
+    from onegroup.defaults import *
     import onegroup.handler as hl
 except:
-    from config import *
+    from defaults import *
     import handler as hl
 
 
@@ -88,8 +89,12 @@ def render():
 @admin_required
 def home():
     if request.method == 'POST':
-        userforms()
-        return redirect(url_for('confirm', confirmed = 'Added Client'))
+        #Error checking on user creation
+        if userforms():
+            return redirect(url_for('confirm', confirmed = 'Added Client'))
+        else:
+            flash("User already exists")
+        
     return render_template('index.html')
 
 
@@ -252,7 +257,7 @@ def keysCode(code):
 @app.route('/log/<log>', methods=['GET'])
 @admin_required
 def logType(log):
-    filename = log_location
+    filename = log_dir
     if log == "general":
         filename += "openvpn.log"
     elif log == "status":
@@ -260,7 +265,7 @@ def logType(log):
     else:
         abort(404)
 
-    return jsonify({LogData:hl.getLog(filename)})
+    return jsonify({"logData" : hl.getLog(filename)})
 
 def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = None, attachmentFilePath = None):
     msg = Message(
@@ -286,13 +291,17 @@ def userforms():
         # password = request.form['pass1']
         password = randompassword()
         email = request.form['email1']
-        hl.createUser(name,password,email)
-        subjectTitle = "OneGroup account details"
-        recipientEmail = email
-        bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(randompassword())
-        emailMessage(subjectTitle, recipientEmail, bodyMessage)
-        user = hl.getUser("Email",email)
-        hl.zipUserKeys(user['Keys'])
+        #Check if the user creation was succesful
+        if hl.createUser(name,password,email):
+            subjectTitle = "OneGroup account details"
+            recipientEmail = email
+            bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
+            emailMessage(subjectTitle, recipientEmail, bodyMessage)
+            user = hl.getUser("Email",email)
+            hl.zipUserKeys(user['Keys'])
+            return True
+        else:
+            return False
 
 def passwordform(name = None):
     if request.method == 'POST':

@@ -9,7 +9,7 @@ $(document).ready(function () {
 
 function addInfo()
 {
-  $.get("/logtestdata/", function (data)
+  $.get("/log/general", function (data)
     {
       var LogInfo = data;
       var logStringArrays = new Array
