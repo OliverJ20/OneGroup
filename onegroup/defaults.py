@@ -10,8 +10,6 @@ config_path_backup = "/usr/local/onegroup/"+config_file
 keys_dir = working_dir+"/keys/"
 log_dir = "/var/log/"
 
-
-
 #STANDARD CONFIG
 tag = 'OG_'
 base_config = {

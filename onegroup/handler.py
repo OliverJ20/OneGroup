@@ -10,16 +10,16 @@ import fileinput
 
 #Database and constants
 try:
-    from onegroup.config import *
+    from onegroup.defaults import *
     from onegroup.db import Database
 except:
-    from config import *
+    from defaults import *
     from db import Database
 
 #Database
 filen = database
 if os.path.isdir(working_dir):
-    filen = working_dir+database
+    filen = working_dir+"/"+database
 
 def init_database():
     """
@@ -82,7 +82,6 @@ def loadConfig():
     except Exception as e:
         logging.error("Error reading config at line %s",e)
         
-
 #
 # User Methods
 #
@@ -94,6 +93,8 @@ def createUser(name, passwd, email):
         name  : str : User's name/username
         passwd: str : User's password 
         email : str : User's email
+
+        returns: true if successful, else false
     """
     #Connect to the database
     db = Database(filename = filen)
@@ -101,14 +102,27 @@ def createUser(name, passwd, email):
     #Create user dictonary for database
     user = {"Name" : name, "Email" : email, "Password": sha256_crypt.hash(passwd), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : createUserFilename(name), "Key_Distributed" : 0}
 
+    #Check if user exists (Check both username and email)
+    if getUser("Name",user["Name"]) != None or getUser("Email",user["Email"]) != None:
+        logging.error("Error creating user %s user exists",name)
+        return False
+    
     #create the users key/cert pair
-    subprocess.call(shlex.split('scripts/user_gen.sh {}'.format(user["Keys"])))
+    args = [
+        user["Keys"],
+        os.getenv(tag+'openvpn_keys',base_config['openvpn_keys']), 
+        os.getenv(tag+'openvpn_ersa',base_config['openvpn_ersa']), 
+        os.getenv(tag+'openvpn_client_config',base_config['openvpn_client_config']) 
+    ]
+    callScript('user_gen.sh',args)
+    #subprocess.call(shlex.split('user_gen.sh {}'.format(user["Keys"])))
 
     #Add user to the database
     db.insert("users",user)
 
-    #close database connection
+    #close database connection and exit
     db.close()
+    return True
           
 
 def zipUserKeys(user):
@@ -118,7 +132,12 @@ def zipUserKeys(user):
         user : str : the filename of the client
     """
     #create the users key/cert pair
-    subprocess.call(shlex.split('scripts/user_dist.sh {}'.format(user)))
+    args = [
+        user,
+        os.getenv(tag+'openvpn_keys',base_config['openvpn_keys']), 
+    ]
+    callScript('user_dist.sh',args)
+    #subprocess.call(shlex.split('user_dist.sh {}'.format(user)))
 
 
 
@@ -330,4 +349,25 @@ def getLog(filepath):
         return None
     return log
     
+
+def callScript(script, params = []):
+    """
+        Determine the location of the script and calls it
     
+        :param script : file name of the script to call without path
+        :param params : parameters to pass to the script
+    """
+    #Determine if the script dir exists, else use local path
+    if os.path.exists("scripts/"):
+        call = "scripts/"+script
+    else:
+        call = script
+
+    #loop over parameters if any
+    for arg in params:
+        call += " {}".format(arg)
+
+    subprocess.call(shlex.split(call))
+
+
+
