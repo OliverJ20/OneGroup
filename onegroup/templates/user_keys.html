@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block header %}
-<a href = "{{ url_for('logout') }}">Log Out</a>
 {% endblock %}
 {% block body %}
 <body>
@@ -17,7 +16,7 @@
                    <a href="/userkey" download><button class='btn btn-default'>Download</button></a>
                    <br  />
                    <br  />
-                   <a href = "/index"> Back to Home</a>
+                   <a href = "{{ url_for('logout') }}">Log Out</a>
                </div>
             {% else %}
 

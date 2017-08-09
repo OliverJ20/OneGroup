@@ -105,14 +105,12 @@ def password():
 @admin_required
 def retrieve_user_page():
     ##redirect(url_for('users'))
-    flash("Run")
     return render_template('users.html')
 
 
 @app.route('/logs')
 @admin_required
 def show_logs():
-    flash("Rabbit")
     return render_template('logs.html')
 
 
@@ -131,8 +129,6 @@ def show_user_keys(username):
 @app.route('/config')
 @admin_required
 def show_config():
-    flash("Run")
-    flash("Forget the Sun")
     return render_template('config.html')
 
 

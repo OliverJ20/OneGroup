@@ -21,6 +21,18 @@ function checkForm() {
     }
 }
 
+function enableServer() {
+x = document.getElementById("status");
+if(statusColour==1) {
+    x.style.color = 'red';
+    statusColour = 2;
+}
+else if(status!=1) {
+    x.style.color = 'green';
+    statusColour = 1;
+}
+
+}
 
 // function displayLogInfo()
 // {
