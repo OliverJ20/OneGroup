@@ -11,18 +11,14 @@ class Database:
     def __init__(self, **kwargs):
         self.filename = kwargs.get('filename')
         self._db = sqlite3.connect(self.filename)
-        self.check_empty()
+        self.init()
         self._db.row_factory = sqlite3.Row
 
-    def check_empty(self):
-        #Check if the database is empty. If not the exit
-        #cursor = self._db.execute("SELECT name from sqlite_master WHERE type='table';") 
-        #if len([x for x in cursor.fetchall()]) > 0:
-        #    return
-        
+    def init(self):
         #Tables
         self._db.execute('create table IF NOT EXISTS users (ID INTEGER PRIMARY KEY NOT NULL, Name text, Email text, Password text, Auth_Type text, Account_Type text, Keys text, Key_Distributed INTEGER)')
         self._db.execute('create table IF NOT EXISTS codes (Code text PRIMARY KEY NOT NULL, Name text, Purpose text, Used INTEGER)')
+        self._db.execute('create table IF NOT EXISTS notifications (User text, Request text)')
 
     def insert(self, table, row):
         keys = sorted(row.keys())
