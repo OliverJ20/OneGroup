@@ -106,11 +106,37 @@ def password():
         return redirect(url_for('confirm', confirmed = 'Changed Password'))
     return render_template('password.html')
 
-@app.route('/users')
+@app.route('/users', methods=['GET', 'POST'])
 @admin_required
 def retrieve_user_page():
     ##redirect(url_for('users'))
-    return render_template('users.html')
+    ##requests = hl.retrieveRequests()
+    return render_template('users.html', testdata = [
+        {"User": "MyName", "Request": 10},
+        {"User": "YourName", "Request": 5},
+        {"User": "TheirName", "Request": 7},
+    ])
+    ##return render_template('users.html', testdata = hl.retrieveRequests())
+
+
+@app.route('/approve_req', methods=['POST'])
+@admin_required
+def approve_req():
+    reqName = request.form['user']
+    reqStatus = request.form['request']
+    if request.method == 'POST':
+        if request.form['reqOption'] == 'Approve':
+            print("Approve")
+            print(reqName)
+            print(reqStatus)
+            #hl.acceptRequest(reqName, reqReq)
+            return redirect('/users')
+        elif request.form['reqOption'] == 'Decline':
+            print("Decline")
+            print(reqName)
+            print(reqStatus)
+            #hl.declineRequest(reqName)#, reqReq)
+            return redirect('/users')
 
 
 @app.route('/logs')
@@ -121,7 +147,10 @@ def show_logs():
 
 @app.route('/userkey')
 def userkey():
+    name = session['name']
+    hl.keyDistributeFlag(name)
     return getKeys()
+
 
 
 @app.route('/clients/<username>')
@@ -262,6 +291,7 @@ def logType(log):
         abort(404)
 
     return jsonify({"logData" : hl.getLog(filename)})
+
 
 def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = None, attachmentFilePath = None):
     msg = Message(

@@ -194,6 +194,38 @@ footer    {
 	margin-top:10px;
 }
 
+#approveButton{
+  display:inline-block;
+  color: #ffffff;
+  font-weight: bolder;
+  border: none;
+  padding: 10px 20px;
+  font-size: 11px;
+  margin-left:25%;
+ background-color: #37f925;
+}
+
+#declineButton{
+  display:inline-block;
+  color: #ffffff;
+  font-weight: bolder;
+  border: none;
+  padding: 10px 20px;
+  font-size: 11px;
+  background-color: #db2727;
+}
+
+#approveButton:hover{
+  background-color: #1e8214;
+}
+
+#declineButton:hover{
+  background-color: #911818;
+}
+
+#hiddenInput{
+  display: none;
+}
 
 nav ul    {
     margin-left: -8px;
