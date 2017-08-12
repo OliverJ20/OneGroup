@@ -129,7 +129,10 @@ def userkey():
 @app.route('/clients/<username>')
 @client_required
 def show_user_keys(username):
-    return render_template('user_keys.html', username=username)
+
+    key_distributed = hl.validateKeysDownloaded(username)
+    
+    return render_template('user_keys.html', username=username, key_distributed=key_distributed)
     ##method to pull keys from database using username
 
 
@@ -221,6 +224,7 @@ def forgotPassword():
         
     return render_template('emailsend.html')
 
+
 @app.route('/reset/<code>', methods=['GET','POST'])
 def passwordCode(code):
     #Check if code exists and for the correct purpose. Else abort
@@ -267,6 +271,7 @@ def logType(log):
 
     return jsonify({"logData" : hl.getLog(filename)})
 
+
 def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = None, attachmentFilePath = None):
     msg = Message(
         subjectTitle,
@@ -278,6 +283,7 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
         mail.attach(attachmentName, attachmentFilePath, "application/zip")
 
     mail.send(msg)
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -303,6 +309,7 @@ def userforms():
         else:
             return False
 
+
 def passwordform(name = None):
     if request.method == 'POST':
         if name == None:
@@ -313,16 +320,19 @@ def passwordform(name = None):
         if password == confirmPassword:
             hl.changePassword(name,confirmPassword)
 
+
 def randompassword():
     characters = string.ascii_uppercase + string.ascii_lowercase + string.digits
     size = random.randint(8, 12)
     return ''.join(random.choice(characters) for x in range(size))
+
 
 @app.route('/logtestdata/', methods=["GET"])
 def logTestData():
     testLogData = ["friday 12:00pm server hacked", "monday 12:00pm server hacked", "thursday 2:00pm server hacked",
                    "sunday 1:00pm nerd","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm Fire","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked"];
     return jsonify({"logData":testLogData});
+
 
 def emailform():
     if request.method == 'POST':
@@ -331,6 +341,7 @@ def emailform():
         if email == confirmemail:
             #EMAIL CODE HERE
             return True
+
 
 def getKeys(name = None):
     """
@@ -347,6 +358,7 @@ def getKeys(name = None):
     #Else use relative dev path
     else:
         return send_file('static\\Test_client1.zip')
+
 
 def setConfig(debug):
     """
@@ -376,6 +388,7 @@ def setConfig(debug):
     app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
     app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
+
 
 #
 #Cherrypy server base
@@ -413,6 +426,7 @@ def run_server(development=False):
         #Start WSGI web server
         cherrypy.engine.start()
         cherrypy.engine.block()
+
 
 if __name__ == '__main__':
     run_server(True)

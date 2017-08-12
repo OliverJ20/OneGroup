@@ -370,4 +370,14 @@ def callScript(script, params = []):
     subprocess.call(shlex.split(call))
 
 
+def validateKeysDownloaded(username):
+    """
+        Return the value of Key_Distributed for a specific user in the user's table
+    
+        :param username : str : the name of the user to validate keys are downloaded
+        :return : int : 1 (TRUE), 0 (FALSE) corresponding to value set in database table
+    """
 
+    return getUser("Name", username)["Key_Distributed"]
+    
+    
