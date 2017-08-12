@@ -151,6 +151,24 @@ def userkey():
     hl.keyDistributeFlag(name)
     return getKeys()
 
+@app.route('/create_request')
+def create_request():
+    name = session['name']
+    requestId = hl.createRequest(name, "Key Reset")
+    adminEmails = hl.getAdminEmails()
+    #Send email to all admin accounts
+    msg = """
+        Request from {}:
+        
+        ID: {}
+
+        Request: Key Reset
+        
+        This message is automatically generated, please do not reply as this account is not monitored.
+        
+        """.format(name, requestId)
+    emailMessage("New Request", adminEmails, msg)
+    return redirect(url_for('confirm'), confirmed='New Key Request Sent!')
 
 
 @app.route('/clients/<username>')
@@ -301,7 +319,10 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
     msg = Message(
         subjectTitle,
         sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
-        recipients= [recipientEmail])
+        )
+    for email in recipientEmail:             
+        msg.add_recipient(email)
+
     msg.body = bodyMessage
 
     if attachmentName is not None and attachmentFilePath is not None:
@@ -325,10 +346,10 @@ def userforms():
         #Check if the user creation was succesful
         if hl.createUser(name,password,email):
             subjectTitle = "OneGroup account details"
-            recipientEmail = email
+            recipientEmail = [email]
             bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
             emailMessage(subjectTitle, recipientEmail, bodyMessage)
-            user = hl.getUser("Email",email)
+            user = hl.getUser("Email", recipientEmail[0])
             hl.zipUserKeys(user['Keys'])
             return True
         else:

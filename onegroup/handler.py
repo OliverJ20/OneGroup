@@ -419,5 +419,25 @@ def validateKeysDownloaded(username):
     """
 
     return getUser("Name", username)["Key_Distributed"]
+
+
+def createRequest(username, requestType):
+    db = Database(filename=filen)
+    db.insert("notifications", { "User" : username, "Request" : requestType })
+    db.close()
     
+    
+def getAdminEmails():
+
+    db = Database(filename=filen)
+
+    emails = retrieve('users', {"Account_Type" : "Admin"})
+
+    #get all emails where account_type is "Admin"
+
+    db.close()
+    return emails
+
+
+
     
