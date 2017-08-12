@@ -345,7 +345,7 @@ def acceptRequest(reqName):
 
 def declineRequest(reqName):#, reqReq):
     db = Database(filename = filen)
-    db.delete("notifications","Users",reqName)
+    db.delete("notifications",{"Users":reqName})
     #db.delete("notifications", "Request", reqReq)
     db.close()
     return True
