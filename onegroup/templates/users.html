@@ -95,6 +95,31 @@
                     <td>12/05/2017</td>
                 </tr>
             </table>
+
+            <h2>Current Requests</h2>
+
+            <div id="userReqTable" align="center" style="margin-top: 10px;">
+
+                <table>
+                  <tr>
+                      <th>Users</th>
+                      <th>Request</th>
+                      <th>Approval?</th>
+                  </tr>
+                  {%for notifications in testdata%}
+                    <tr><td>{{notifications["User"]}}</td>
+                      <td>{{notifications["Request"]}}</td>
+                      <td><form action="{{ url_for('approve_req') }}" vname="approveForm" method=post>
+                        <input type="text" name="user" value= {{notifications["User"]}} id = "hiddenInput" readonly>
+                        <input type="text" name="request" value= {{notifications["Request"]}}  id = "hiddenInput" readonly>
+                        <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
+                        <input type="submit" name="reqOption" value="Decline" id = "declineButton"></input>
+                      </form>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </table>
+            </div>
         </div>
         </center>
     </body>

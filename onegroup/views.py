@@ -106,24 +106,51 @@ def password():
         return redirect(url_for('confirm', confirmed = 'Changed Password'))
     return render_template('password.html')
 
-@app.route('/users')
+@app.route('/users', methods=['GET', 'POST'])
 @admin_required
 def retrieve_user_page():
     ##redirect(url_for('users'))
-    flash("Run")
-    return render_template('users.html')
+    ##requests = hl.retrieveRequests()
+    return render_template('users.html', testdata = [
+        {"User": "MyName", "Request": 10},
+        {"User": "YourName", "Request": 5},
+        {"User": "TheirName", "Request": 7},
+    ])
+    ##return render_template('users.html', testdata = hl.retrieveRequests())
+
+
+@app.route('/approve_req', methods=['POST'])
+@admin_required
+def approve_req():
+    reqName = request.form['user']
+    reqStatus = request.form['request']
+    if request.method == 'POST':
+        if request.form['reqOption'] == 'Approve':
+            print("Approve")
+            print(reqName)
+            print(reqStatus)
+            #hl.acceptRequest(reqName, reqReq)
+            return redirect('/users')
+        elif request.form['reqOption'] == 'Decline':
+            print("Decline")
+            print(reqName)
+            print(reqStatus)
+            #hl.declineRequest(reqName)#, reqReq)
+            return redirect('/users')
 
 
 @app.route('/logs')
 @admin_required
 def show_logs():
-    flash("Rabbit")
     return render_template('logs.html')
 
 
 @app.route('/userkey')
 def userkey():
+    name = session['name']
+    hl.keyDistributeFlag(name)
     return getKeys()
+
 
 
 @app.route('/clients/<username>')
@@ -139,8 +166,6 @@ def show_user_keys(username):
 @app.route('/config')
 @admin_required
 def show_config():
-    flash("Run")
-    flash("Forget the Sun")
     return render_template('config.html')
 
 

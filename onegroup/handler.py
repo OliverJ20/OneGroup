@@ -332,6 +332,46 @@ def changePassword(name, userinput):
     db.close()
 
 
+def retrieveRequests():
+    db = Database(filename = filen)
+    requests =  db.retrieve("notifications")
+    db.close()
+    return requests
+
+
+def acceptRequest(reqName):
+    return True
+
+
+def declineRequest(reqName):#, reqReq):
+    db = Database(filename = filen)
+    db.delete("notifications","Users",reqName)
+    #db.delete("notifications", "Request", reqReq)
+    db.close()
+    return True
+
+# Work in Progress
+# def retrieveFlags(name):
+#     db = Database(filename = filen)
+#     flag =  db.retrieve("users",{})
+#     db.close()
+#     return flag
+
+
+def keyDistributeFlag(name):
+    """
+    Changes key disrutbted value in database
+
+    :param name : user's identifying name
+    :return :
+    sets key value to 1
+    """
+    db = Database(filename=filen)
+    user = getUser("Name", name)['ID']
+    db.update("users", {"Key_Distributed": 1}, ("ID", user))
+    db.close()
+
+
 def getLog(filepath):
     """
     Retrieves log file from specified path
