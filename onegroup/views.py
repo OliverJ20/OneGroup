@@ -148,15 +148,20 @@ def show_logs():
 @app.route('/userkey')
 def userkey():
     name = session['name']
-    hl.keyDistributeFlag(name)
-    return getKeys()
+    flagCheck = hl.keyDistributeFlag(name)
+    if flagCheck == 0:
+        return getKeys()
+    elif flagCheck == 1:
+        flash("You have been logged out. Please contact your system administrator")
+        return redirect(url_for('logout'))
+
 
 
 
 @app.route('/clients/<username>')
 @client_required
 def show_user_keys(username):
-    return render_template('user_keys.html', username=username)
+    return render_template('user_keys.html', username=username, distributed = hl.checkDistributeFlag(username))
     ##method to pull keys from database using username
 
 

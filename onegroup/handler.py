@@ -358,6 +358,18 @@ def declineRequest(reqName):#, reqReq):
 #     return flag
 
 
+def checkDistributeFlag(name):
+    """
+    Checks key disributed value in database
+
+    :param name : user's identifying name
+    :return :
+    true if key has not been set to 1
+    """
+    flag = getUser("Name", name)['Key_Distributed']
+    return flag == 1
+
+
 def keyDistributeFlag(name):
     """
     Changes key disrutbted value in database
