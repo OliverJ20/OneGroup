@@ -156,6 +156,24 @@ def userkey():
         return redirect(url_for('logout'))
 
 
+@app.route('/create_request')
+def create_request():
+    name = session['name']
+    requestId = hl.createRequest(name, "Key Reset")
+    adminEmails = hl.getAdminEmails()
+    #Send email to all admin accounts
+    msg = """
+        Request from {}:
+        
+        ID: {}
+
+        Request: Key Reset
+        
+        This message is automatically generated, please do not reply as this account is not monitored.
+        
+        """.format(name, requestId)
+    emailMessage("New Request", adminEmails, msg)
+    return redirect(url_for('confirm'), confirmed='New Key Request Sent!')
 
 
 @app.route('/clients/<username>')
@@ -251,6 +269,7 @@ def forgotPassword():
         
     return render_template('emailsend.html')
 
+
 @app.route('/reset/<code>', methods=['GET','POST'])
 def passwordCode(code):
     #Check if code exists and for the correct purpose. Else abort
@@ -302,13 +321,17 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
     msg = Message(
         subjectTitle,
         sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
-        recipients= [recipientEmail])
+        )
+    for email in recipientEmail:             
+        msg.add_recipient(email)
+
     msg.body = bodyMessage
 
     if attachmentName is not None and attachmentFilePath is not None:
         mail.attach(attachmentName, attachmentFilePath, "application/zip")
 
     mail.send(msg)
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -325,14 +348,15 @@ def userforms():
         #Check if the user creation was succesful
         if hl.createUser(name,password,email):
             subjectTitle = "OneGroup account details"
-            recipientEmail = email
+            recipientEmail = [email]
             bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
             emailMessage(subjectTitle, recipientEmail, bodyMessage)
-            user = hl.getUser("Email",email)
+            user = hl.getUser("Email", recipientEmail[0])
             hl.zipUserKeys(user['Keys'])
             return True
         else:
             return False
+
 
 def passwordform(name = None):
     if request.method == 'POST':
@@ -344,16 +368,19 @@ def passwordform(name = None):
         if password == confirmPassword:
             hl.changePassword(name,confirmPassword)
 
+
 def randompassword():
     characters = string.ascii_uppercase + string.ascii_lowercase + string.digits
     size = random.randint(8, 12)
     return ''.join(random.choice(characters) for x in range(size))
+
 
 @app.route('/logtestdata/', methods=["GET"])
 def logTestData():
     testLogData = ["friday 12:00pm server hacked", "monday 12:00pm server hacked", "thursday 2:00pm server hacked",
                    "sunday 1:00pm nerd","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm Fire","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked"];
     return jsonify({"logData":testLogData});
+
 
 def emailform():
     if request.method == 'POST':
@@ -362,6 +389,7 @@ def emailform():
         if email == confirmemail:
             #EMAIL CODE HERE
             return True
+
 
 def getKeys(name = None):
     """
@@ -378,6 +406,7 @@ def getKeys(name = None):
     #Else use relative dev path
     else:
         return send_file('static\\Test_client1.zip')
+
 
 def setConfig(debug):
     """
@@ -407,6 +436,7 @@ def setConfig(debug):
     app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
     app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
+
 
 #
 #Cherrypy server base
@@ -444,6 +474,7 @@ def run_server(development=False):
         #Start WSGI web server
         cherrypy.engine.start()
         cherrypy.engine.block()
+
 
 if __name__ == '__main__':
     run_server(True)

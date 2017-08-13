@@ -18,7 +18,7 @@ class Database:
         #Tables
         self._db.execute('create table IF NOT EXISTS users (ID INTEGER PRIMARY KEY NOT NULL, Name text, Email text, Password text, Auth_Type text, Account_Type text, Keys text, Key_Distributed INTEGER)')
         self._db.execute('create table IF NOT EXISTS codes (Code text PRIMARY KEY NOT NULL, Name text, Purpose text, Used INTEGER)')
-        self._db.execute('create table IF NOT EXISTS notifications (User text, Request text)')
+        self._db.execute('create table IF NOT EXISTS notifications (ID INTEGER PRIMARY KEY NOT NULL, User text, Request text)')
 
     def insert(self, table, row):
         keys = sorted(row.keys())
@@ -75,8 +75,15 @@ class Database:
         self._db.execute(q, (ID[1],) )
         self._db.commit()
 
-    def delete(self, table, key, val):
-        self._db.execute('delete from {} where {} = ?'.format(table, key),(val,))
+    def delete(self, table, keypairs):
+        keys = sorted(keypairs.keys())
+        values = tuple([keypairs[k] for k in keys])
+        query = ''
+        for key in keys:
+            query += " {} = ? AND".format(key)
+
+        query = query[:-4]
+        self._db.execute('delete from {} where {}'.format(table, query))
         self._db.commit()
 
     def RunSQL(self, sql):

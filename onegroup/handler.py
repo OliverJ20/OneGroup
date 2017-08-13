@@ -345,7 +345,7 @@ def acceptRequest(reqName):
 
 def declineRequest(reqName):#, reqReq):
     db = Database(filename = filen)
-    db.delete("notifications","Users",reqName)
+    db.delete("notifications",{"Users":reqName})
     #db.delete("notifications", "Request", reqReq)
     db.close()
     return True
@@ -422,4 +422,34 @@ def callScript(script, params = []):
     subprocess.call(shlex.split(call))
 
 
+def validateKeysDownloaded(username):
+    """
+        Return the value of Key_Distributed for a specific user in the user's table
+    
+        :param username : str : the name of the user to validate keys are downloaded
+        :return : int : 1 (TRUE), 0 (FALSE) corresponding to value set in database table
+    """
 
+    return getUser("Name", username)["Key_Distributed"]
+
+
+def createRequest(username, requestType):
+    db = Database(filename=filen)
+    db.insert("notifications", { "User" : username, "Request" : requestType })
+    db.close()
+    
+    
+def getAdminEmails():
+
+    db = Database(filename=filen)
+
+    emails = retrieve('users', {"Account_Type" : "Admin"})
+
+    #get all emails where account_type is "Admin"
+
+    db.close()
+    return emails
+
+
+
+    
