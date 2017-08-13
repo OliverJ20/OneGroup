@@ -156,7 +156,7 @@ def userkey():
         return redirect(url_for('logout'))
 
 
-@app.route('/create_request')
+@app.route('/create_request', methods =['POST'])
 def create_request():
     name = session['name']
     requestId = hl.createRequest(name, "Key Reset")
