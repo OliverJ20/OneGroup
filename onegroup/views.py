@@ -148,7 +148,7 @@ def show_logs():
 @app.route('/userkey')
 def userkey():
     name = session['name']
-    flagCheck = hl.keyDistributeFlag(name)
+    flagCheck = hl.checkDistributeFlag(name)
     if flagCheck == 0:
         return getKeys()
     elif flagCheck == 1:
@@ -399,7 +399,7 @@ def getKeys(name = None):
         name =session.get('name')
 
     keys = hl.getUser("Name",name)["Keys"]
-    print(keys)
+    hl.keyDistributeFlag(name)
     #If on a production server, use actual path
     if os.path.isdir(keys_dir):
         return send_file(keys_dir + keys + '.zip')
