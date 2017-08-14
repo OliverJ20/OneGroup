@@ -105,3 +105,6 @@ ENV/
 
 #ignore development config file
 onegroup/onegroup.conf
+
+#.idea
+.idea/
