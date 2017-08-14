@@ -437,6 +437,9 @@ def createRequest(username, requestType):
     db = Database(filename=filen)
     db.insert("notifications", { "User" : username, "Request" : requestType })
     db.close()
+    requestedId = db.retrieve("notifications", { "User" : username, "Request" : requestType })['ID']
+    return requestedId
+
     
     
 def getAdminEmails():
