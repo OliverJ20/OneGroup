@@ -1,5 +1,5 @@
 /**
- * Created by Oliver on 8/6/2017.
+ * Created by Olive & Eliot on 8/6/2017.
  */
 
 $(document).ready(function () {
