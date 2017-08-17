@@ -94,7 +94,7 @@ def home():
             return redirect(url_for('confirm', confirmed = 'Added Client'))
         else:
             flash("User already exists")
-        
+
     return render_template('index.html')
 
 
@@ -145,13 +145,14 @@ def show_logs():
     return render_template('logs.html')
 
 
-@app.route('/userkey')
-def userkey():
+@app.route('/userkey/<hash>')
+@client_required
+def userkey(hash):
     name = session['name']
     flagCheck = hl.checkDistributeFlag(name)
-    if flagCheck == 0:
+    if flagCheck == False:
         return getKeys()
-    elif flagCheck == 1:
+    elif flagCheck == True:
         flash("You have been logged out. Please contact your system administrator")
         return redirect(url_for('logout'))
 
@@ -179,7 +180,12 @@ def create_request():
 @app.route('/clients/<username>')
 @client_required
 def show_user_keys(username):
-    return render_template('user_keys.html', username=username, distributed = hl.checkDistributeFlag(username))
+    downloaded = hl.checkDistributeFlag(username)
+    hash = None
+    if not downloaded:
+        #generate hash
+        hash = randompassword()
+    return render_template('user_keys.html', username=username, distributed = downloaded, hash = hash)
     ##method to pull keys from database using username
 
 
@@ -334,9 +340,11 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
 
 
 @app.errorhandler(404)
+@app.errorhandler(401)
 def page_not_found(e):
-    return render_template('error.html'), 404
-	
+        flash("Error: Try Something Different This Time")
+        return render_template('login.html'), 404
+
 
 #Function to create user and generate keys into a ZIP folder
 def userforms():

@@ -1,3 +1,18 @@
+// $(document).ready(function () {
+// var buttons = document.getElementsByClassName('downloadButton');
+//           for(var i = 0; i < buttons.length; i++) {
+//               var button = buttons[i];
+//               button.onclick = function() {
+//                   button.style.display = "none";
+//               }
+//           }
+//
+// });
+
+function hideButton(){
+   document.getElementById('testButton')style.display = "none";
+}
+
 function displayForm() {
    document.getElementById('formDivleft').style.display = "block";
 

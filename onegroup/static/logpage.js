@@ -15,7 +15,7 @@ function addInfo()
       var logStringArrays = new Array
       for (var i = 0; i<LogInfo["logData"].length; i++)
         {
-          var tempvar = LogInfo["logData"][i].split("pm");
+          var tempvar = LogInfo["logData"][i].split("2017");
           logStringArrays.push(tempvar);
         }
               var table = $("<table />");
