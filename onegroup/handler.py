@@ -451,7 +451,7 @@ def getAdminEmails():
     #get all emails where account_type is "Admin"
 
     db.close()
-    return emails
+    return [x["Email"] for x in emails]
 
 
 
