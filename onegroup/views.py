@@ -401,8 +401,8 @@ def randompassword():
 
 @app.route('/logtestdata/', methods=["GET"])
 def logTestData():
-    testLogData = ["friday 12:00pm server hacked", "monday 12:00pm server hacked", "thursday 2:00pm server hacked",
-                   "sunday 1:00pm nerd","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm Fire","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked","thursday 2:00pm server hacked"];
+    testLogData = ["Fri Jul 28 17:19:16 2017 UDPv4 link", "Fri Jul 28 17:19:16 2017 UDPv4 local", "Mon Jul 31 11:18:16 2017 OpenVPN",
+                   "Thu Aug 3 10:20:16 2017 Library version control", "This log will not specify the split point"];
     return jsonify({"logData":testLogData});
 
 
@@ -426,7 +426,11 @@ def getKeys(name = None):
     hl.keyDistributeFlag(name)
     #If on a production server, use actual path
     if os.path.isdir(keys_dir):
-        return send_file(keys_dir + keys + '.zip')
+        filename = keys_dir + keys + '.zip' 
+        if not os.path.exists(filename):
+            hl.zipUserKeys(keys) 
+
+        return send_file(filename)
     #Else use relative dev path
     else:
         return send_file('static\\Test_client1.zip')
