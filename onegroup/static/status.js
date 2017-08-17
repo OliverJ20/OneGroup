@@ -9,6 +9,13 @@ $(document).ready(function () {
 
 function addInfo()
 {
+    var invalid1 = "Open VPN CLIENT LIST";
+    var invalid2 = "Updated";
+    var invalid3 = "ROUTING TABLE";
+    var invalid4 = "GLOBAL STATS";
+    var invalid5 = "Max bcast";
+    var invalid6 = "END";
+
   $.get("/log/status", function (data)
     {
       var LogInfo = data;
@@ -16,7 +23,12 @@ function addInfo()
       for (var i = 0; i<LogInfo["logData"].length; i++)
         {
           var tempvar = LogInfo["logData"][i];
-          logStringArrays.push(tempvar);
+            if(/invalid1/.test(tempvar) || /invalid2/.test(tempvar) || /invalid3/.test(tempvar) || /invalid4/.test(tempvar) || /invalid5/.test(tempvar) || /invalid6/.test(tempvar)){
+                LogInfo["logData"].splice(i);
+            }
+            else{
+                logStringArrays.push(tempvar);
+            }
         }
 
               var table = $("<table />");
