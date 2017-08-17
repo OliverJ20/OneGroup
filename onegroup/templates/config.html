@@ -1,12 +1,79 @@
 {% extends "layout.html" %}
+
 {% block body %}
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='iptables.js') }}></script>
+-->
     <body>
         <div class="contentDiv" width="100%">
             <div class="bodydiv" id="SecPolicy">
                 <h2>Security Policy</h2>
                 <br  />
+                <form>
+                <label for ="source">Source</label>
+                <br/>
+                <input type = "text" id = "source"  name = "source" value = "">
+                <br>
+                <label for = "port">Port</label>
+                <br>
+                <input type = "text" id = "port"  name = "port" value = "port">
+                <br>
+                <label for ="destination">Destination</label>
+                <br>
+                <input type = "text" id = "destination" name = "destination" value = "destination">
+                <br>
+                <select value = "TABLE" id = "TABLE" name = "TABLE" >
+                    <option value = "NULL">TABLE</option>
+                    <option value ="nat">nat</option>
+                    <option value ="filter">filter</option>
+                    <option value ="mangle">mangle</option>
+                </select>
                 <br  />
+                <select value = "CHAIN" id = "CHAIN" name = "CHAIN" >
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                 </select>
+                
                 <br  />
+                <select value = "IFACE" id = "IFACE" name = "IFACE" >
+                    <option value = "NULL">IFACE</option>
+                    <option value ="eth0">eth0</option>
+                    <option value ="eth1">eth1</option>
+                    <option value ="ppp0">ppp0</option>
+                </select>
+                <br/>
+                <select value = "PROT" id = "PROT" name = "PROT" >
+                    <option value = "NULL">PROT</option>
+                    <option value ="tcp">tcp</option>
+                    <option value ="icmp">icmp</option>
+                    <option value ="udp">udp</option>
+                </select>
+                
+                <br  />
+                <select value = "STATE" id = "STATE" name = "STATE" >
+                    <option value = "NULL">STATE</option>
+                    <option value ="NEW">NEW</option>
+                    <option value ="ESTABLISHED">ESTABLISHED</option>
+                    <option value ="RELATED">RELATED</option>
+                </select>
+                <br />
+                <select value = "ACTION" id = "ACTION" name = "ACTION" >
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                </select>
+                
+                        
+                <br  />
+                <input type = "button" onclick ="testfunction()">
+                <input type = "button" id = "iptablesSubmit" class = "iptablesSubmit" value = "submit" onclick = "getIPTablesData()"> 
+                </form>
                 <br  />
             </div>
             <div class="bodydiv" id="UserPaths">
@@ -37,8 +104,11 @@
                         <td><button class="button-wide">IP TABLE?</button></td>
                     </tr>
                 </table>
+        <input type = "button" onclick = "testfunction()" value = "hello">
             </div>
         </div>
+<!--        <script type="text/javascript" src="{{ url_for('static', filename='iptables.js') }}></script>
+-->
     </body>
 {% endblock %}
 

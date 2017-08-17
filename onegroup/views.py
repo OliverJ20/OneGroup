@@ -66,6 +66,22 @@ def admin_required(f):
             abort(401)
     return admin_decorator
 
+#make a new form to take packet type, source, destination and port as parameters
+#parameters given could be 3 of something or 17.
+#def ipTableForm():
+   
+ #   packetType = Type:
+  #  packetSource = Source:
+   # packetDestination = Destination:
+   # packetPort = Port:
+    
+    
+    
+
+
+
+
+
 
 def client_required(f):
     @wraps(f)
