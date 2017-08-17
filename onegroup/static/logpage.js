@@ -9,14 +9,24 @@ $(document).ready(function () {
 
 function addInfo()
 {
-  $.get("/log/general", function (data)
+  $.get("/logtestdata", function (data)
     {
       var LogInfo = data;
-      var logStringArrays = new Array
+      var logStringArrays = new Array;
+      var d = new Date();
+      var n = d.getFullYear();
       for (var i = 0; i<LogInfo["logData"].length; i++)
         {
-          var tempvar = LogInfo["logData"][i].split("2017");
+          var tempvar = LogInfo["logData"][i];
+          if(/2017/.test(tempvar)){
+          tempvar = tempvar.split("2017");
+          tempvar[0] = tempvar[0] + n;
           logStringArrays.push(tempvar);
+        }
+        else{
+          temparray= ["No Date", tempvar];
+          logStringArrays.push(temparray);
+        }
         }
               var table = $("<table />");
               var infoLength = logStringArrays[0].length;
