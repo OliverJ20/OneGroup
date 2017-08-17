@@ -16,9 +16,9 @@
                    <a href="{{ url_for('userkey', hash=hash) }}" download><button onclick = "hideButton()" class='downloadButton' id= "testButton">Download</button></a>
                    <br  />
                    <br  />
-                   <a href = "{{ url_for('logout') }}">Log Out</a>
                </div>
             {% else %}
+            <a href = "{{ url_for('logout') }}">Log Out</a>
             <button>Lost Certificate? Request New Keys</button>
             {% endif %}
              <a href = "/password"> <h3> Reset Password </h3></a>
