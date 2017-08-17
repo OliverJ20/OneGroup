@@ -107,4 +107,4 @@ ENV/
 onegroup/onegroup.conf
 
 #.idea
-.idea/
+**.idea/
