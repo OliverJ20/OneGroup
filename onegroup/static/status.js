@@ -32,7 +32,7 @@ function addInfo()
                   row = $(table[0].insertRow(-1));
                   for (var j = 0; j < infoLength; j++) {
                       var info = $("<td />");
-                      info.html(logStringArrays[i][j]);
+                      info.html(logStringArrays[i]);
                       row.append(info);
                   }
               }
