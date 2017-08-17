@@ -42,11 +42,11 @@ function addInfo()
               //Add the data rows.
               for (var i = 1; i < logStringArrays.length; i++) {
                   row = $(table[0].insertRow(-1));
-                  for (var j = 0; j < infoLength; j++) {
-                      var info = $("<td />");
+                  // for (var j = 0; j < infoLength; j++) {
+                  //     var info = $("<td />");
                       info.html(logStringArrays[i]);
                       row.append(info);
-                  }
+                  // }
               }
 
               var statusTable = $("#statusTable");
