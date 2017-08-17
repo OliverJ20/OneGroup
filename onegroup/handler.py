@@ -110,9 +110,6 @@ def createUser(name, passwd, email):
     #create the users key/cert pair
     args = [
         user["Keys"],
-        os.getenv(tag+'openvpn_keys',base_config['openvpn_keys']), 
-        os.getenv(tag+'openvpn_ersa',base_config['openvpn_ersa']), 
-        os.getenv(tag+'openvpn_client_config',base_config['openvpn_client_config']) 
     ]
     callScript('user_gen.sh',args)
     #subprocess.call(shlex.split('user_gen.sh {}'.format(user["Keys"])))
@@ -134,7 +131,6 @@ def zipUserKeys(user):
     #create the users key/cert pair
     args = [
         user,
-        os.getenv(tag+'openvpn_keys',base_config['openvpn_keys']), 
     ]
     callScript('user_dist.sh',args)
     #subprocess.call(shlex.split('user_dist.sh {}'.format(user)))
@@ -418,8 +414,12 @@ def callScript(script, params = []):
     #loop over parameters if any
     for arg in params:
         call += " {}".format(arg)
-
-    subprocess.call(shlex.split(call))
+   
+    #shlex doesn't work with more than 1 arguments
+    if len(params) == 1:
+        subprocess.call(call,shell=True)
+    else:
+        subprocess.call(shlex.split(call),shell=True)
 
 
 def validateKeysDownloaded(username):

@@ -402,7 +402,11 @@ def getKeys(name = None):
     hl.keyDistributeFlag(name)
     #If on a production server, use actual path
     if os.path.isdir(keys_dir):
-        return send_file(keys_dir + keys + '.zip')
+        filename = keys_dir + keys + '.zip' 
+        if not os.path.exists(filename):
+            hl.zipUserKeys(keys) 
+
+        return send_file(filename)
     #Else use relative dev path
     else:
         return send_file('static\\Test_client1.zip')
