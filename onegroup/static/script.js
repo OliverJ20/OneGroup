@@ -10,7 +10,7 @@
 // });
 
 function hideButton(){
-   document.getElementById('testButton')style.display = "none";
+   document.getElementById('testButton').style.display = "none";
 }
 
 function displayForm() {

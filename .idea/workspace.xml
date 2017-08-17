@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fe12bd19-fb55-4f9e-bb58-0c2ef414e7ba" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/onegroup/static/logpage.js" afterPath="$PROJECT_DIR$/onegroup/static/logpage.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/onegroup/static/script.js" afterPath="$PROJECT_DIR$/onegroup/static/script.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/onegroup/templates/index.html" afterPath="$PROJECT_DIR$/onegroup/templates/index.html" />
     </list>
     <ignored path="OneGroup.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -37,11 +37,33 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="logpage.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="logpage.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/onegroup/static/logpage.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state relative-caret-position="136">
+              <caret line="12" column="5" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="script.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/onegroup/static/script.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="192">
+              <caret line="28" column="35" selection-start-line="28" selection-start-column="34" selection-end-line="28" selection-end-column="35" />
+              <folding>
+                <element signature="n#!!doc" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="index.html" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/onegroup/templates/index.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="255">
+              <caret line="15" column="115" selection-start-line="15" selection-start-column="115" selection-end-line="15" selection-end-column="115" />
               <folding />
             </state>
           </provider>
@@ -82,6 +104,8 @@
       <list>
         <option value="$PROJECT_DIR$/onegroup/handler.py" />
         <option value="$PROJECT_DIR$/onegroup/views.py" />
+        <option value="$PROJECT_DIR$/onegroup/static/script.js" />
+        <option value="$PROJECT_DIR$/onegroup/templates/index.html" />
       </list>
     </option>
   </component>
@@ -383,7 +407,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
-    <editor active="true" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -565,10 +589,28 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/onegroup/static/script.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="192">
+          <caret line="28" column="35" selection-start-line="28" selection-start-column="34" selection-end-line="28" selection-end-column="35" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/onegroup/static/logpage.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="136">
+          <caret line="12" column="5" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/onegroup/templates/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="15" column="115" selection-start-line="15" selection-start-column="115" selection-end-line="15" selection-end-column="115" />
           <folding />
         </state>
       </provider>
