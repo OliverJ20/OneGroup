@@ -77,6 +77,8 @@ setup(
         'onegroup/scripts/user_gen.sh',
         'onegroup/scripts/user_dist.sh',
         'onegroup/scripts/user_del.sh',
+        'onegroup/scripts/userman',
+        'onegroup/scripts/tabler' 
     ],
     cmdclass={
         'develop': PostDevelopCommand,

@@ -108,3 +108,6 @@ onegroup/onegroup.conf
 
 #.idea
 **.idea/
+
+#Swap files
+**.swp
