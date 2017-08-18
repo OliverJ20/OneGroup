@@ -109,9 +109,10 @@ def createUser(name, passwd, email):
     
     #create the users key/cert pair
     args = [
+        "add"
         user["Keys"],
     ]
-    callScript('user_gen.sh',args)
+    callScript('userman',args)
     #subprocess.call(shlex.split('user_gen.sh {}'.format(user["Keys"])))
 
     #Add user to the database
@@ -130,9 +131,10 @@ def zipUserKeys(user):
     """
     #create the users key/cert pair
     args = [
+        "dist"
         user,
     ]
-    callScript('user_dist.sh',args)
+    callScript('userman',args)
     #subprocess.call(shlex.split('user_dist.sh {}'.format(user)))
 
 
