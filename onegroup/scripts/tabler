@@ -1,0 +1,50 @@
+#/bin/bash
+
+#####
+# tabler: The onegroup openvpn iptables management tool
+#
+# Params
+# $1 : action to perform (Append, Insert, Replace, Delete, Policy) 
+# $2 : iptable rule as string
+#
+# Usage:
+#   tabler <action> <rule>
+#
+#####
+
+usage () {
+    echo "Usage: tabler <append|insert|replace|delete|policy> <rule>";
+    exit 1;  
+}
+
+###### MAIN ######
+
+#Check the amount of arguments passed
+if [ $# -ne 2 ]; then
+    usage;    
+fi
+
+case $1 in
+    "append")
+        iptables -A $2;
+        ;;
+    "insert")
+        iptables -I $2;
+        ;;
+    "replace")
+        iptables -R $2;
+        ;;
+    "delete")
+        iptables -D $2;
+        ;;
+    "policy")
+        iptables -P $2;
+        ;;
+    *)
+        usage;
+        ;;
+esac
+
+#Exit gracefully
+exit 0;
+

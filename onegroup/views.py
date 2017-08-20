@@ -197,6 +197,7 @@ def create_request():
 @client_required
 def show_user_keys(username):
     downloaded = hl.checkDistributeFlag(username)
+    #Prevent Replay Attacks by downloading keys
     hash = None
     if not downloaded:
         #generate hash

@@ -1,0 +1,100 @@
+#! /bin/bash
+
+#####
+# userman: The onegroup openvpn user management tool
+#
+# Params
+# $1 : action to perform (add, del, dist) 
+# $2 : Client's name
+#
+# Usage:
+#   userman <action> <client>
+#
+#####
+
+#GLOBALS
+HOME=/usr/local/onegroup/keys
+
+usage () {
+    echo "Usage: userman <add|del|dist> <client>";
+    exit 1;  
+}
+
+create () {
+    #Creates a client's keys and certificates  
+    #Params: $1 The clients directory
+
+    #Create client's filename and dir
+    CLIENT_DIR=$OG_openvpn_keys/$1;
+    mkdir $CLIENT_DIR;
+
+    #Create client key/cert pair
+    cd $OG_openvpn_ersa;
+    source ./vars;
+    ./pkitool $1;
+
+    #Create config variables
+    CLIENT_CONF="$1.conf";
+    CLIENT_CERT="$1.crt";
+    CLIENT_KEY="$1.key";
+    CLIENT_CSR="$1.csr";
+
+    #Create new config file and change key and cert sections
+    cp $OG_openvpn_client_config $CLIENT_DIR/$CLIENT_CONF;
+
+    #sudo sed -i -e 's,ca ca.crt,ca '"$CA"',g' $DIR/$CLIENT_CONF;
+    sudo sed -i -e 's,cert client.crt,cert '"$CLIENT_CERT"',g' $CLIENT_DIR/$CLIENT_CONF;
+    sudo sed -i -e 's,key client.key,key '"$CLIENT_KEY"',g' $CLIENT_DIR/$CLIENT_CONF;
+
+    #create directory and move key/certs into it
+    mv $OG_openvpn_keys/$CLIENT_CERT $OG_openvpn_keys/$CLIENT_KEY $OG_openvpn_keys/$CLIENT_CSR $CLIENT_DIR;
+}
+
+delete () {
+    #Deletes a client's keys and certificates  
+    #Params: $1 The clients directory
+
+    #Remove directory
+    rm $OG_openvpn_keys/$1 -rf;
+}
+
+
+distribute () {
+    #Creates the zip files of a client's keys and certificates  
+    #Params: $1 The clients directory
+
+    CLIENT_DIR=$OG_openvpn_keys/$1;
+
+    #copy ca.crt to the user's dir
+    cp $OG_openvpn_keys/ca.crt $CLIENT_DIR;
+
+    #Compress client's key/certs
+    #cd $CLIENT_DIR
+    zip -r $HOME/$1.zip $CLIENT_DIR -j;
+}
+
+###### MAIN ######
+
+#Check the amount of arguments passed
+if [ $# -ne 2 ]; then
+    usage;    
+fi
+
+case $1 in
+    "add")
+        create $2;
+        ;;
+    "del")
+        delete $2;
+        ;;
+    "dist")
+        distribute $2;
+        ;;
+    *)
+        usage;
+        ;;
+esac
+
+#Exit gracefully
+exit 0;
+
