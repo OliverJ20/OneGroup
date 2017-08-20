@@ -436,6 +436,19 @@ def getKeys(name = None):
         return send_file('static\\Test_client1.zip')
 
 
+def passScript():
+    """
+        Pass variables obtioned in webform to bashscript
+    """
+    if request.method == 'POST':
+        packType = request.form['type1']
+        source = request.form['source1']
+        destination = request.form['destination1']
+        port = request.form['port1']
+        ipRules = packType +" " +source+" " +destination+" " +port
+        callScript('ip_rules.sh',[ipRules])
+        
+
 def setConfig(debug):
     """
         Loads the configuration from the config file 
