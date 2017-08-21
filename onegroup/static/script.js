@@ -26,9 +26,9 @@ function testfunction()
 function getIPTablesData()
 {
        
-       var source = document.getElementById("source");
-        var port = document.getElementById("port");
-        var destination = document.getElementById("destination"); 
+       var source = document.getElementById("source").value;
+        var port = document.getElementById("port").value;
+        var destination = document.getElementById("destination").value;
 
         var tableData = jQuery("#TABLE option:selected").val();
         var chainData = jQuery("#CHAIN option:selected").val();
@@ -46,6 +46,13 @@ function getIPTablesData()
         console.log(protData);
         console.log(stateData);
         console.log(actionData);
+
+
+       // var ipTablesRuleData = {"source": source, "port": port, "destination":destination, "tableData": tableData, "chainData": chainData, "ifaceData": ifaceData, "protData":protData, "stateData": stateData, "actionData":actionData};
+
+
+
+
         
 }
 

@@ -46,6 +46,42 @@ mail = Mail(app)
 #     mail.send(msg)
 # )
 
+
+@app.route('/iptablesdata/', methods= ["POST"])
+def ipTablesRuleData():
+    if request.method == 'POST':
+
+        source = request.form["source"]
+        port = request.form["port"]
+        destination = request.form["destination"]
+        tableData = request.form["tableData"]
+        chainData = request.form["chainData"]
+        ifaceData = request.form["ifaceData"]
+        protData = request.form["protData"]
+        stateData = request.form["stateData"]
+        actionData = request.form["actionData"]
+
+# content = request.get_json()
+    #
+    # if content == None:
+    #     content = {"source": request.values("source"), "port": request.values("port"), "destination":request.values("destination"), "tableData": request.values("tableData"),
+    #                "chainData": request.values("chainData"), "ifaceData": request.values("ifaceData"), "protData":request.values("protData"), "stateData": request.values("stateData"), "actionData":request.values("actionData")};
+    #
+    # source = content["source"]
+    # port = content["port"]
+    # destination = content["destination"]
+    # tableData = content["tableData"]
+    # chainData = content["chainData"]
+    # ifaceData = content["ifaceData"]
+    # protData = content["protData"]
+    # stateData = content["stateData"]
+    # actionData = content["actionData"]
+
+
+
+
+
+
 def login_required(f):
     @wraps(f)
     def login_decorator(*args, **kwargs):
