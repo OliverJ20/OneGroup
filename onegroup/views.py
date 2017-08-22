@@ -242,9 +242,11 @@ def show_user_keys(username):
     ##method to pull keys from database using username
 
 
-@app.route('/config')
+@app.route('/config', methods=['GET', 'POST'])
 @admin_required
 def show_config():
+    if request.method == 'POST':
+        passScript():
     return render_template('config.html')
 
 
@@ -419,6 +421,48 @@ def userforms():
             return False
 
 
+def passScript():
+    """
+        Pass variables obtioned in webform to bashscript
+    """
+    if request.method == 'POST':
+        ipRules = "iptables"
+        table = request.form['TABLE']
+        if not table=="":
+            ipRules = ipRules + " -t " + table
+            
+        chain = request.form['CHAIN']
+        if not chain=="":
+            ipRules = ipRules + " -A " + chain
+            
+        packType = request.form['PROT']
+        if not packType=="":
+            ipRules = ipRules + " -p " + packType
+        else if packType=="" and not port=="":
+            ipRules = ipRules + " -p tcp"
+            
+        source = request.form['source']
+        if not source=="":
+             ipRules = ipRules + " -s " + source
+             
+        destination = request.form['destination']
+        if not destination=="":
+            ipRules = ipRules + " -d " + desination
+            
+        port = request.form['port']
+        if not port=="":
+            ipRules = ipRules + " -dport " + port
+            
+        action = request.form['ACTION']
+        if not action=="":
+            ipRules = ipRules + " -j " + action
+            
+        callScript('ip_rules.sh',[ipRules])
+        return True
+    else:
+        return False
+
+
 def passwordform(name = None):
     if request.method == 'POST':
         if name == None:
@@ -472,19 +516,6 @@ def getKeys(name = None):
     else:
         return send_file('static\\Test_client1.zip')
 
-
-def passScript():
-    """
-        Pass variables obtioned in webform to bashscript
-    """
-    if request.method == 'POST':
-        packType = request.form['type1']
-        source = request.form['source1']
-        destination = request.form['destination1']
-        port = request.form['port1']
-        ipRules = packType +" " +source+" " +destination+" " +port
-        callScript('ip_rules.sh',[ipRules])
-        
 
 def setConfig(debug):
     """
