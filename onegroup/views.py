@@ -162,13 +162,13 @@ def password():
 @admin_required
 def retrieve_user_page():
     ##redirect(url_for('users'))
-    ##requests = hl.retrieveRequests()
+    ##requests = hl.retrieveRequests("notifications")
     return render_template('users.html', testdata = [
         {"User": "MyName", "Request": 10},
         {"User": "YourName", "Request": 5},
-        {"User": "TheirName", "Request": 7},
-    ])
-    ##return render_template('users.html', testdata = hl.retrieveRequests())
+        {"User": "TheirName", "Request": 7}
+    ], testdata2 = hl.retrieveRequests("users"))
+    ##return render_template('users.html', testdata = hl.retrieveRequests("notifications"))
 
 
 @app.route('/approve_req', methods=['POST'])
@@ -190,6 +190,14 @@ def approve_req():
             #hl.declineRequest(reqName)#, reqReq)
             return redirect('/users')
 
+
+@app.route('/delete_key', methods=['POST'])
+@admin_required
+def approve_req():
+    name = request.form['name']
+    if request.method == 'POST':
+           ## OJ CODE GO HERE ##
+            return redirect('/users')
 
 @app.route('/logs')
 @admin_required
@@ -246,7 +254,7 @@ def show_user_keys(username):
 @admin_required
 def show_config():
     if request.method == 'POST':
-        passScript():
+        passScript()
     return render_template('config.html')
 
 
@@ -438,7 +446,7 @@ def passScript():
         packType = request.form['PROT']
         if not packType=="":
             ipRules = ipRules + " -p " + packType
-        else if packType=="" and not port=="":
+        elif packType=="" and not port=="":
             ipRules = ipRules + " -p tcp"
             
         source = request.form['source']

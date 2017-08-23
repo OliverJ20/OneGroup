@@ -64,37 +64,30 @@
 
             </div>
             <h1> Current Activity </h1>
+
             <table>
                 <tr>
                     <th>Users</th>
                     <th>Address</th>
                     <th>Rules/Filtering</th>
                     <th>Connection Type</th>
-                    <th>Connection Expires</th>
-
+                    <th>Delete Keys?</th>
                 </tr>
-                <tr>
-                    <td>SebShery</td>
-                    <td>192.168.0.1</td>
-                    <td>Check Rules</td>
-                    <td>Bridge</td>
-                    <td>10/05/2017</td>
-                </tr>
-                <tr>
-                    <td>JaysTurn</td>
-                    <td>192.168.0.1</td>
-                    <td>Check Rules</td>
-                    <td>Route</td>
-                    <td>11/05/2017</td>
-                </tr>
-                <tr>
-                    <td>OlivJohn</td>
-                    <td>192.168.0.1</td>
-                    <td>Check Rules</td>
-                    <td>Route</td>
-                    <td>12/05/2017</td>
-                </tr>
-            </table>
+                {%for users in testdata2%}
+                  <tr>
+                    <td>{{users["Name"]}}</td>
+                    <td>{{users["Email"]}}</td>
+                    <td>{{users["Auth_Type"]}}</td>
+                    <td>{{users["Account_Type"]}}</td>
+                    <td>
+                        <form action="{{ url_for('delete_key') }}" method=post>
+                        <input type="text" name="name" value= {{notifications["Name"]}} id = "hiddenInput" readonly>
+                        <input type="submit" value="Delete" id = "declineButton"></input>
+                        </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </table>
 
             <h2>Current Requests</h2>
 

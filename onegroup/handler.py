@@ -328,9 +328,9 @@ def changePassword(name, userinput):
     db.close()
 
 
-def retrieveRequests():
+def retrieveRequests(table):
     db = Database(filename = filen)
-    requests =  db.retrieve("notifications")
+    requests =  db.retrieve(table)
     db.close()
     return requests
 
