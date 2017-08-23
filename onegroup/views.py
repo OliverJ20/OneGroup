@@ -193,7 +193,7 @@ def approve_req():
 
 @app.route('/delete_key', methods=['POST'])
 @admin_required
-def approve_req():
+def delete_key():
     name = request.form['name']
     if request.method == 'POST':
            ## OJ CODE GO HERE ##
