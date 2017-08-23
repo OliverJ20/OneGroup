@@ -1,5 +1,5 @@
-#Cherrypy imports
-import cherrypy
+#Imports
+import cherrypy 
 import random
 import string
 from paste.translogger import TransLogger
@@ -47,6 +47,13 @@ mail = Mail(app)
 # )
 
 def login_required(f):
+    """
+        Wraper for endpoints to perform an authentication check
+        
+        f : endpoint function to be wrapped
+
+        returns f if logged in, else aborts with a 401 error
+    """
     @wraps(f)
     def login_decorator(*args, **kwargs):
         if not session.get('logged_in'):
@@ -58,6 +65,13 @@ def login_required(f):
 
 
 def admin_required(f):
+    """
+        Wraper for endpoints to perform an authentication check specifically for admin only pages
+        
+        f : endpoint function to be wrapped
+
+        returns f if logged in, else aborts with a 401 error
+    """
     @wraps(f)
     def admin_decorator(*args, **kwargs):
         if session.get('logged_in') and session.get('type') == 'Admin':
@@ -74,16 +88,15 @@ def admin_required(f):
   #  packetSource = Source:
    # packetDestination = Destination:
    # packetPort = Port:
-    
-    
-    
-
-
-
-
-
 
 def client_required(f):
+    """
+        Wraper for endpoints to perform an authentication check specifically for client only pages
+        
+        f : endpoint function to be wrapped
+
+        returns f if logged in, else aborts with a 401 error
+    """
     @wraps(f)
     def client_decorator(*args, **kwargs):
         if session.get('logged_in') and session.get('type') == 'Client':
@@ -94,16 +107,32 @@ def client_required(f):
 
 
 def redirect_to_user(username):
+    """
+        Redirects the to a particular client's page
+        
+        username : username of the client
+
+        returns redirect to specified client's page
+    """
     redirect(url_for('users', username=username))
 
 
 @app.route('/')
 def render():
+    """Endpoint placeholder to redirect to the login page"""
     return redirect(url_for('login'))
 
-@app.route('/index', methods=['GET', 'POST'])
+@app.route('/index/', methods=['GET', 'POST'])
 @admin_required
 def home():
+    """
+        Main admin dashboard
+        
+        GET: Surves the dashboard html  
+        POST: Attempts to create a new client
+            Displays confirmation message if creation is successful
+            Flashes notification if user exists
+    """
     if request.method == 'POST':
         #Error checking on user creation
         if userforms():
@@ -114,17 +143,28 @@ def home():
     return render_template('index.html')
 
 
-@app.route('/password', methods=['GET', 'POST'])
+@app.route('/password/', methods=['GET', 'POST'])
 @client_required
 def password():
+    """
+        Password reset page
+        
+        GET: Surves password reset html  
+        POST: Changes the user's password, displays confirmation message
+    """
     if request.method == 'POST':
         passwordform()
         return redirect(url_for('confirm', confirmed = 'Changed Password'))
     return render_template('password.html')
 
-@app.route('/users', methods=['GET', 'POST'])
+@app.route('/users/', methods=['GET'])
 @admin_required
 def retrieve_user_page():
+    """
+        User management page for admins
+        
+        GET: Surves the user management html with new admin notifications 
+    """
     ##redirect(url_for('users'))
     ##requests = hl.retrieveRequests()
     return render_template('users.html', testdata = [
@@ -135,9 +175,14 @@ def retrieve_user_page():
     ##return render_template('users.html', testdata = hl.retrieveRequests())
 
 
-@app.route('/approve_req', methods=['POST'])
+@app.route('/approve_req/', methods=['POST'])
 @admin_required
 def approve_req():
+    """
+        Endpoint to handle the approval/denial of requests made to an admin
+        
+        POST: If approve, perform the request. Else delete the request
+    """
     reqName = request.form['user']
     reqStatus = request.form['request']
     if request.method == 'POST':
@@ -155,15 +200,28 @@ def approve_req():
             return redirect('/users')
 
 
-@app.route('/logs')
+@app.route('/logs/')
 @admin_required
 def show_logs():
+    """
+        VPN log display page
+        
+        GET: Surves the log display html 
+    """
     return render_template('logs.html')
 
 
-@app.route('/userkey/<hash>')
+@app.route('/userkey/<hash>' methods=['GET'])
 @client_required
 def userkey(hash):
+    """
+        Surves the user's keys as a downloadable zip file 
+
+        hash : unique name for the downloaded zip file
+        
+        GET: If the keys have already been download: flash error message and logout
+             Else: Offer keys to be downloaded
+    """
     name = session['name']
     flagCheck = hl.checkDistributeFlag(name)
     if flagCheck == False:
@@ -173,8 +231,13 @@ def userkey(hash):
         return redirect(url_for('logout'))
 
 
-@app.route('/create_request')
+@app.route('/create_request/')
 def create_request():
+    """
+        Endpoint to create a new admin notification
+ 
+        GET: Creates a notification and emails the admins detailing the request
+    """
     name = session['name']
     requestId = hl.createRequest(name, "Key Reset")
     adminEmails = hl.getAdminEmails()
@@ -196,6 +259,11 @@ def create_request():
 @app.route('/clients/<username>')
 @client_required
 def show_user_keys(username):
+    """
+        Client's personal page
+ 
+        GET: Displays the client page html. Displays download button and generates hash if keys haven't been downloaded for this user
+    """
     downloaded = hl.checkDistributeFlag(username)
     #Prevent Replay Attacks by downloading keys
     hash = None
@@ -206,14 +274,26 @@ def show_user_keys(username):
     ##method to pull keys from database using username
 
 
-@app.route('/config')
+@app.route('/config/')
 @admin_required
 def show_config():
+    """
+        VPN Server configuration page 
+ 
+        GET: Displays the configuration page html
+    """
     return render_template('config.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login/', methods=['GET', 'POST'])
 def login():
+    """
+        User login page 
+ 
+        GET: Displays the login page html
+        POST: If credentials are correct: redirect to the appropriate user page
+              Else display error
+    """
     error = None
     if request.method == 'POST':
         email = request.form['email']
@@ -237,13 +317,24 @@ def login():
 @app.route('/logout/')
 @login_required
 def logout():
+    """
+        Endpoint to logout the user
+ 
+        GET: Clears the user's cookies and returns to the login page
+    """
     session.clear()
     print(session)
     return redirect(url_for('login'))
 
 
-@app.route('/confirm', methods=['GET', 'POST'])
+@app.route('/confirm/', methods=['GET', 'POST'])
 def confirm():
+    """
+        Confirmation page to display that an action was successful
+ 
+        GET: Displays the confirmation message
+        POST: Redirects the user to the appropriate user page
+    """
     if request.method == 'POST':
         user_type = session.get('type', None)
         print(user_type)
@@ -258,8 +349,15 @@ def confirm():
     
     return render_template('confirm.html', confirmed=confirmed)
 
-@app.route('/forgot', methods=['GET','POST'])
+@app.route('/forgot/', methods=['GET','POST'])
 def forgotPassword():
+    """
+        Password reset request page for users who have forgotten their password
+ 
+        GET: Displays the password reset request html
+        POST: If user email is valid, sends a reset link to that address
+              Else displays error message
+    """
     if request.method == 'POST':
         if emailform():
             email = request.form['email1']
@@ -295,6 +393,14 @@ def forgotPassword():
 
 @app.route('/reset/<code>', methods=['GET','POST'])
 def passwordCode(code):
+    """
+        Password reset page for link sent in an email
+ 
+        GET: If the code is valid, display password reset html
+             Else abort with a 404
+        POST: If the code is valid, confirm passwords are the same and change password
+              Else abort with 404 
+    """
     #Check if code exists and for the correct purpose. Else abort
     if (hl.checkCode(code,"Password")):
         user = hl.getUserFromCode(code)
@@ -314,6 +420,12 @@ def passwordCode(code):
         
 @app.route('/keys/<code>', methods=['GET'])
 def keysCode(code):
+    """
+        Download user's keys from an email link
+ 
+        GET: If the code is valid, download user keys
+             Else abort with a 404
+    """
     #Check if code exists and for the correct purpose. Else abort
     if (hl.checkCode(code,"Keys")):
         user = hl.getUserFromCode(code)
@@ -329,6 +441,14 @@ def keysCode(code):
 @app.route('/log/<log>', methods=['GET'])
 @admin_required
 def logType(log):
+    """
+        Fetches a json representation of the vpn logs
+
+        log : the log to fetch
+ 
+        GET: If log is a valid log name, return json formatted log. 
+             Else aboirt 404
+    """
     filename = log_dir
     if log == "general":
         filename += "openvpn.log"
@@ -341,6 +461,15 @@ def logType(log):
 
 
 def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = None, attachmentFilePath = None):
+    """
+        Sends an email to specified recipients
+
+        subjectTitle : Email's subject
+        recipientEmail : The address(s) to send the email to. Expects list
+        bodyMessage: Email's body
+        attachmentName : Name of the attached file. None if no attachment
+        attachmentFilePath : Full path to the attachment. None if no attachment
+    """
     msg = Message(
         subjectTitle,
         sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
@@ -359,12 +488,24 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
 @app.errorhandler(404)
 @app.errorhandler(401)
 def page_not_found(e):
-        flash("Error: Try Something Different This Time")
-        return render_template('login.html'), 404
+    """
+        Error handler for 404 and 401 errors
+
+        Returns : login template and flashes error message
+    """
+    flash("Error: Try Something Different This Time")
+    return render_template('login.html'), 404
 
 
 #Function to create user and generate keys into a ZIP folder
 def userforms():
+    """
+        Handles input of the new user form. 
+
+        If user creation is successful, emails the user their initial password
+
+        returns : True if user created, else False
+    """
     if request.method == 'POST':
         name = request.form['name1']
         # password = request.form['pass1']
@@ -384,6 +525,13 @@ def userforms():
 
 
 def passwordform(name = None):
+    """
+        Handles input for the change password form
+        
+        name :  Username of the user who's password should be changed. Uses cookie value if None
+
+        if both passwords match, the user's password is changed
+    """
     if request.method == 'POST':
         if name == None:
             name = session['name']
@@ -395,19 +543,21 @@ def passwordform(name = None):
 
 
 def randompassword():
+    """
+        Generates a random password
+        
+        Returns: string of random length
+    """
     characters = string.ascii_uppercase + string.ascii_lowercase + string.digits
     size = random.randint(8, 12)
     return ''.join(random.choice(characters) for x in range(size))
 
-
-@app.route('/logtestdata/', methods=["GET"])
-def logTestData():
-    testLogData = ["Fri Jul 28 17:19:16 2017 UDPv4 link", "Fri Jul 28 17:19:16 2017 UDPv4 local", "Mon Jul 31 11:18:16 2017 OpenVPN",
-                   "Thu Aug 3 10:20:16 2017 Library version control", "This log will not specify the split point"];
-    return jsonify({"logData":testLogData});
-
-
 def emailform():
+    """
+        Handles input for email confirmation forms
+        
+        Returns: True if emails match
+    """
     if request.method == 'POST':
         email = request.form['email1']
         confirmemail = request.form['email2']
@@ -419,6 +569,10 @@ def emailform():
 def getKeys(name = None):
     """
         Returns a zip file of the user's key/cert pair
+        
+        name : Name of user's keys to fetch. Uses cookie value if None
+
+        Returns : zip file of user's keys if found. Else returns example zip file
     """
     if name == None:
         name =session.get('name')
@@ -442,7 +596,7 @@ def setConfig(debug):
         Loads the configuration from the config file 
         and applies the config to the server
 
-        debug : bool : to turn on the flask debugging flag
+        debug : flag to turn on the flask debugging flag
     """
     #load config 
     hl.loadConfig()
@@ -466,11 +620,15 @@ def setConfig(debug):
     app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
 
-
 #
 #Cherrypy server base
 #
 def run_server(development=False):
+    """
+        Initialises and runs the web server
+        
+        development : flag to run the Flask development server instead of the full Cherrypy server
+    """
     #Initalise database
     hl.init_database()
     

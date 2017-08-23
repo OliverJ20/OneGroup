@@ -90,9 +90,9 @@ def createUser(name, passwd, email):
     """
         Creates a user entry in the database and generates key/cert pair
 
-        name  : str : User's name/username
-        passwd: str : User's password 
-        email : str : User's email
+        name  : User's name/username
+        passwd: User's password 
+        email : User's email
 
         returns: true if successful, else false
     """
@@ -127,7 +127,7 @@ def zipUserKeys(user):
     """
         creates a zip file with the client's key/cert pair
 
-        user : str : the filename of the client
+        user : the filename of the client
     """
     #create the users key/cert pair
     args = [
@@ -137,15 +137,13 @@ def zipUserKeys(user):
     callScript('userman',args)
     #subprocess.call(shlex.split('user_dist.sh {}'.format(user)))
 
-
-
 def createUserFilename(name):
     """
         Creates a filename for the user's key and cert based on specific rules
 
-        :param name : str : name of the user
+        name : name of the user
 
-        :returns userFile : str : the generated filename for the user
+        Returns : the generated filename for the user
     """
 
     #Filenames must follow the following rules
@@ -170,10 +168,10 @@ def getUser(key, value):
     """
         Gets a user from the database based on a single key/value pair
 
-        key   : str : The field to indentify the user by
-        value : str : The value to indentify the user by
+        key   : The field to indentify the user by
+        value : The value to indentify the user by
 
-        returns dict the user's database entry
+        Returns : dict the user's database entry
 
     """
     db = Database(filename = filen)
@@ -188,14 +186,13 @@ def getUser(key, value):
 
 def confirmLogin(email, password):
     """
+        Confirms if the entered login credentials are correct
     
-    
-    :param email: user's email address
-    :param password: user's associated password
-    :return : boolean : True if both email is found in the database and associated password matches. 
-                        False if either condition fails
+        email: user's email address
+        password: user's associated password
+        returna : True if both email is found in the database and associated password matches. 
+                  False if either condition fails
     """
-
     if confirmUser(email):
         user = getUser("Email",email)
 
@@ -208,12 +205,11 @@ def confirmLogin(email, password):
 
 def confirmClient(email):
     """
+        Confirms if the user account is of the client user type
     
-    
-    :param email : user's email address
-    :return : 
+        email : user's email address
+        Returns : True if client, else false
     """
-
     user = getUser("Email",email)
 
     if user['Account_Type'] == "Client":
@@ -223,7 +219,12 @@ def confirmClient(email):
 
 
 def confirmUser(email):
-
+    """
+        Confirms if the user exists in the database
+    
+        email : user's email address
+        Returns : True if exists, else False
+    """
     user = getUser("Email",email)
 
     if user is not None:
@@ -236,10 +237,10 @@ def genUrl(user,purpose):
     """
         Generates a unique URL for password reset and fecthing keys
 
-        user    : str : The user who owns the url
-        purpose : str : The reason the url is being made 
+        user    : The user who owns the url
+        purpose : The reason the url is being made 
 
-        returns str fully formed url
+        Returns : fully formed url
     """
     db = Database(filename = filen)
 
@@ -263,9 +264,9 @@ def genCode(user):
     """
         Generates a unique code to be used with URLS
 
-        user : str : the user to generate the code for
+        user : the user to generate the code for
 
-        returns str code
+        Returns : created code
     """
     secret = "{}{}".format(user,datetime.now().strftime("%Y%m%d%H%M%S%f"))
     return hashlib.sha512(secret.encode('UTF-8')).hexdigest()
@@ -274,10 +275,10 @@ def checkCode(code,purpose):
     """
         Checks if a code exists and is for the right purpose
 
-        code    : str : the code to check
-        purpose : str : the intended use for the code
+        code    : the code to check
+        purpose : the intended use for the code
 
-        returns true if correct, else false
+        Returns : True if correct, else False
     """
     db = Database(filename = filen)
     row = db.retrieve("codes",{"Code" : code, "Purpose" : purpose})
@@ -293,9 +294,9 @@ def getUserFromCode(code):
     """
         Get a user from their unique code
 
-        code : str : unique code
+        code : unique code
 
-        returns str user name
+        Returns : username
     """
     db = Database(filename = filen)
     user = db.retrieve("codes",{"Code" : code})
@@ -308,7 +309,7 @@ def flagCode(code):
     """
         Mark a code as used
 
-        code : str : unique code
+        code : unique code
     """
     db = Database(filename = filen)
     code = db.retrieve("codes",{"Code" : code})
@@ -318,11 +319,10 @@ def flagCode(code):
 
 def changePassword(name, userinput):
     """
-    Changes user password in database
-    
-    :param email : user's identifying email
-    :param userinput : user's desired password
-    :return : 
+        Changes user password in database
+        
+        email : user's identifying email
+        userinput : user's desired password 
     """
     db = Database(filename = filen)
     user = getUser("Name",name)['ID']
@@ -331,6 +331,11 @@ def changePassword(name, userinput):
 
 
 def retrieveRequests():
+    """
+        Fetchs all active admin requests from the database
+    
+        Returns : List of all admin requests
+    """
     db = Database(filename = filen)
     requests =  db.retrieve("notifications")
     db.close()
@@ -338,10 +343,24 @@ def retrieveRequests():
 
 
 def acceptRequest(reqName):
+    """
+        Performs the accepted request
+    
+        reqName : The request to perform
+
+        Returns : True if the request was succesfully performed. Else False
+    """
     return True
 
 
 def declineRequest(reqName):#, reqReq):
+    """
+        Deletes a request from the database without additional action
+    
+        reqName : The request to delete
+
+        Returns : True if the request was succesfully deleted. Else False
+    """
     db = Database(filename = filen)
     db.delete("notifications",{"Users":reqName})
     #db.delete("notifications", "Request", reqReq)
@@ -358,11 +377,10 @@ def declineRequest(reqName):#, reqReq):
 
 def checkDistributeFlag(name):
     """
-    Checks key disributed value in database
+        Checks key distributed value in database
 
-    :param name : user's identifying name
-    :return :
-    true if key has not been set to 1
+        name : user's identifying name
+        Returns : True if key has not been set to 1, Else False
     """
     flag = getUser("Name", name)['Key_Distributed']
     return flag == 1
@@ -370,11 +388,9 @@ def checkDistributeFlag(name):
 
 def keyDistributeFlag(name):
     """
-    Changes key disrutbted value in database
+        Changes key disrutbted value in database
 
-    :param name : user's identifying name
-    :return :
-    sets key value to 1
+        name : user's identifying name
     """
     db = Database(filename=filen)
     user = getUser("Name", name)['ID']
@@ -384,12 +400,11 @@ def keyDistributeFlag(name):
 
 def getLog(filepath):
     """
-    Retrieves log file from specified path
+        Retrieves log file from specified path
 
-    :param filepath : file path to log file
-    :return : list of strings containing logs contents
+        filepath : file path to log file
+        Returns : list of strings containing logs contents
     """
-
     log = []
     try:
         with open(filepath) as f:
@@ -403,9 +418,9 @@ def getLog(filepath):
 def callScript(script, params = []):
     """
         Determine the location of the script and calls it
-    
-        :param script : file name of the script to call without path
-        :param params : parameters to pass to the script
+        
+        script : file name of the script to call without path
+        params : parameters to pass to the script
     """
     #Determine if the script dir exists, else use local path
     if os.path.exists("scripts/"):
@@ -428,14 +443,21 @@ def validateKeysDownloaded(username):
     """
         Return the value of Key_Distributed for a specific user in the user's table
     
-        :param username : str : the name of the user to validate keys are downloaded
-        :return : int : 1 (TRUE), 0 (FALSE) corresponding to value set in database table
+        username : the name of the user to validate keys are downloaded
+        Returns : 1 (TRUE), 0 (FALSE) corresponding to value set in database table
     """
-
     return getUser("Name", username)["Key_Distributed"]
 
 
 def createRequest(username, requestType):
+    """
+        Creates a new admin request 
+    
+        username : User who made the request
+        requestType : Requested action 
+
+        Returns : The id of the new request
+    """
     db = Database(filename=filen)
     db.insert("notifications", { "User" : username, "Request" : requestType })
     db.close()
@@ -445,7 +467,11 @@ def createRequest(username, requestType):
     
     
 def getAdminEmails():
-
+    """
+        Gets the emails of all the admins
+    
+        Returns : A list of all the admin's emails in the database
+    """
     db = Database(filename=filen)
 
     emails = retrieve('users', {"Account_Type" : "Admin"})
