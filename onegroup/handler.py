@@ -22,9 +22,7 @@ if os.path.isdir(working_dir):
     filen = working_dir+"/"+database
 
 def init_database():
-    """
-        Initialises the test database if not created already
-    """
+    """Initialises the test database if not created already"""
     #Connect to the database
     db = Database(filename = filen)
 
@@ -38,9 +36,7 @@ def init_database():
     db.close()
 
 def loadConfig():
-    """ 
-        Reads a config file and sets environment variables
-    """
+    """Reads a config file and sets environment variables"""
     #base config dictonary 
     config = base_config
     
@@ -190,7 +186,8 @@ def confirmLogin(email, password):
     
         email: user's email address
         password: user's associated password
-        returna : True if both email is found in the database and associated password matches. 
+        
+        Returns : True if both email is found in the database and associated password matches. 
                   False if either condition fails
     """
     if confirmUser(email):
@@ -208,6 +205,7 @@ def confirmClient(email):
         Confirms if the user account is of the client user type
     
         email : user's email address
+        
         Returns : True if client, else false
     """
     user = getUser("Email",email)
@@ -223,6 +221,7 @@ def confirmUser(email):
         Confirms if the user exists in the database
     
         email : user's email address
+        
         Returns : True if exists, else False
     """
     user = getUser("Email",email)
@@ -330,14 +329,16 @@ def changePassword(name, userinput):
     db.close()
 
 
-def retrieveRequests():
+def retrieveRequests(table):
     """
         Fetchs all active admin requests from the database
-    
+
+        table : Table to retrieve the requests from
+
         Returns : List of all admin requests
     """
     db = Database(filename = filen)
-    requests =  db.retrieve("notifications")
+    requests =  db.retrieve(table)
     db.close()
     return requests
 

@@ -46,6 +46,38 @@ mail = Mail(app)
 #     mail.send(msg)
 # )
 
+
+@app.route('/iptablesdata/', methods= ["POST"])
+def ipTablesRuleData():
+    """Handles the input for new iptables rules"""
+    if request.method == 'POST':
+
+        source = request.form["source"]
+        port = request.form["port"]
+        destination = request.form["destination"]
+        tableData = request.form["tableData"]
+        chainData = request.form["chainData"]
+        ifaceData = request.form["ifaceData"]
+        protData = request.form["protData"]
+        stateData = request.form["stateData"]
+        actionData = request.form["actionData"]
+
+# content = request.get_json()
+    #
+    # if content == None:
+    #     content = {"source": request.values("source"), "port": request.values("port"), "destination":request.values("destination"), "tableData": request.values("tableData"),
+    #                "chainData": request.values("chainData"), "ifaceData": request.values("ifaceData"), "protData":request.values("protData"), "stateData": request.values("stateData"), "actionData":request.values("actionData")};
+    #
+    # source = content["source"]
+    # port = content["port"]
+    # destination = content["destination"]
+    # tableData = content["tableData"]
+    # chainData = content["chainData"]
+    # ifaceData = content["ifaceData"]
+    # protData = content["protData"]
+    # stateData = content["stateData"]
+    # actionData = content["actionData"]
+
 def login_required(f):
     """
         Wraper for endpoints to perform an authentication check
@@ -166,13 +198,13 @@ def retrieve_user_page():
         GET: Surves the user management html with new admin notifications 
     """
     ##redirect(url_for('users'))
-    ##requests = hl.retrieveRequests()
+    ##requests = hl.retrieveRequests("notifications")
     return render_template('users.html', testdata = [
         {"User": "MyName", "Request": 10},
         {"User": "YourName", "Request": 5},
-        {"User": "TheirName", "Request": 7},
-    ])
-    ##return render_template('users.html', testdata = hl.retrieveRequests())
+        {"User": "TheirName", "Request": 7}
+    ], testdata2 = hl.retrieveRequests("users"))
+    ##return render_template('users.html', testdata = hl.retrieveRequests("notifications"))
 
 
 @app.route('/approve_req/', methods=['POST'])
@@ -199,6 +231,18 @@ def approve_req():
             #hl.declineRequest(reqName)#, reqReq)
             return redirect('/users')
 
+@app.route('/delete_key/', methods=['POST'])
+@admin_required
+def delete_key():
+    """
+        Endpoint to handle the deletion of a user
+        
+        POST: Redirect to the user management page
+    """
+    name = request.form['name']
+    if request.method == 'POST':
+           ## OJ CODE GO HERE ##
+            return redirect('/users')
 
 @app.route('/logs/')
 @admin_required
@@ -273,15 +317,17 @@ def show_user_keys(username):
     return render_template('user_keys.html', username=username, distributed = downloaded, hash = hash)
     ##method to pull keys from database using username
 
-
-@app.route('/config/')
+@app.route('/config/', methods=['GET', 'POST'])
 @admin_required
 def show_config():
     """
         VPN Server configuration page 
  
         GET: Displays the configuration page html
+        POST: Handles form data for a new iptables rule 
     """
+    if request.method == 'POST':
+        passScript()
     return render_template('config.html')
 
 
@@ -522,6 +568,50 @@ def userforms():
             return True
         else:
             return False
+
+
+def passScript():
+    """
+        Pass variables obtioned in webform to bashscript
+        
+        Returns : True if POST request, Else False
+    """
+    if request.method == 'POST':
+        ipRules = "iptables"
+        table = request.form['TABLE']
+        if not table=="":
+            ipRules = ipRules + " -t " + table
+            
+        chain = request.form['CHAIN']
+        if not chain=="":
+            ipRules = ipRules + " -A " + chain
+            
+        packType = request.form['PROT']
+        if not packType=="":
+            ipRules = ipRules + " -p " + packType
+        elif packType=="" and not port=="":
+            ipRules = ipRules + " -p tcp"
+            
+        source = request.form['source']
+        if not source=="":
+             ipRules = ipRules + " -s " + source
+             
+        destination = request.form['destination']
+        if not destination=="":
+            ipRules = ipRules + " -d " + desination
+            
+        port = request.form['port']
+        if not port=="":
+            ipRules = ipRules + " -dport " + port
+            
+        action = request.form['ACTION']
+        if not action=="":
+            ipRules = ipRules + " -j " + action
+            
+        callScript('ip_rules.sh',[ipRules])
+        return True
+    else:
+        return False
 
 
 def passwordform(name = None):
