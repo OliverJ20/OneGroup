@@ -26,7 +26,9 @@ function testfunction()
 function getIPTablesData()
 {
        
-       var source = document.getElementById("source").value;
+       var Input = document.getElementById("INPUT").value;
+       var Output = document.getElementById("OUTPUT").value;
+        var source = document.getElementById("source").value;
         var port = document.getElementById("port").value;
         var destination = document.getElementById("destination").value;
 
