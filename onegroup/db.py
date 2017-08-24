@@ -19,6 +19,7 @@ class Database:
         self._db.execute('create table IF NOT EXISTS users (ID INTEGER PRIMARY KEY NOT NULL, Name text, Email text, Password text, Auth_Type text, Account_Type text, Keys text, Key_Distributed INTEGER)')
         self._db.execute('create table IF NOT EXISTS codes (Code text PRIMARY KEY NOT NULL, Name text, Purpose text, Used INTEGER)')
         self._db.execute('create table IF NOT EXISTS notifications (ID INTEGER PRIMARY KEY NOT NULL, User text, Request text)')
+        self._db.execute('create table IF NOT EXISTS firewall (ID INTEGER PRIMARY KEY NOT NULL, Rule text, Policy INTEGER)')
 
     def insert(self, table, row):
         keys = sorted(row.keys())

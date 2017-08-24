@@ -115,7 +115,7 @@ def createUser(name, passwd, email):
     
     #create the users key/cert pair
     args = [
-        "add"
+        "add",
         user["Keys"],
     ]
     callScript('userman',args)
@@ -137,7 +137,7 @@ def zipUserKeys(user):
     """
     #create the users key/cert pair
     args = [
-        "dist"
+        "dist",
         user,
     ]
     callScript('userman',args)
@@ -492,6 +492,33 @@ def getAdminEmails():
     db.close()
     return [x["Email"] for x in emails]
 
+#
+# Iptables commands
+#
 
+def getIptablesRules():
+    """
+        Gets all the iptables rules from the database
+
+        Returns: List of all iptables in the following dictonary format:
+            ID : Row ID
+            Rule : The rule in text form
+            Policy : 1 if a policy rule, else 0
+    """
+    db = Database(filename=filen)
+    rules = retrieve('firewall')
+    db.close()
+    return rules
+
+def getRule(ruleid):
+    """
+        Gets the specified iptables rule from the database
+
+        Returns: the given rule
+    """
+    db = Database(filename=filen)
+    rule = retrieve('firewall',{"ID",ruleid})
+    db.close()
+    return rule
 
     

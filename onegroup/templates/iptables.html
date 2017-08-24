@@ -1,0 +1,205 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <body>
+    {% if policy %}
+        <!--
+            TODO OJ MAKE POLICY FORM
+        -->
+    {% else %}
+        <form action="{{ url_for('show_config') }}" vname="ipform" method=post>
+            <label for ="source">Source</label>
+            <br/>
+            <input type = "text" id = "source"  name = "source" value = '{{rule["Source"]}}'>
+            <br>
+            <label for = "port">port</label>
+            <br>
+            <input type = "text" id = "sport"  name = "sport" value = '{{rule["Source_Port"]}}'>
+            <br>
+            <label for ="destination">Destination</label>
+            <br>
+            <input type = "text" id = "destination" name = "destination" value = '{{rule["Destination"]}}'>
+            <br>
+            <label for = "port">port</label>
+            <br>
+            <input type = "text" id = "dport"  name = "dport" value = '{{rule["Destination_Port"]}}'>
+            <br>
+            <select value = "TABLE" id = "TABLE" name = "TABLE" >
+                {% if rule['Table'] == "nat" %}
+                    <option value = "NULL">TABLE</option>
+                    <option value ="nat" selected>nat</option>
+                    <option value ="filter">filter</option>
+                    <option value ="mangle">mangle</option>
+                {% elif rule['Table'] == "filter" %}
+                    <option value = "NULL">TABLE</option>
+                    <option value ="nat">nat</option>
+                    <option value ="filter" selected>filter</option>
+                    <option value ="mangle">mangle</option>
+                {% elif rule['Table'] == "mangle" %}
+                    <option value = "NULL">TABLE</option>
+                    <option value ="nat">nat</option>
+                    <option value ="filter">filter</option>
+                    <option value ="mangle" selected>mangle</option>
+                {% else %}
+                    <option value = "NULL" selected>TABLE</option>
+                    <option value ="nat">nat</option>
+                    <option value ="filter">filter</option>
+                    <option value ="mangle">mangle</option>
+                {% endif %}
+            </select>
+            <br  />
+            <select value = "CHAIN" id = "CHAIN" name = "CHAIN" >
+                {% if rule['Chain'] == "INPUT" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT" selected>INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% elif rule['Chain'] == "OUTPUT" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT" selected>OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% elif rule['Chain'] == "FORWARD" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD" selected>FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% elif rule['Chain'] == "PREROUTING" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING" selected>PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% elif rule['Chain'] == "POSTROUTED" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING" selected>POSTROUTING</option>
+                {% else %}
+                    <option value = "NULL" selected>CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% endif %}
+             </select>
+            <br  />
+            <label for ="input">Input Interface</label>
+            <br>
+            <input type = "text" id = "input" name = "input" value = "{{rule['Input']}}">
+            <br/>
+            <label for ="destination">Output Interface</label>
+            <br>
+            <input type = "text" id = "output" name = "output" value = "{{rule['Output']}}">
+            <br/>
+            <select value = "PROT" id = "PROT" name = "PROT" >
+                {% if rule['Protocol'] == "tcp"  %}
+                    <option value = "NULL">PROT</option>
+                    <option value ="tcp" selected>tcp</option>
+                    <option value ="icmp">icmp</option>
+                    <option value ="udp">udp</option>
+                {% elif rule['Protocol'] == "icmp" %}
+                    <option value = "NULL">PROT</option>
+                    <option value ="tcp">tcp</option>
+                    <option value ="icmp" selected>icmp</option>
+                    <option value ="udp">udp</option>
+                {% elif rule['Protocol'] == "udp" %}
+                    <option value = "NULL">PROT</option>
+                    <option value ="tcp">tcp</option>
+                    <option value ="icmp">icmp</option>
+                    <option value ="udp" selected>udp</option>
+                {% else %}
+                    <option value = "NULL" selected>PROT</option>
+                    <option value ="tcp">tcp</option>
+                    <option value ="icmp">icmp</option>
+                    <option value ="udp">udp</option> 
+                {% endif %}
+            </select>
+            
+            <br  />
+            <select value = "STATE" id = "STATE" name = "STATE" >
+                {% if rule['State'] == "NEW" %}
+                    <option value = "NULL">STATE</option>
+                    <option value ="NEW" selected>NEW</option>
+                    <option value ="ESTABLISHED">ESTABLISHED</option>
+                    <option value ="RELATED">RELATED</option>
+                {% elif rule['State'] == "ESTABLISHED" %}
+                    <option value = "NULL">STATE</option>
+                    <option value ="NEW">NEW</option>
+                    <option value ="ESTABLISHED" selected>ESTABLISHED</option>
+                    <option value ="RELATED">RELATED</option>
+                {% elif rule['State'] == "RELATED" %}
+                    <option value = "NULL">STATE</option>
+                    <option value ="NEW">NEW</option>
+                    <option value ="ESTABLISHED">ESTABLISHED</option>
+                    <option value ="RELATED" selected>RELATED</option>
+                {% else %}
+                    <option value = "NULL" selected>STATE</option>
+                    <option value ="NEW">NEW</option>
+                    <option value ="ESTABLISHED">ESTABLISHED</option>
+                    <option value ="RELATED">RELATED</option> 
+                {% endif %} 
+            </select>
+            <br />
+            <select value = "ACTION" id = "ACTION" name = "ACTION" >
+                {% if rule['Action'] == "DROP"  %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP" selected>DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% elif rule['Action'] == "ACCEPT" %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT" selected>ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% elif rule['Action'] == "REJECT" %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT" selected>REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% elif rule['Action'] == "DNAT" %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT" selected>DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% elif rule['Action'] == "SNAT" %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT" selected>SNAT</option>
+                {% else %}
+                    <option value="NULL" selected>ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% endif %}
+            </select>
+            <br  />
+            <input type = "button" onclick ="testfunction()">
+            <input type = "button" id = "iptablesSubmit" class = "iptablesSubmit" value = "submit" onclick = "getIPTablesData()"> 
+        </form>
+    {% endif %}
+    </body>
+{% endblock %}

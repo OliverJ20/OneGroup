@@ -89,8 +89,7 @@ def login_required(f):
     @wraps(f)
     def login_decorator(*args, **kwargs):
         if not session.get('logged_in'):
-            abort(401)
-            ##return redirect(url_for('login'))
+            return redirect(url_for('login'))
         else:
             return f(*args, **kwargs)
     return login_decorator
@@ -109,7 +108,7 @@ def admin_required(f):
         if session.get('logged_in') and session.get('type') == 'Admin':
             return f(*args, **kwargs)
         else:
-            abort(401)
+            return redirect(url_for('login'))
     return admin_decorator
 
 #make a new form to take packet type, source, destination and port as parameters
@@ -134,7 +133,7 @@ def client_required(f):
         if session.get('logged_in') and session.get('type') == 'Client':
             return f(*args, **kwargs)
         else:
-            abort(401)
+            return redirect(url_for('login'))
     return client_decorator
 
 
@@ -257,7 +256,7 @@ def show_logs():
     return render_template('logs.html')
 
 
-@app.route('/userkey/<hash>' methods=['GET'])
+@app.route('/userkey/<hash>', methods=['GET'])
 @client_required
 def userkey(hash):
     """
@@ -319,19 +318,44 @@ def show_user_keys(username):
     return render_template('user_keys.html', username=username, distributed = downloaded, hash = hash)
     ##method to pull keys from database using username
 
-@app.route('/config/', methods=['GET', 'POST'])
+@app.route('/config/', methods=['GET'])
 @admin_required
 def show_config():
     """
         VPN Server configuration page 
  
-        GET: Displays the configuration page html
+        GET: Displays the configuration page html, with iptables firewall rules
+    """
+    rules = [
+        {"ID" : 0, "Rule" : "INPUT DROP", "Policy" : 1},
+        {"ID" : 1, "Rule" : "FORWARD DROP", "Policy" : 1},
+        {"ID" : 2, "Rule" : "OUTPUT DROP", "Policy" : 1},
+        {"ID" : 3, "Rule" : "INPUT -i eth0 -s 192.168.1.0/24 -p udp --dport 1194 -j ACCEPT", "Policy" : 0}, 
+    ]
+    return render_template('config.html', firewall = hl.getIptablesRules())
+
+@app.route('/iptables/<ruleid>', methods=['GET', 'POST'])
+@admin_required
+def edit_iptable(ruleid):
+    """
+        Form to edit an iptables rule
+
+        rule : the id of the rule to edit 
+ 
+        GET: Displays the iptable editor form html
         POST: Handles form data for a new iptables rule 
     """
+    rules = [
+        {"ID" : 0, "Rule" : {"Chain" : "INPUT", "Action" : "DROP"}, "Policy" : 1},
+        {"ID" : 1, "Rule" : {"Chain" : "FORWARD", "Action" : "DROP"}, "Policy" : 1},
+        {"ID" : 2, "Rule" : {"Chain" : "OUTPUT", "Action" : "DROP"}, "Policy" : 1},
+        {"ID" : 3, "Rule" : {"Chain" : "INPUT", "Table" : "", "Input" : "eth0", "Protocol" : "udp", "Source" : "192.168.1.0/24", "Source_Port" : "", "Destination" : "", "Destination_Port" : 1194, "Output" : "", "State" : "" ,"Action" : "ACCEPT"}, "Policy" : 0} 
+    ]
+    #rule = [x for x in rules if x['ID'] == rule][0]
+    rule = hl.getRule(ruleid)
     if request.method == 'POST':
         passScript()
-    return render_template('config.html')
-
+    return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
@@ -534,7 +558,6 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
 
 
 @app.errorhandler(404)
-@app.errorhandler(401)
 def page_not_found(e):
     """
         Error handler for 404 and 401 errors
