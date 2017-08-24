@@ -105,7 +105,7 @@ def createUser(name, passwd, email):
     
     #create the users key/cert pair
     args = [
-        "add"
+        "add",
         user["Keys"],
     ]
     callScript('userman',args)
@@ -127,7 +127,7 @@ def zipUserKeys(user):
     """
     #create the users key/cert pair
     args = [
-        "dist"
+        "dist",
         user,
     ]
     callScript('userman',args)

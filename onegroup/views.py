@@ -89,8 +89,7 @@ def login_required(f):
     @wraps(f)
     def login_decorator(*args, **kwargs):
         if not session.get('logged_in'):
-            abort(401)
-            ##return redirect(url_for('login'))
+            return redirect(url_for('login'))
         else:
             return f(*args, **kwargs)
     return login_decorator
@@ -109,7 +108,7 @@ def admin_required(f):
         if session.get('logged_in') and session.get('type') == 'Admin':
             return f(*args, **kwargs)
         else:
-            abort(401)
+            return redirect(url_for('login'))
     return admin_decorator
 
 #make a new form to take packet type, source, destination and port as parameters
@@ -134,7 +133,7 @@ def client_required(f):
         if session.get('logged_in') and session.get('type') == 'Client':
             return f(*args, **kwargs)
         else:
-            abort(401)
+            return redirect(url_for('login'))
     return client_decorator
 
 
@@ -255,7 +254,7 @@ def show_logs():
     return render_template('logs.html')
 
 
-@app.route('/userkey/<hash>' methods=['GET'])
+@app.route('/userkey/<hash>', methods=['GET'])
 @client_required
 def userkey(hash):
     """
@@ -532,7 +531,6 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
 
 
 @app.errorhandler(404)
-@app.errorhandler(401)
 def page_not_found(e):
     """
         Error handler for 404 and 401 errors
