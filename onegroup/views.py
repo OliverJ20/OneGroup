@@ -241,6 +241,7 @@ def delete_key():
     """
     name = request.form['name']
     if request.method == 'POST':
+        hl.deleteUser(name) 
            ## OJ CODE GO HERE ##
             return redirect('/users')
 

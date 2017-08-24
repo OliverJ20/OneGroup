@@ -81,6 +81,16 @@ def loadConfig():
 #
 # User Methods
 #
+def deleteUser(name):
+    db = Database(filename = filen)
+
+    user = getUser("Name",name)
+    db.delete("users", user)
+    db.close()
+    return true
+
+
+
 
 def createUser(name, passwd, email):
     """
