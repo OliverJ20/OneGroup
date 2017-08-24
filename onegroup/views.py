@@ -243,7 +243,8 @@ def delete_key():
     if request.method == 'POST':
         hl.deleteUser(name) 
            ## OJ CODE GO HERE ##
-            return redirect('/users')
+    return redirect('/users')
+        
 
 @app.route('/logs/')
 @admin_required
@@ -609,7 +610,9 @@ def passScript():
         if not action=="":
             ipRules = ipRules + " -j " + action
             
-        callScript('ip_rules.sh',[ipRules])
+        ip_dict = {'Table': table, 'Chain': chain, 'Pack': packType,
+                   'Source': source, 'Destination': destination,
+                   'Port': port, 'Action': action}
         return True
     else:
         return False
