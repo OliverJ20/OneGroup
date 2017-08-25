@@ -21,6 +21,10 @@ filen = database
 if os.path.isdir(working_dir):
     filen = working_dir+"/"+database
 
+#
+# Config
+#
+
 def init_database():
     """Initialises the test database if not created already"""
     #Connect to the database
@@ -77,20 +81,58 @@ def loadConfig():
 
     except Exception as e:
         logging.error("Error reading config at line %s",e)
+
+def loadIptables():
+    """Retrieves the iptables rules from the database (if any) and applys those rules"""
+    rules = getIptablesRules()
+
+    #If there are no/not enough rules, use the defaults
+    if rules == None or len(rules) != len(iptables):
+        rules = iptables
+        
+        #Add the defaults to the database
+        db = Database(filename = filen)
+        db.runSQL('DELETE FROM firewall')
+        for rule in rules:
+            db.insert("firewall",rule)
+
+        db.close()
+          
+    #Extract rules and add the correct prefix
+    ruleStrings = []
+    for rule in rules:
+        if rule["Policy"]:
+            ruleStrings.append("'-P "+rule["Rule"]+"'")
+        else: 
+            ruleStrings.append("'-A "+rule["Rule"]+"'")
+
+    #Apply rules
+    callScript('tabler',ruleStrings)
+    
         
 #
 # User Methods
 #
 def deleteUser(name):
+    """
+        Deletes a user and their keys from the database
+
+        name  : User's name/username
+    """
     db = Database(filename = filen)
 
     user = getUser("Name",name)
+    
+    #delete the users key/cert pair
+    args = [
+        "del",
+        user["Keys"],
+    ]
+    callScript('userman',args)
+    
     db.delete("users", user)
     db.close()
-    return true
-
-
-
+    return True
 
 def createUser(name, passwd, email):
     """
@@ -444,10 +486,10 @@ def callScript(script, params = []):
         call += " {}".format(arg)
    
     #shlex doesn't work with more than 1 arguments
-    if len(params) == 1:
-        subprocess.call(call,shell=True)
-    else:
-        subprocess.call(shlex.split(call),shell=True)
+    #if len(params) == 1:
+    subprocess.call(call,shell=True)
+    #else:
+    #    subprocess.call(shlex.split(call),shell=True)
 
 
 def validateKeysDownloaded(username):
@@ -506,7 +548,7 @@ def getIptablesRules():
             Policy : 1 if a policy rule, else 0
     """
     db = Database(filename=filen)
-    rules = retrieve('firewall')
+    rules = db.retrieve('firewall')
     db.close()
     return rules
 

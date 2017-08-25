@@ -87,7 +87,7 @@ class Database:
         self._db.execute('delete from {} where {}'.format(table, query))
         self._db.commit()
 
-    def RunSQL(self, sql):
+    def runSQL(self, sql):
         #TODO SQL INJECTION TESTING
         self._db.execute(sql)
         self._db.commit()

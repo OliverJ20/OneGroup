@@ -241,8 +241,8 @@ def delete_key():
     name = request.form['name']
     if request.method == 'POST':
         hl.deleteUser(name) 
-           ## OJ CODE GO HERE ##
-            return redirect('/users')
+        ## OJ CODE GO HERE ##
+        return redirect('/users')
 
 @app.route('/logs/')
 @admin_required
@@ -325,12 +325,6 @@ def show_config():
  
         GET: Displays the configuration page html, with iptables firewall rules
     """
-    rules = [
-        {"ID" : 0, "Rule" : "INPUT DROP", "Policy" : 1},
-        {"ID" : 1, "Rule" : "FORWARD DROP", "Policy" : 1},
-        {"ID" : 2, "Rule" : "OUTPUT DROP", "Policy" : 1},
-        {"ID" : 3, "Rule" : "INPUT -i eth0 -s 192.168.1.0/24 -p udp --dport 1194 -j ACCEPT", "Policy" : 0}, 
-    ]
     return render_template('config.html', firewall = hl.getIptablesRules())
 
 @app.route('/iptables/<ruleid>', methods=['GET', 'POST'])
@@ -344,13 +338,6 @@ def edit_iptable(ruleid):
         GET: Displays the iptable editor form html
         POST: Handles form data for a new iptables rule 
     """
-    rules = [
-        {"ID" : 0, "Rule" : {"Chain" : "INPUT", "Action" : "DROP"}, "Policy" : 1},
-        {"ID" : 1, "Rule" : {"Chain" : "FORWARD", "Action" : "DROP"}, "Policy" : 1},
-        {"ID" : 2, "Rule" : {"Chain" : "OUTPUT", "Action" : "DROP"}, "Policy" : 1},
-        {"ID" : 3, "Rule" : {"Chain" : "INPUT", "Table" : "", "Input" : "eth0", "Protocol" : "udp", "Source" : "192.168.1.0/24", "Source_Port" : "", "Destination" : "", "Destination_Port" : 1194, "Output" : "", "State" : "" ,"Action" : "ACCEPT"}, "Policy" : 0} 
-    ]
-    #rule = [x for x in rules if x['ID'] == rule][0]
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
         passScript()
@@ -733,6 +720,9 @@ def setConfig(debug):
     app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
     app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
+
+    #Iptables
+    hl.loadIptables()
 
 #
 #Cherrypy server base
