@@ -7,7 +7,7 @@
             TODO OJ MAKE POLICY FORM
         -->
     {% else %}
-        <form action="{{ url_for('show_config') }}" vname="ipform" method=post>
+        <form action="{{ url_for('iptablesdata') }}" vname="ipform" method=post>
             <label for ="source">Source</label>
             <br/>
             <input type = "text" id = "source"  name = "source" value = '{{rule["Source"]}}'>

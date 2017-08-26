@@ -51,7 +51,7 @@ mail = Mail(app)
 def ipTablesRuleData():
     """Handles the input for new iptables rules"""
     if request.method == 'POST':
-
+        name = session['name']
         source = request.form["source"]
         port = request.form["port"]
         destination = request.form["destination"]
@@ -61,6 +61,9 @@ def ipTablesRuleData():
         protData = request.form["protData"]
         stateData = request.form["stateData"]
         actionData = request.form["actionData"]
+
+        ip_string = hl.ipDictToString(hl.ipStringToDict(source, port,destination,tableData,chainData,ifaceData,protData,stateData,actionData))
+        hl.updateIPRules(name,ip_string)
 
 # content = request.get_json()
     #
@@ -241,9 +244,8 @@ def delete_key():
     name = request.form['name']
     if request.method == 'POST':
         hl.deleteUser(name) 
-           ## OJ CODE GO HERE ##
     return redirect('/users')
-        
+
 
 @app.route('/logs/')
 @admin_required
@@ -326,12 +328,6 @@ def show_config():
  
         GET: Displays the configuration page html, with iptables firewall rules
     """
-    rules = [
-        {"ID" : 0, "Rule" : "INPUT DROP", "Policy" : 1},
-        {"ID" : 1, "Rule" : "FORWARD DROP", "Policy" : 1},
-        {"ID" : 2, "Rule" : "OUTPUT DROP", "Policy" : 1},
-        {"ID" : 3, "Rule" : "INPUT -i eth0 -s 192.168.1.0/24 -p udp --dport 1194 -j ACCEPT", "Policy" : 0}, 
-    ]
     return render_template('config.html', firewall = hl.getIptablesRules())
 
 @app.route('/iptables/<ruleid>', methods=['GET', 'POST'])
@@ -345,13 +341,6 @@ def edit_iptable(ruleid):
         GET: Displays the iptable editor form html
         POST: Handles form data for a new iptables rule 
     """
-    rules = [
-        {"ID" : 0, "Rule" : {"Chain" : "INPUT", "Action" : "DROP"}, "Policy" : 1},
-        {"ID" : 1, "Rule" : {"Chain" : "FORWARD", "Action" : "DROP"}, "Policy" : 1},
-        {"ID" : 2, "Rule" : {"Chain" : "OUTPUT", "Action" : "DROP"}, "Policy" : 1},
-        {"ID" : 3, "Rule" : {"Chain" : "INPUT", "Table" : "", "Input" : "eth0", "Protocol" : "udp", "Source" : "192.168.1.0/24", "Source_Port" : "", "Destination" : "", "Destination_Port" : 1194, "Output" : "", "State" : "" ,"Action" : "ACCEPT"}, "Policy" : 0} 
-    ]
-    #rule = [x for x in rules if x['ID'] == rule][0]
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
         passScript()
@@ -595,52 +584,6 @@ def userforms():
             return False
 
 
-def passScript():
-    """
-        Pass variables obtioned in webform to bashscript
-        
-        Returns : True if POST request, Else False
-    """
-    if request.method == 'POST':
-        ipRules = "iptables"
-        table = request.form['TABLE']
-        if not table=="":
-            ipRules = ipRules + " -t " + table
-            
-        chain = request.form['CHAIN']
-        if not chain=="":
-            ipRules = ipRules + " -A " + chain
-            
-        packType = request.form['PROT']
-        if not packType=="":
-            ipRules = ipRules + " -p " + packType
-        elif packType=="" and not port=="":
-            ipRules = ipRules + " -p tcp"
-            
-        source = request.form['source']
-        if not source=="":
-             ipRules = ipRules + " -s " + source
-             
-        destination = request.form['destination']
-        if not destination=="":
-            ipRules = ipRules + " -d " + desination
-            
-        port = request.form['port']
-        if not port=="":
-            ipRules = ipRules + " -dport " + port
-            
-        action = request.form['ACTION']
-        if not action=="":
-            ipRules = ipRules + " -j " + action
-            
-        ip_dict = {'Table': table, 'Chain': chain, 'Pack': packType,
-                   'Source': source, 'Destination': destination,
-                   'Port': port, 'Action': action}
-        return True
-    else:
-        return False
-
-
 def passwordform(name = None):
     """
         Handles input for the change password form
@@ -736,6 +679,9 @@ def setConfig(debug):
     app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
     app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
+
+    #Iptables
+    hl.loadIptables()
 
 #
 #Cherrypy server base

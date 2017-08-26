@@ -21,6 +21,10 @@ filen = database
 if os.path.isdir(working_dir):
     filen = working_dir+"/"+database
 
+#
+# Config
+#
+
 def init_database():
     """Initialises the test database if not created already"""
     #Connect to the database
@@ -77,20 +81,58 @@ def loadConfig():
 
     except Exception as e:
         logging.error("Error reading config at line %s",e)
+
+def loadIptables():
+    """Retrieves the iptables rules from the database (if any) and applys those rules"""
+    rules = getIptablesRules()
+
+    #If there are no/not enough rules, use the defaults
+    if rules == None or len(rules) != len(iptables):
+        rules = iptables
+        
+        #Add the defaults to the database
+        db = Database(filename = filen)
+        db.runSQL('DELETE FROM firewall')
+        for rule in rules:
+            db.insert("firewall",rule)
+
+        db.close()
+          
+    #Extract rules and add the correct prefix
+    ruleStrings = []
+    for rule in rules:
+        if rule["Policy"]:
+            ruleStrings.append("'-P "+rule["Rule"]+"'")
+        else: 
+            ruleStrings.append("'-A "+rule["Rule"]+"'")
+
+    #Apply rules
+    callScript('tabler',ruleStrings)
+    
         
 #
 # User Methods
 #
 def deleteUser(name):
+    """
+        Deletes a user and their keys from the database
+
+        name  : User's name/username
+    """
     db = Database(filename = filen)
 
     user = getUser("Name",name)
+    
+    #delete the users key/cert pair
+    args = [
+        "del",
+        user["Keys"],
+    ]
+    callScript('userman',args)
+    
     db.delete("users", user)
     db.close()
-    return true
-
-
-
+    return True
 
 def createUser(name, passwd, email):
     """
@@ -444,10 +486,10 @@ def callScript(script, params = []):
         call += " {}".format(arg)
    
     #shlex doesn't work with more than 1 arguments
-    if len(params) == 1:
-        subprocess.call(call,shell=True)
-    else:
-        subprocess.call(shlex.split(call),shell=True)
+    #if len(params) == 1:
+    subprocess.call(call,shell=True)
+    #else:
+    #    subprocess.call(shlex.split(call),shell=True)
 
 
 def validateKeysDownloaded(username):
@@ -506,7 +548,7 @@ def getIptablesRules():
             Policy : 1 if a policy rule, else 0
     """
     db = Database(filename=filen)
-    rules = retrieve('firewall')
+    rules = db.retrieve('firewall')
     db.close()
     return rules
 
@@ -521,4 +563,69 @@ def getRule(ruleid):
     db.close()
     return rule
 
+
+def ipDictToString(ip_dict):
+    """
+        Pass dictionary obtioned in webform to string
+        
+        Returns : String of dictionary values
+    """
     
+    ipRules = "iptables"
+        table = ip_dict['Table']
+        if not table=="":
+            ipRules = ipRules + " -t " + table
+            
+        chain = ip_dict['Chain']
+        if not chain=="":
+            ipRules = ipRules + " -A " + chain
+
+        interface = ip_dict['Interface']
+        if not interface=="":
+            ipRules = ipRules + " -i " + interface
+            
+        packType = ip_dict['Protocol']
+        if not packType=="":
+            ipRules = ipRules + " -p " + packType
+        elif packType=="" and not port=="":
+            ipRules = ipRules + " -p tcp"
+            
+        source = ip_dict['Source']
+        if not source=="":
+             ipRules = ipRules + " -s " + source
+             
+        destination = ip_dict['Destination']
+        if not destination=="":
+            ipRules = ipRules + " -d " + desination
+            
+        port = ip_dict['Port']
+        if not port=="":
+            ipRules = ipRules + " -dport " + port
+
+        state = ip_dict['State']
+        if not state =="":
+            ipRules = ipRules + " -m " + state
+              
+        action = ip_dict['Action']
+        if not action=="":
+            ipRules = ipRules + " -j " + action
+            
+        return ipRules
+
+
+def ipStringToDict(source, port,destination,tableData,chainData,ifaceData,protData,stateData,actionData):
+    """
+        Pass String obtioned in webform to string
+        
+        Returns : Dictionary of values
+    """
+    return  ip_dict = {'Table': tableData, 'Chain': chainData, 'Interface': ifaceData, 'Protocol': protData,
+                   'Source': source, 'Destination': destination,'Port': port, 'State':stateData, 'Action': actionData}
+
+
+def updateIPRules(name, value)
+    db = Database(filename=filen)
+    user = getUser("Name", name)['ID']
+    db.update("firewall", {"Rule": value}, ("ID", user))
+    db.close()
+                  
