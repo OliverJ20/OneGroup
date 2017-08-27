@@ -344,7 +344,7 @@ def edit_iptable(ruleid):
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
         passScript()
-    return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
+    return render_template('iptables.html', rule = rule['Rule'], policy = rule['Policy'])
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
