@@ -622,25 +622,34 @@ def ipStringToDict(ipString):
         Returns : Dictionary of values
     """
     ipSplit = ipString.split()
-    for string in len(ipSplit):
-        if ipString[string] == '-t':
-            tableData= ipString[string+1]
-        elif ipString[string] == '-A':
-            chainData= ipString[string+1]
-        elif ipString[string] == '-i':
-            ifaceData= ipString[string+1]
-        elif ipString[string] == '-p':
-            protData= ipString[string+1]
-        elif ipString[string] == '-s':
-            source= ipString[string+1]
-        elif ipString[string] == '-d':
-            destination= ipString[string+1]
-        elif ipString[string] == '-dport':
-            port= ipString[string+1]
-        elif ipString[string] == '-m':
-            stateData= ipString[string+1]
-        elif ipString[string] == '-j':
-            actionData= ipString[string+1]
+    tableData =''
+    chainData =''
+    ifaceData =''
+    protData =''
+    source =''
+    destination =''
+    port =''
+    stateData =''
+    actionData =''
+    for index in range(0, len(ipSplit)):
+        if ipSplit[index] == '-t':
+            tableData= ipSplit[index+1]
+        elif ipSplit[index] == '-A':
+            chainData= ipSplit[index+1]
+        elif ipSplit[index] == '-i':
+            ifaceData= ipSplit[index+1]
+        elif ipSplit[index] == '-p':
+            protData= ipSplit[index+1]
+        elif ipSplit[index] == '-s':
+            source= ipSplit[index+1]
+        elif ipSplit[index] == '-d':
+            destination= ipSplit[index+1]
+        elif ipSplit[index] == '-dport':
+            port= ipSplit[index+1]
+        elif ipSplit[index] == '-m':
+            stateData= ipSplit[index+1]
+        elif ipSplit[index] == '-j':
+            actionData= ipSplit[index+1]
 
     return {'Table': tableData, 'Chain': chainData, 'Interface': ifaceData, 'Protocol': protData,
                    'Source': source, 'Destination': destination,'Port': port, 'State':stateData, 'Action': actionData}
