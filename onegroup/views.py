@@ -52,17 +52,26 @@ def ipTablesRuleData():
     """Handles the input for new iptables rules"""
     if request.method == 'POST':
         name = session['name']
+        
         source = request.form["source"]
-        port = request.form["port"]
+        sourceport = request.form["sport"]
+        
         destination = request.form["destination"]
-        tableData = request.form["tableData"]
-        chainData = request.form["chainData"]
-        ifaceData = request.form["ifaceData"]
-        protData = request.form["protData"]
-        stateData = request.form["stateData"]
-        actionData = request.form["actionData"]
+        port = request.form["dport"]
+        
+        tableData = request.form["TABLE"]
+        chainData = request.form["CHAIN"]
+        
+        infaceData = request.form["input"]
+        oufaceData = request.form["output"]
+        
+        protData = request.form["PROT"]
+        stateData = request.form["STATE"]
+        
+        actionData = request.form["ACTION"]
 
-        ipRules = "iptables" + " -t " + table + " -A " + chain + " -i " + interface + packType + " -s " + source + " -d " + desination + " -dport " + port + " -m " + state + " -j " + action
+        ipRules = "iptables" + " -t " + table + " -A " + chain + " -i " + infaceData + " -o " + oufaceData + " -p " + protData + " -s "
+        + source + " -sport " + sourceport + " -d " + desination + " -dport " + port + " -m " + stateData + " -j " + actionData
 
         ip_string = hl.ipDictToString(hl.ipStringToDict(ipRules))
         hl.updateIPRules(name,ip_string)
@@ -346,6 +355,7 @@ def edit_iptable(ruleid):
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
         passScript()
+    print(rule)
     return render_template('iptables.html', rule = rule['Rule'], policy = rule['Policy'])
 
 @app.route('/login/', methods=['GET', 'POST'])
