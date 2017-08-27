@@ -37,7 +37,7 @@
             <br>
             <input type = "text" id = "dport"  name = "dport" value = '{{rule["Destination_Port"]}}'>
             <br>
-            <select value = "TABLE" id = "TABLE" name = "TABLE" >
+            <select value = "TABLE" id = "Table" name = "Table" >
                 {% if rule['Table'] == "nat" %}
                     <option value = "NULL">TABLE</option>
                     <option value ="nat" selected>nat</option>
@@ -61,7 +61,7 @@
                 {% endif %}
             </select>
             <br  />
-            <select value = "CHAIN" id = "CHAIN" name = "CHAIN" >
+            <select value = "CHAIN" id = "Chain" name = "Chain" >
                 {% if rule['Chain'] == "INPUT" %}
                     <option value = "NULL">CHAIN</option>
                     <option value ="INPUT" selected>INPUT</option>
@@ -115,7 +115,7 @@
             <br>
             <input type = "text" id = "output" name = "output" value = "{{rule['Output']}}">
             <br/>
-            <select value = "PROT" id = "PROT" name = "PROT" >
+            <select value = "PROT" id = "Protocol" name = "Protocol" >
                 {% if rule['Protocol'] == "tcp"  %}
                     <option value = "NULL">PROT</option>
                     <option value ="tcp" selected>tcp</option>
@@ -140,7 +140,7 @@
             </select>
             
             <br  />
-            <select value = "STATE" id = "STATE" name = "STATE" >
+            <select value = "STATE" id = "State" name = "State" >
                 {% if rule['State'] == "NEW" %}
                     <option value = "NULL">STATE</option>
                     <option value ="NEW" selected>NEW</option>
@@ -164,7 +164,7 @@
                 {% endif %} 
             </select>
             <br />
-            <select value = "ACTION" id = "ACTION" name = "ACTION" >
+            <select value = "ACTION" id = "Action" name = "Action" >
                 {% if rule['Action'] == "DROP"  %}
                     <option value="NULL">ACTION</option>
                     <option value ="DROP" selected>DROP</option>

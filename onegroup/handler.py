@@ -573,14 +573,15 @@ def ipDictToString(ip_dict):
         Returns : String of dictionary values
     """
     
-    ipRules = "iptables"
+    ipRules = ip_dict['Chain']
+    
     table = ip_dict['TABLE']
     if not table=="":
         ipRules = ipRules + " -t " + table
         
-    chain = ip_dict['CHAIN']
-    if not chain=="":
-        ipRules = ipRules + " -A " + chain
+    #chain = ip_dict['CHAIN']
+    #if not chain=="":
+    #    ipRules = ipRules + " -A " + chain
 
     inputFace = ip_dict['Input']
     if not inputFace=="":
@@ -629,46 +630,52 @@ def ipStringToDict(ipString):
         
         Returns : Dictionary of values
     """
+    print(ipString)
     ipSplit = ipString.split()
-    tableData =''
-    chainData =''
-    ifaceData =''
-    oufaceData =''
-    protData =''
-    source =''
-    sourceport=''
-    destination =''
-    port =''
-    stateData =''
-    actionData =''
-    for index in range(0, len(ipSplit)):
-        if ipSplit[index] == '-t':
-            tableData= ipSplit[index+1]
-        elif ipSplit[index] == '-A':
-            chainData= ipSplit[index+1]
-        elif ipSplit[index] == '-i':
-            ifaceData= ipSplit[index+1]
-        elif ipSplit[index] == '-o':
-            oufaceData= ipSplit[index+1]
-        elif ipSplit[index] == '-p':
-            protData= ipSplit[index+1]
-        elif ipSplit[index] == '-s':
-            source= ipSplit[index+1]
-        elif ipSplit[index] == '-sport':
-            sourceport= ipSplit[index+1]
-        elif ipSplit[index] == '-d':
-            destination= ipSplit[index+1]
-        elif ipSplit[index] == '-dport':
-            port= ipSplit[index+1]
-        elif ipSplit[index] == '-m':
-            stateData= ipSplit[index+1]
-        elif ipSplit[index] == '-j':
-            actionData= ipSplit[index+1]
-
-    ipDict = {'TABLE': tableData, 'CHAIN': chainData, 'Input': ifaceData, 'Output': oufaceData, 'PROT': protData,
-                   'Source': source, 'Source_Port': sourceport, 'Destination': destination,'Destination_Port': port, 'STATE':stateData, 'ACTION': actionData}
     
-    print(ipDict)
+    #If ipSplit is only 2 words, it's a policy rule
+    if len(ipSplit) == 2:
+        ipDict = {"Chain" : ipSplit[0], "Action" : ipSplit[1]}
+    #Else it's a full rule
+    else:
+        tableData =''
+        chainData = ipSplit[0]
+        ifaceData =''
+        oufaceData =''
+        protData =''
+        source =''
+        sourceport=''
+        destination =''
+        port =''
+        stateData =''
+        actionData =''
+        for index in range(0, len(ipSplit)):
+            if ipSplit[index] == '-t':
+                tableData= ipSplit[index+1]
+            #elif ipSplit[index] == '-A':
+            #    chainData= ipSplit[index+1]
+            elif ipSplit[index] == '-i':
+                ifaceData= ipSplit[index+1]
+            elif ipSplit[index] == '-o':
+                oufaceData= ipSplit[index+1]
+            elif ipSplit[index] == '-p':
+                protData= ipSplit[index+1]
+            elif ipSplit[index] == '-s':
+                source= ipSplit[index+1]
+            elif ipSplit[index] == '--sport':
+                sourceport= ipSplit[index+1]
+            elif ipSplit[index] == '-d':
+                destination= ipSplit[index+1]
+            elif ipSplit[index] == '--dport':
+                port= ipSplit[index+1]
+            elif ipSplit[index] == '-m':
+                stateData= ipSplit[index+1]
+            elif ipSplit[index] == '-j':
+                actionData= ipSplit[index+1]
+
+        ipDict = {'Table': tableData, 'Chain': chainData, 'Input': ifaceData, 'Output': oufaceData, 'Protocol': protData,
+                       'Source': source, 'Source_Port': sourceport, 'Destination': destination,'Destination_Port': port, 'State':stateData, 'Action': actionData}
+    
     return ipDict
 
 
@@ -677,4 +684,10 @@ def updateIPRules(name, value):
     user = getUser("Name", name)['ID']
     db.update("firewall", {"Rule": value}, ("ID", user))
     db.close()
+
+    #Apply new rules
+    loadIptables()
+
+
+
                   
