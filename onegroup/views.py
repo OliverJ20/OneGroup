@@ -84,7 +84,7 @@ mail = Mail(app)
 def login_required(f):
     """
         Wraper for endpoints to perform an authentication check
-        
+
         f : endpoint function to be wrapped
 
         returns f if logged in, else aborts with a 401 error
@@ -101,7 +101,7 @@ def login_required(f):
 def admin_required(f):
     """
         Wraper for endpoints to perform an authentication check specifically for admin only pages
-        
+
         f : endpoint function to be wrapped
 
         returns f if logged in, else aborts with a 401 error
@@ -117,7 +117,7 @@ def admin_required(f):
 #make a new form to take packet type, source, destination and port as parameters
 #parameters given could be 3 of something or 17.
 #def ipTableForm():
-   
+
  #   packetType = Type:
   #  packetSource = Source:
    # packetDestination = Destination:
@@ -126,7 +126,7 @@ def admin_required(f):
 def client_required(f):
     """
         Wraper for endpoints to perform an authentication check specifically for client only pages
-        
+
         f : endpoint function to be wrapped
 
         returns f if logged in, else aborts with a 401 error
@@ -143,7 +143,7 @@ def client_required(f):
 def redirect_to_user(username):
     """
         Redirects the to a particular client's page
-        
+
         username : username of the client
 
         returns redirect to specified client's page
@@ -161,8 +161,8 @@ def render():
 def home():
     """
         Main admin dashboard
-        
-        GET: Surves the dashboard html  
+
+        GET: Surves the dashboard html
         POST: Attempts to create a new client
             Displays confirmation message if creation is successful
             Flashes notification if user exists
@@ -182,8 +182,8 @@ def home():
 def password():
     """
         Password reset page
-        
-        GET: Surves password reset html  
+
+        GET: Surves password reset html
         POST: Changes the user's password, displays confirmation message
     """
     if request.method == 'POST':
@@ -196,8 +196,8 @@ def password():
 def retrieve_user_page():
     """
         User management page for admins
-        
-        GET: Surves the user management html with new admin notifications 
+
+        GET: Surves the user management html with new admin notifications
     """
     ##redirect(url_for('users'))
     ##requests = hl.retrieveRequests("notifications")
@@ -214,7 +214,7 @@ def retrieve_user_page():
 def approve_req():
     """
         Endpoint to handle the approval/denial of requests made to an admin
-        
+
         POST: If approve, perform the request. Else delete the request
     """
     reqName = request.form['user']
@@ -238,12 +238,12 @@ def approve_req():
 def delete_key():
     """
         Endpoint to handle the deletion of a user
-        
+
         POST: Redirect to the user management page
     """
     name = request.form['name']
     if request.method == 'POST':
-        hl.deleteUser(name) 
+        hl.deleteUser(name)
     return redirect('/users')
 
 
@@ -252,8 +252,8 @@ def delete_key():
 def show_logs():
     """
         VPN log display page
-        
-        GET: Surves the log display html 
+
+        GET: Surves the log display html
     """
     return render_template('logs.html')
 
@@ -262,10 +262,10 @@ def show_logs():
 @client_required
 def userkey(hash):
     """
-        Surves the user's keys as a downloadable zip file 
+        Surves the user's keys as a downloadable zip file
 
         hash : unique name for the downloaded zip file
-        
+
         GET: If the keys have already been download: flash error message and logout
              Else: Offer keys to be downloaded
     """
@@ -282,7 +282,7 @@ def userkey(hash):
 def create_request():
     """
         Endpoint to create a new admin notification
- 
+
         GET: Creates a notification and emails the admins detailing the request
     """
     name = session['name']
@@ -291,13 +291,13 @@ def create_request():
     #Send email to all admin accounts
     msg = """
         Request from {}:
-        
+
         ID: {}
 
         Request: Key Reset
-        
+
         This message is automatically generated, please do not reply as this account is not monitored.
-        
+
         """.format(name, requestId)
     emailMessage("New Request", adminEmails, msg)
     return redirect(url_for('confirm'), confirmed='New Key Request Sent!')
@@ -308,7 +308,7 @@ def create_request():
 def show_user_keys(username):
     """
         Client's personal page
- 
+
         GET: Displays the client page html. Displays download button and generates hash if keys haven't been downloaded for this user
     """
     downloaded = hl.checkDistributeFlag(username)
@@ -324,8 +324,8 @@ def show_user_keys(username):
 @admin_required
 def show_config():
     """
-        VPN Server configuration page 
- 
+        VPN Server configuration page
+
         GET: Displays the configuration page html, with iptables firewall rules
     """
     return render_template('config.html', firewall = hl.getIptablesRules())
@@ -336,10 +336,10 @@ def edit_iptable(ruleid):
     """
         Form to edit an iptables rule
 
-        rule : the id of the rule to edit 
- 
+        rule : the id of the rule to edit
+
         GET: Displays the iptable editor form html
-        POST: Handles form data for a new iptables rule 
+        POST: Handles form data for a new iptables rule
     """
     rule = hl.getRule(ruleid)
     if request.method == 'POST':

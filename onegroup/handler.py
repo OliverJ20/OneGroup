@@ -24,7 +24,6 @@ if os.path.isdir(working_dir):
 #
 # Config
 #
-
 def init_database():
     """Initialises the test database if not created already"""
     #Connect to the database
@@ -527,7 +526,7 @@ def getAdminEmails():
     """
     db = Database(filename=filen)
 
-    emails = db.retrieve('users', {"Account_Type" : "Admin"})
+    emails = retrieve('users', {"Account_Type" : "Admin"})
 
     #get all emails where account_type is "Admin"
 
@@ -541,6 +540,8 @@ def getAdminEmails():
 def getIptablesRules():
     """
         Gets all the iptables rules from the database
+
+        toDict : Flag to convert all the rules to dictonaries
 
         Returns: List of all iptables in the following dictonary format:
             ID : Row ID
@@ -560,6 +561,7 @@ def getRule(ruleid):
     """
     db = Database(filename=filen)
     rule = db.retrieve('firewall',{"ID" : ruleid})
+    rule["Rule"] = ipStringToDict(rule["Rule"])
     db.close()
     return rule
 
@@ -572,54 +574,102 @@ def ipDictToString(ip_dict):
     """
     
     ipRules = "iptables"
-    table = ip_dict['Table']
+    table = ip_dict['TABLE']
     if not table=="":
         ipRules = ipRules + " -t " + table
-            
-    chain = ip_dict['Chain']
+        
+    chain = ip_dict['CHAIN']
     if not chain=="":
         ipRules = ipRules + " -A " + chain
 
-    interface = ip_dict['Interface']
-    if not interface=="":
-        ipRules = ipRules + " -i " + interface
-            
-    packType = ip_dict['Protocol']
+    inputFace = ip_dict['Input']
+    if not inputFace=="":
+        ipRules = ipRules + " -i " + inputFace
+
+    outputFace = ip_dict['Output']
+    if not outputFace=="":
+        ipRules = ipRules + " -o " + outputFace
+        
+    packType = ip_dict['PROT']
     if not packType=="":
-         ipRules = ipRules + " -p " + packType
+        ipRules = ipRules + " -p " + packType
     elif packType=="" and not port=="":
         ipRules = ipRules + " -p tcp"
-            
+        
     source = ip_dict['Source']
     if not source=="":
-        ipRules = ipRules + " -s " + source
-             
+         ipRules = ipRules + " -s " + source
+
+    sourceport = ip_dict['Source_Port']
+    if not sourceport=="":
+         ipRules = ipRules + " -sport " + sourceport
+         
     destination = ip_dict['Destination']
     if not destination=="":
         ipRules = ipRules + " -d " + desination
-            
-    port = ip_dict['Port']
+        
+    port = ip_dict['Destination_Port']
     if not port=="":
         ipRules = ipRules + " -dport " + port
 
-    state = ip_dict['State']
+    state = ip_dict['STATE']
     if not state =="":
         ipRules = ipRules + " -m " + state
-              
-    action = ip_dict['Action']
+          
+    action = ip_dict['ACTION']
     if not action=="":
         ipRules = ipRules + " -j " + action
-            
+        
     return ipRules
 
 
-def ipStringToDict(source, port,destination,tableData,chainData,ifaceData,protData,stateData,actionData):
+def ipStringToDict(ipString):
     """
         Pass String obtioned in webform to string
         
         Returns : Dictionary of values
     """
-    return {'Table': tableData, 'Chain': chainData, 'Interface': ifaceData, 'Protocol': protData, 'Source': source, 'Destination': destination,'Port': port, 'State': stateData, 'Action': actionData}
+    ipSplit = ipString.split()
+    tableData =''
+    chainData =''
+    ifaceData =''
+    oufaceData =''
+    protData =''
+    source =''
+    sourceport=''
+    destination =''
+    port =''
+    stateData =''
+    actionData =''
+    for index in range(0, len(ipSplit)):
+        if ipSplit[index] == '-t':
+            tableData= ipSplit[index+1]
+        elif ipSplit[index] == '-A':
+            chainData= ipSplit[index+1]
+        elif ipSplit[index] == '-i':
+            ifaceData= ipSplit[index+1]
+        elif ipSplit[index] == '-o':
+            oufaceData= ipSplit[index+1]
+        elif ipSplit[index] == '-p':
+            protData= ipSplit[index+1]
+        elif ipSplit[index] == '-s':
+            source= ipSplit[index+1]
+        elif ipSplit[index] == '-sport':
+            sourceport= ipSplit[index+1]
+        elif ipSplit[index] == '-d':
+            destination= ipSplit[index+1]
+        elif ipSplit[index] == '-dport':
+            port= ipSplit[index+1]
+        elif ipSplit[index] == '-m':
+            stateData= ipSplit[index+1]
+        elif ipSplit[index] == '-j':
+            actionData= ipSplit[index+1]
+
+    ipDict = {'TABLE': tableData, 'CHAIN': chainData, 'Input': ifaceData, 'Output': oufaceData, 'PROT': protData,
+                   'Source': source, 'Source_Port': sourceport, 'Destination': destination,'Destination_Port': port, 'STATE':stateData, 'ACTION': actionData}
+    
+    print(ipDict)
+    return ipDict
 
 
 def updateIPRules(name, value):
