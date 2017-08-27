@@ -618,8 +618,8 @@ def ipStringToDict(ipString):
         
         Returns : Dictionary of values
     """
-    ipString = ipString.split()
-    for string in len(ipString):
+    ipSplit = ipString.split()
+    for string in len(ipSplit):
         if ipString[string] == '-t':
             tableData= ipString[string+1]
         elif ipString[string] == '-A':
