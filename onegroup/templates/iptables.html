@@ -7,7 +7,7 @@
             TODO OJ MAKE POLICY FORM CHAIN AND ACTION STUFF.
 
         -->
-           <form action="{{ url_for('ipTablesRuleData') }}" vname="ipform" method=post>
+           <form  vname="ipform" method=post>
             <label for = "Policy">Policy: </label>
                <br>
            <select value = "CHAIN" id = "CHAIN" name = "CHAIN" >
@@ -104,7 +104,7 @@
            <br>
         </form>
     {% else %}
-        <form action="{{ url_for('ipTablesRuleData') }}" vname="ipform" method=post>
+        <form  vname="ipform" method=post>
             <label for ="source">Source</label>
             <br/>
             <input type = "text" id = "source"  name = "source" value = '{{rule["Source"]}}'>

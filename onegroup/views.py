@@ -45,25 +45,25 @@ mail = Mail(app)
 #     msg.body = "some text here" <--- the body of the email here
 #     mail.send(msg)
 # )
-
-
-@app.route('/iptablesdata/', methods= ["POST"])
-def ipTablesRuleData():
-    """Handles the input for new iptables rules"""
-    if request.method == 'POST':
-        name = session['name']
-        source = request.form["source"]
-        port = request.form["port"]
-        destination = request.form["destination"]
-        tableData = request.form["tableData"]
-        chainData = request.form["chainData"]
-        ifaceData = request.form["ifaceData"]
-        protData = request.form["protData"]
-        stateData = request.form["stateData"]
-        actionData = request.form["actionData"]
-
-        ip_string = hl.ipDictToString(hl.ipStringToDict(source, port,destination,tableData,chainData,ifaceData,protData,stateData,actionData))
-        hl.updateIPRules(name,ip_string)
+#
+#
+# @app.route('/iptablesdata/', methods= ["POST"])
+# def ipTablesRuleData():
+#     """Handles the input for new iptables rules"""
+#     if request.method == 'POST':
+#         name = session['name']
+#         source = request.form["source"]
+#         port = request.form["port"]
+#         destination = request.form["destination"]
+#         tableData = request.form["tableData"]
+#         chainData = request.form["chainData"]
+#         ifaceData = request.form["ifaceData"]
+#         protData = request.form["protData"]
+#         stateData = request.form["stateData"]
+#         actionData = request.form["actionData"]
+#
+#         ip_string = hl.ipDictToString(hl.ipStringToDict(source, port,destination,tableData,chainData,ifaceData,protData,stateData,actionData))
+#         hl.updateIPRules(name,ip_string)
 
 # content = request.get_json()
     #
@@ -343,6 +343,20 @@ def edit_iptable(ruleid):
     """
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
+        name = session['name']
+        source = request.form["source"]
+        port = request.form["port"]
+        destination = request.form["destination"]
+        tableData = request.form["tableData"]
+        chainData = request.form["chainData"]
+        ifaceData = request.form["ifaceData"]
+        protData = request.form["protData"]
+        stateData = request.form["stateData"]
+        actionData = request.form["actionData"]
+        ip_string = hl.ipDictToString(
+            hl.ipStringToDict(source, port, destination, tableData, chainData, ifaceData, protData, stateData,
+                              actionData))
+        hl.updateIPRules(name, ip_string)
         passScript()
     return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
 
