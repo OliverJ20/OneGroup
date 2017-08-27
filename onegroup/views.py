@@ -62,7 +62,7 @@ def ipTablesRuleData():
         stateData = request.form["stateData"]
         actionData = request.form["actionData"]
 
-            ipRules = "iptables" + " -t " + table + " -A " + chain + " -i " + interface + packType + " -s " + source + " -d " + desination + " -dport " + port + " -m " + state + " -j " + action
+        ipRules = "iptables" + " -t " + table + " -A " + chain + " -i " + interface + packType + " -s " + source + " -d " + desination + " -dport " + port + " -m " + state + " -j " + action
 
         ip_string = hl.ipDictToString(hl.ipStringToDict(ipRules))
         hl.updateIPRules(name,ip_string)

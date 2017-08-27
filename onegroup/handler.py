@@ -541,6 +541,8 @@ def getIptablesRules():
     """
         Gets all the iptables rules from the database
 
+        toDict : Flag to convert all the rules to dictonaries
+
         Returns: List of all iptables in the following dictonary format:
             ID : Row ID
             Rule : The rule in text form
@@ -558,7 +560,8 @@ def getRule(ruleid):
         Returns: the given rule
     """
     db = Database(filename=filen)
-    rule = retrieve('firewall',{"ID",ruleid})
+    rule = db.retrieve('firewall',{"ID" : ruleid})
+    rule["Rule"] = ipStringToDict(rule["Rule"])
     db.close()
     return rule
 
@@ -571,45 +574,45 @@ def ipDictToString(ip_dict):
     """
     
     ipRules = "iptables"
-        table = ip_dict['Table']
-        if not table=="":
-            ipRules = ipRules + " -t " + table
-            
-        chain = ip_dict['Chain']
-        if not chain=="":
-            ipRules = ipRules + " -A " + chain
+    table = ip_dict['Table']
+    if not table=="":
+        ipRules = ipRules + " -t " + table
+        
+    chain = ip_dict['Chain']
+    if not chain=="":
+        ipRules = ipRules + " -A " + chain
 
-        interface = ip_dict['Interface']
-        if not interface=="":
-            ipRules = ipRules + " -i " + interface
-            
-        packType = ip_dict['Protocol']
-        if not packType=="":
-            ipRules = ipRules + " -p " + packType
-        elif packType=="" and not port=="":
-            ipRules = ipRules + " -p tcp"
-            
-        source = ip_dict['Source']
-        if not source=="":
-             ipRules = ipRules + " -s " + source
-             
-        destination = ip_dict['Destination']
-        if not destination=="":
-            ipRules = ipRules + " -d " + desination
-            
-        port = ip_dict['Port']
-        if not port=="":
-            ipRules = ipRules + " -dport " + port
+    interface = ip_dict['Interface']
+    if not interface=="":
+        ipRules = ipRules + " -i " + interface
+        
+    packType = ip_dict['Protocol']
+    if not packType=="":
+        ipRules = ipRules + " -p " + packType
+    elif packType=="" and not port=="":
+        ipRules = ipRules + " -p tcp"
+        
+    source = ip_dict['Source']
+    if not source=="":
+         ipRules = ipRules + " -s " + source
+         
+    destination = ip_dict['Destination']
+    if not destination=="":
+        ipRules = ipRules + " -d " + desination
+        
+    port = ip_dict['Port']
+    if not port=="":
+        ipRules = ipRules + " -dport " + port
 
-        state = ip_dict['State']
-        if not state =="":
-            ipRules = ipRules + " -m " + state
-              
-        action = ip_dict['Action']
-        if not action=="":
-            ipRules = ipRules + " -j " + action
-            
-        return ipRules
+    state = ip_dict['State']
+    if not state =="":
+        ipRules = ipRules + " -m " + state
+          
+    action = ip_dict['Action']
+    if not action=="":
+        ipRules = ipRules + " -j " + action
+        
+    return ipRules
 
 
 def ipStringToDict(ipString):
@@ -639,11 +642,11 @@ def ipStringToDict(ipString):
         elif ipString[string] == '-j':
             actionData= ipString[string+1]
 
-    return  ip_dict = {'Table': tableData, 'Chain': chainData, 'Interface': ifaceData, 'Protocol': protData,
+    return {'Table': tableData, 'Chain': chainData, 'Interface': ifaceData, 'Protocol': protData,
                    'Source': source, 'Destination': destination,'Port': port, 'State':stateData, 'Action': actionData}
 
 
-def updateIPRules(name, value)
+def updateIPRules(name, value):
     db = Database(filename=filen)
     user = getUser("Name", name)['ID']
     db.update("firewall", {"Rule": value}, ("ID", user))
