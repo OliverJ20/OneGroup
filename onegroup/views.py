@@ -343,21 +343,29 @@ def edit_iptable(ruleid):
     """
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
-        name = session['name']
-        source = request.form["source"]
-        port = request.form["port"]
-        destination = request.form["destination"]
-        tableData = request.form["tableData"]
-        chainData = request.form["chainData"]
-        ifaceData = request.form["ifaceData"]
-        protData = request.form["protData"]
-        stateData = request.form["stateData"]
-        actionData = request.form["actionData"]
-        ip_string = hl.ipDictToString(
-            hl.ipStringToDict(source, port, destination, tableData, chainData, ifaceData, protData, stateData,
-                              actionData))
-        hl.updateIPRules(name, ip_string)
-        passScript()
+        if rule["Policy"] == 1:
+            ip_dict = {
+                "Chain" : request.form["Chain"],
+                "Action" : request.form["Action"]
+            }
+        else:
+            ip_dict = {
+                "Source" : request.form["source"],
+                "Source_Port" : request.form["sport"],
+                "Destination" : request.form["destination"],
+                "Destination_Port" : request.form["dport"], 
+                "Table" : request.form["Table"],
+                "Chain" : request.form["Chain"],
+                "Input" : request.form["input"],
+                "Output" : request.form["output"],
+                "Protocol" : request.form["Protocol"],
+                "State" : request.form["State"],
+                "Action" : request.form["Action"]
+            }
+        ip_string = hl.ipDictToString(ip_dict)
+        hl.updateIPRules(ruleid, ip_string)
+        return redirect('/config')
+        
     return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
 
 @app.route('/login/', methods=['GET', 'POST'])

@@ -575,7 +575,7 @@ def ipDictToString(ip_dict):
     
     ipRules = ip_dict['Chain']
     
-    table = ip_dict['TABLE']
+    table = ip_dict['Table']
     if not table=="":
         ipRules = ipRules + " -t " + table
         
@@ -591,7 +591,7 @@ def ipDictToString(ip_dict):
     if not outputFace=="":
         ipRules = ipRules + " -o " + outputFace
         
-    packType = ip_dict['PROT']
+    packType = ip_dict['Protocol']
     if not packType=="":
         ipRules = ipRules + " -p " + packType
     elif packType=="" and not port=="":
@@ -613,11 +613,11 @@ def ipDictToString(ip_dict):
     if not port=="":
         ipRules = ipRules + " -dport " + port
 
-    state = ip_dict['STATE']
+    state = ip_dict['State']
     if not state =="":
         ipRules = ipRules + " -m " + state
           
-    action = ip_dict['ACTION']
+    action = ip_dict['Action']
     if not action=="":
         ipRules = ipRules + " -j " + action
         
@@ -679,10 +679,9 @@ def ipStringToDict(ipString):
     return ipDict
 
 
-def updateIPRules(name, value):
+def updateIPRules(ID, value):
     db = Database(filename=filen)
-    user = getUser("Name", name)['ID']
-    db.update("firewall", {"Rule": value}, ("ID", user))
+    db.update("firewall", {"Rule": value}, ("ID", ID))
     db.close()
 
     #Apply new rules

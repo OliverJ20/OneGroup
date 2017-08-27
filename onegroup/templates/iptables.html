@@ -10,7 +10,7 @@
            <form  vname="ipform" method=post>
             <label for = "Policy">Policy: </label>
                <br>
-           <select value = "CHAIN" id = "CHAIN" name = "CHAIN" >
+           <select value = "CHAIN" id = "Chain" name = "Chain" >
                 {% if rule['Chain'] == "INPUT" %}
                     <option value = "NULL">CHAIN</option>
                     <option value ="INPUT" selected>INPUT</option>
@@ -56,7 +56,7 @@
                 {% endif %}
              </select>
            <br>
-          <select value = "ACTION" id = "ACTION" name = "ACTION" >
+          <select value = "ACTION" id = "Action" name = "Action" >
                 {% if rule['Action'] == "DROP"  %}
                     <option value="NULL">ACTION</option>
                     <option value ="DROP" selected>DROP</option>
