@@ -527,7 +527,7 @@ def getAdminEmails():
     """
     db = Database(filename=filen)
 
-    emails = retrieve('users', {"Account_Type" : "Admin"})
+    emails = db.retrieve('users', {"Account_Type" : "Admin"})
 
     #get all emails where account_type is "Admin"
 
@@ -559,7 +559,7 @@ def getRule(ruleid):
         Returns: the given rule
     """
     db = Database(filename=filen)
-    rule = retrieve('firewall',{"ID",ruleid})
+    rule = db.retrieve('firewall',{"ID" : ruleid})
     db.close()
     return rule
 
@@ -572,45 +572,45 @@ def ipDictToString(ip_dict):
     """
     
     ipRules = "iptables"
-        table = ip_dict['Table']
-        if not table=="":
-            ipRules = ipRules + " -t " + table
+    table = ip_dict['Table']
+    if not table=="":
+        ipRules = ipRules + " -t " + table
             
-        chain = ip_dict['Chain']
-        if not chain=="":
-            ipRules = ipRules + " -A " + chain
+    chain = ip_dict['Chain']
+    if not chain=="":
+        ipRules = ipRules + " -A " + chain
 
-        interface = ip_dict['Interface']
-        if not interface=="":
-            ipRules = ipRules + " -i " + interface
+    interface = ip_dict['Interface']
+    if not interface=="":
+        ipRules = ipRules + " -i " + interface
             
-        packType = ip_dict['Protocol']
-        if not packType=="":
-            ipRules = ipRules + " -p " + packType
-        elif packType=="" and not port=="":
-            ipRules = ipRules + " -p tcp"
+    packType = ip_dict['Protocol']
+    if not packType=="":
+         ipRules = ipRules + " -p " + packType
+    elif packType=="" and not port=="":
+        ipRules = ipRules + " -p tcp"
             
-        source = ip_dict['Source']
-        if not source=="":
-             ipRules = ipRules + " -s " + source
+    source = ip_dict['Source']
+    if not source=="":
+        ipRules = ipRules + " -s " + source
              
-        destination = ip_dict['Destination']
-        if not destination=="":
-            ipRules = ipRules + " -d " + desination
+    destination = ip_dict['Destination']
+    if not destination=="":
+        ipRules = ipRules + " -d " + desination
             
-        port = ip_dict['Port']
-        if not port=="":
-            ipRules = ipRules + " -dport " + port
+    port = ip_dict['Port']
+    if not port=="":
+        ipRules = ipRules + " -dport " + port
 
-        state = ip_dict['State']
-        if not state =="":
-            ipRules = ipRules + " -m " + state
+    state = ip_dict['State']
+    if not state =="":
+        ipRules = ipRules + " -m " + state
               
-        action = ip_dict['Action']
-        if not action=="":
-            ipRules = ipRules + " -j " + action
+    action = ip_dict['Action']
+    if not action=="":
+        ipRules = ipRules + " -j " + action
             
-        return ipRules
+    return ipRules
 
 
 def ipStringToDict(source, port,destination,tableData,chainData,ifaceData,protData,stateData,actionData):
@@ -619,11 +619,10 @@ def ipStringToDict(source, port,destination,tableData,chainData,ifaceData,protDa
         
         Returns : Dictionary of values
     """
-    return  ip_dict = {'Table': tableData, 'Chain': chainData, 'Interface': ifaceData, 'Protocol': protData,
-                   'Source': source, 'Destination': destination,'Port': port, 'State':stateData, 'Action': actionData}
+    return {'Table': tableData, 'Chain': chainData, 'Interface': ifaceData, 'Protocol': protData, 'Source': source, 'Destination': destination,'Port': port, 'State': stateData, 'Action': actionData}
 
 
-def updateIPRules(name, value)
+def updateIPRules(name, value):
     db = Database(filename=filen)
     user = getUser("Name", name)['ID']
     db.update("firewall", {"Rule": value}, ("ID", user))
