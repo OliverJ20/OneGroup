@@ -10,13 +10,97 @@
            <form action="{{ url_for('ipTablesRuleData') }}" vname="ipform" method=post>
             <label for = "Policy">Policy: </label>
                <br>
-            <label for = "Chain">Chain</label>
-           <br/>
-           <input type = "text" id = "chain" name = "chain" value = '{{rule["Chain"]}}'>
+           <select value = "CHAIN" id = "CHAIN" name = "CHAIN" >
+                {% if rule['Chain'] == "INPUT" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT" selected>INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% elif rule['Chain'] == "OUTPUT" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT" selected>OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% elif rule['Chain'] == "FORWARD" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD" selected>FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% elif rule['Chain'] == "PREROUTING" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING" selected>PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% elif rule['Chain'] == "POSTROUTED" %}
+                    <option value = "NULL">CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING" selected>POSTROUTING</option>
+                {% else %}
+                    <option value = "NULL" selected>CHAIN</option>
+                    <option value ="INPUT">INPUT</option>
+                    <option value ="OUTPUT">OUTPUT</option>
+                    <option value ="FORWARD">FORWARD</option>
+                    <option value ="PREROUTING">PREROUTING</option>
+                    <option value ="POSTROUTING">POSTROUTING</option>
+                {% endif %}
+             </select>
            <br>
-            <label for = "Action">Action</label>
-           <br/>
-           <input type = "text" id = "action" name = "action" value = '{{rule["Action"]}}'>
+          <select value = "ACTION" id = "ACTION" name = "ACTION" >
+                {% if rule['Action'] == "DROP"  %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP" selected>DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% elif rule['Action'] == "ACCEPT" %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT" selected>ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% elif rule['Action'] == "REJECT" %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT" selected>REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% elif rule['Action'] == "DNAT" %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT" selected>DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% elif rule['Action'] == "SNAT" %}
+                    <option value="NULL">ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT" selected>SNAT</option>
+                {% else %}
+                    <option value="NULL" selected>ACTION</option>
+                    <option value ="DROP">DROP</option>
+                    <option value ="ACCEPT">ACCEPT</option>
+                    <option value ="REJECT">REJECT</option>
+                    <option value ="DNAT">DNAT</option>
+                    <option value ="SNAT">SNAT</option>
+                {% endif %}
+            </select>
            <br>
         </form>
     {% else %}
