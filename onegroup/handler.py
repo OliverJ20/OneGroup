@@ -572,55 +572,58 @@ def ipDictToString(ip_dict):
         
         Returns : String of dictionary values
     """
-    
-    ipRules = ip_dict['Chain']
-    
-    table = ip_dict['Table']
-    if not table=="":
-        ipRules = ipRules + " -t " + table
+    if len(ip_dict) == 2:
+        ipRules = " -A " + ip_dict['CHAIN']
+         ipRules = ipRules + " -j " + ip_dict['ACTION']
+    else:
+        ipRules = ip_dict['Chain']
         
-    #chain = ip_dict['CHAIN']
-    #if not chain=="":
-    #    ipRules = ipRules + " -A " + chain
+        table = ip_dict['Table']
+        if not table=="":
+            ipRules = ipRules + " -t " + table
+            
+        #chain = ip_dict['CHAIN']
+        #if not chain=="":
+        #    ipRules = ipRules + " -A " + chain
 
-    inputFace = ip_dict['Input']
-    if not inputFace=="":
-        ipRules = ipRules + " -i " + inputFace
+        inputFace = ip_dict['Input']
+        if not inputFace=="":
+            ipRules = ipRules + " -i " + inputFace
 
-    outputFace = ip_dict['Output']
-    if not outputFace=="":
-        ipRules = ipRules + " -o " + outputFace
-        
-    packType = ip_dict['Protocol']
-    if not packType=="":
-        ipRules = ipRules + " -p " + packType
-    elif packType=="" and not port=="":
-        ipRules = ipRules + " -p tcp"
-        
-    source = ip_dict['Source']
-    if not source=="":
-         ipRules = ipRules + " -s " + source
+        outputFace = ip_dict['Output']
+        if not outputFace=="":
+            ipRules = ipRules + " -o " + outputFace
+            
+        packType = ip_dict['Protocol']
+        if not packType=="":
+            ipRules = ipRules + " -p " + packType
+        elif packType=="" and not port=="":
+            ipRules = ipRules + " -p tcp"
+            
+        source = ip_dict['Source']
+        if not source=="":
+             ipRules = ipRules + " -s " + source
 
-    sourceport = ip_dict['Source_Port']
-    if not sourceport=="":
-         ipRules = ipRules + " -sport " + sourceport
-         
-    destination = ip_dict['Destination']
-    if not destination=="":
-        ipRules = ipRules + " -d " + desination
-        
-    port = ip_dict['Destination_Port']
-    if not port=="":
-        ipRules = ipRules + " -dport " + port
+        sourceport = ip_dict['Source_Port']
+        if not sourceport=="":
+             ipRules = ipRules + " -sport " + sourceport
+             
+        destination = ip_dict['Destination']
+        if not destination=="":
+            ipRules = ipRules + " -d " + desination
+            
+        port = ip_dict['Destination_Port']
+        if not port=="":
+            ipRules = ipRules + " -dport " + port
 
-    state = ip_dict['State']
-    if not state =="":
-        ipRules = ipRules + " -m " + state
-          
-    action = ip_dict['Action']
-    if not action=="":
-        ipRules = ipRules + " -j " + action
-        
+        state = ip_dict['State']
+        if not state =="":
+            ipRules = ipRules + " -m " + state
+              
+        action = ip_dict['Action']
+        if not action=="":
+            ipRules = ipRules + " -j " + action
+            
     return ipRules
 
 
