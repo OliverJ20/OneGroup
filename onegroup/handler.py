@@ -483,5 +483,18 @@ def getAdminEmails():
     return [x["Email"] for x in emails]
 
 
+def updateUser(username, email, authtype, accounttype):
+    """
+        Updates the information of a specified user from the users table
 
-    
+        param: username :
+        param: email :
+        param: authtype :
+        param: accounttype :
+    """
+    db = Database(filename=filen)
+    user = getUser("Name", username)['ID']
+    db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype}, ("ID", user))
+    db.close()
+
+    return True

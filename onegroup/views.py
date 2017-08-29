@@ -165,12 +165,7 @@ def home():
             Displays confirmation message if creation is successful
             Flashes notification if user exists
     """
-    if request.method == 'POST':
-        #Error checking on user creation
-        if userforms():
-            return redirect(url_for('confirm', confirmed = 'Added Client'))
-        else:
-            flash("User already exists")
+    
 
     return render_template('index.html')
 
@@ -493,7 +488,7 @@ def logType(log):
         log : the log to fetch
  
         GET: If log is a valid log name, return json formatted log. 
-             Else aboirt 404
+             Else abort 404
     """
     filename = log_dir
     if log == "general":
@@ -505,6 +500,46 @@ def logType(log):
 
     return jsonify({"logData" : hl.getLog(filename)})
 
+app.route('/form/<form>', methods=['GET', 'POST'])
+@admin_required
+def fillform(form):
+    """
+        Displays the form for editing or creating single users
+
+        form : "add" for when admin user is creating a new user or ID,
+
+                where ID is the users ID to edit the user's information
+        
+        GET : If form is valid value display the correct form
+                Else abort 404
+
+        POST : Attempt to add data from form into database, if successful,
+                redirect to confirm endpoint or abort 404
+    """
+    if request.method == 'POST':
+        if form == "add":
+            #Error checking on user creation
+            if createNewUser():
+                return redirect(url_for('confirm', confirmed = 'New Client Addition Confirmed!'))
+            else:
+                flash("User already exists")
+        else:
+            if hl.updateUser(request.form['name2'], request.form['email2'], request.form['authType2'], request.form['accountType2']):
+                return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
+            else:
+                flash("Cannot Update User Information")
+    elif request.method =='GET':
+        if form == "add":
+            return render_template("userforms.html", form=1)
+        else:
+            if getUser("ID", form) != None:
+                #display edit userform from ID
+                user = hl.getUser("ID", form)
+                return render_template("userforms.html", form=0, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
+            else:
+                abort(404)
+    else:
+        abort(404)
 
 def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = None, attachmentFilePath = None):
     """
@@ -544,7 +579,7 @@ def page_not_found(e):
 
 
 #Function to create user and generate keys into a ZIP folder
-def userforms():
+def createNewUser():
     """
         Handles input of the new user form. 
 
