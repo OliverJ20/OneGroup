@@ -21,6 +21,9 @@ filen = database
 if os.path.isdir(working_dir):
     filen = working_dir+"/"+database
 
+#
+# Config
+#
 def init_database():
     """Initialises the test database if not created already"""
     #Connect to the database
@@ -77,10 +80,58 @@ def loadConfig():
 
     except Exception as e:
         logging.error("Error reading config at line %s",e)
+
+def loadIptables():
+    """Retrieves the iptables rules from the database (if any) and applys those rules"""
+    rules = getIptablesRules()
+
+    #If there are no/not enough rules, use the defaults
+    if rules == None or len(rules) != len(iptables):
+        rules = iptables
+        
+        #Add the defaults to the database
+        db = Database(filename = filen)
+        db.runSQL('DELETE FROM firewall')
+        for rule in rules:
+            db.insert("firewall",rule)
+
+        db.close()
+          
+    #Extract rules and add the correct prefix
+    ruleStrings = []
+    for rule in rules:
+        if rule["Policy"]:
+            ruleStrings.append("'-P "+rule["Rule"]+"'")
+        else: 
+            ruleStrings.append("'-A "+rule["Rule"]+"'")
+
+    #Apply rules
+    callScript('tabler',ruleStrings)
+    
         
 #
 # User Methods
 #
+def deleteUser(name):
+    """
+        Deletes a user and their keys from the database
+
+        name  : User's name/username
+    """
+    db = Database(filename = filen)
+
+    user = getUser("Name",name)
+    
+    #delete the users key/cert pair
+    args = [
+        "del",
+        user["Keys"],
+    ]
+    callScript('userman',args)
+    
+    db.delete("users", user)
+    db.close()
+    return True
 
 def createUser(name, passwd, email):
     """
@@ -105,7 +156,7 @@ def createUser(name, passwd, email):
     
     #create the users key/cert pair
     args = [
-        "add"
+        "add",
         user["Keys"],
     ]
     callScript('userman',args)
@@ -127,7 +178,7 @@ def zipUserKeys(user):
     """
     #create the users key/cert pair
     args = [
-        "dist"
+        "dist",
         user,
     ]
     callScript('userman',args)
@@ -434,10 +485,10 @@ def callScript(script, params = []):
         call += " {}".format(arg)
    
     #shlex doesn't work with more than 1 arguments
-    if len(params) == 1:
-        subprocess.call(call,shell=True)
-    else:
-        subprocess.call(shlex.split(call),shell=True)
+    #if len(params) == 1:
+    subprocess.call(call,shell=True)
+    #else:
+    #    subprocess.call(shlex.split(call),shell=True)
 
 
 def validateKeysDownloaded(username):
@@ -498,3 +549,160 @@ def updateUser(username, email, authtype, accounttype):
     db.close()
 
     return True
+
+
+#
+# Iptables commands
+#
+def getIptablesRules():
+    """
+        Gets all the iptables rules from the database
+
+        toDict : Flag to convert all the rules to dictonaries
+
+        Returns: List of all iptables in the following dictonary format:
+            ID : Row ID
+            Rule : The rule in text form
+            Policy : 1 if a policy rule, else 0
+    """
+    db = Database(filename=filen)
+    rules = db.retrieve('firewall')
+    db.close()
+    return rules
+
+def getRule(ruleid):
+    """
+        Gets the specified iptables rule from the database
+
+        Returns: the given rule
+    """
+    db = Database(filename=filen)
+    rule = db.retrieve('firewall',{"ID" : ruleid})
+    rule["Rule"] = ipStringToDict(rule["Rule"])
+    db.close()
+    return rule
+
+
+def ipDictToString(ip_dict):
+    """
+        Pass dictionary obtioned in webform to string
+        
+        Returns : String of dictionary values
+    """
+    if len(ip_dict) == 2:
+        ipRules = " -A " + ip_dict['CHAIN']
+         ipRules = ipRules + " -j " + ip_dict['ACTION']
+    else:
+        ipRules = ip_dict['Chain']
+        
+        table = ip_dict['Table']
+        if not table=="":
+            ipRules = ipRules + " -t " + table
+            
+        #chain = ip_dict['CHAIN']
+        #if not chain=="":
+        #    ipRules = ipRules + " -A " + chain
+
+        inputFace = ip_dict['Input']
+        if not inputFace=="":
+            ipRules = ipRules + " -i " + inputFace
+
+        outputFace = ip_dict['Output']
+        if not outputFace=="":
+            ipRules = ipRules + " -o " + outputFace
+            
+        packType = ip_dict['Protocol']
+        if not packType=="":
+            ipRules = ipRules + " -p " + packType
+        elif packType=="" and not port=="":
+            ipRules = ipRules + " -p tcp"
+            
+        source = ip_dict['Source']
+        if not source=="":
+             ipRules = ipRules + " -s " + source
+
+        sourceport = ip_dict['Source_Port']
+        if not sourceport=="":
+             ipRules = ipRules + " -sport " + sourceport
+             
+        destination = ip_dict['Destination']
+        if not destination=="":
+            ipRules = ipRules + " -d " + desination
+            
+        port = ip_dict['Destination_Port']
+        if not port=="":
+            ipRules = ipRules + " -dport " + port
+
+        state = ip_dict['State']
+        if not state =="":
+            ipRules = ipRules + " -m " + state
+              
+        action = ip_dict['Action']
+        if not action=="":
+            ipRules = ipRules + " -j " + action
+            
+    return ipRules
+
+
+def ipStringToDict(ipString):
+    """
+        Pass String obtioned in webform to string
+        
+        Returns : Dictionary of values
+    """
+    print(ipString)
+    ipSplit = ipString.split()
+    
+    #If ipSplit is only 2 words, it's a policy rule
+    if len(ipSplit) == 2:
+        ipDict = {"Chain" : ipSplit[0], "Action" : ipSplit[1]}
+    #Else it's a full rule
+    else:
+        tableData =''
+        chainData = ipSplit[0]
+        ifaceData =''
+        oufaceData =''
+        protData =''
+        source =''
+        sourceport=''
+        destination =''
+        port =''
+        stateData =''
+        actionData =''
+        for index in range(0, len(ipSplit)):
+            if ipSplit[index] == '-t':
+                tableData= ipSplit[index+1]
+            #elif ipSplit[index] == '-A':
+            #    chainData= ipSplit[index+1]
+            elif ipSplit[index] == '-i':
+                ifaceData= ipSplit[index+1]
+            elif ipSplit[index] == '-o':
+                oufaceData= ipSplit[index+1]
+            elif ipSplit[index] == '-p':
+                protData= ipSplit[index+1]
+            elif ipSplit[index] == '-s':
+                source= ipSplit[index+1]
+            elif ipSplit[index] == '--sport':
+                sourceport= ipSplit[index+1]
+            elif ipSplit[index] == '-d':
+                destination= ipSplit[index+1]
+            elif ipSplit[index] == '--dport':
+                port= ipSplit[index+1]
+            elif ipSplit[index] == '-m':
+                stateData= ipSplit[index+1]
+            elif ipSplit[index] == '-j':
+                actionData= ipSplit[index+1]
+
+        ipDict = {'Table': tableData, 'Chain': chainData, 'Input': ifaceData, 'Output': oufaceData, 'Protocol': protData,
+                       'Source': source, 'Source_Port': sourceport, 'Destination': destination,'Destination_Port': port, 'State':stateData, 'Action': actionData}
+    
+    return ipDict
+
+
+def updateIPRules(ID, value):
+    db = Database(filename=filen)
+    db.update("firewall", {"Rule": value}, ("ID", ID))
+    db.close()
+
+    #Apply new rules
+    loadIptables()

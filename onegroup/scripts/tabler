@@ -3,47 +3,38 @@
 #####
 # tabler: The onegroup openvpn iptables management tool
 #
-# Params
-# $1 : action to perform (Append, Insert, Replace, Delete, Policy) 
-# $2 : iptable rule as string
 #
 # Usage:
-#   tabler <action> <rule>
+#   tabler <rules>
 #
 #####
 
 usage () {
-    echo "Usage: tabler <append|insert|replace|delete|policy> <rule>";
+    echo "Usage: tabler <rules>";
     exit 1;  
 }
 
 ###### MAIN ######
 
 #Check the amount of arguments passed
-if [ $# -ne 2 ]; then
+if [ $# -lt 1 ]; then
     usage;    
 fi
 
-case $1 in
-    "append")
-        iptables -A $2;
-        ;;
-    "insert")
-        iptables -I $2;
-        ;;
-    "replace")
-        iptables -R $2;
-        ;;
-    "delete")
-        iptables -D $2;
-        ;;
-    "policy")
-        iptables -P $2;
-        ;;
-    *)
-        usage;
-        ;;
-esac
+#Clear all rules
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+
+iptables -t nat -F
+iptables -t mangle -F
+iptables -F
+iptables -X
+
+#Loop over rules
+for rule in "$@"; do
+    iptables $rule
+done
 
 #Exit gracefully
 exit 0;
