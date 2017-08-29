@@ -18,9 +18,9 @@
             <!--</table>-->
             <div id="statusTable" align="center" style="margin-top: 10px; overflow-y: scroll;">
             </div>
-            <button onclick = "displayForm()"> ADD CLIENT</button>
+            <a href="/form/add"><button> Add Client</button></a>
             <div id= "bodydiv">
-                <div class= "bodydiv" id= "formDivleft">
+                <!-- <div class= "bodydiv" id= "formDivleft">
                     <h2>Enter User Details</h2>
                     <form action="{{ url_for('home') }}" vname="userForm" id="detailsLeft" method=post>
                         <p>Name</p>
@@ -49,7 +49,7 @@
                           <input type="submit" onclick="submitForm()" name="userforms" value="Send"></input>
                         </div>
                     </form>
-                </div>
+                </div> -->
                 <h2>VPN Status</h2>
                 <p>Server IP:</p> <input type="text" value="192.168.0.1">
                 <button onclick="myFunction()">Confirm</button>
