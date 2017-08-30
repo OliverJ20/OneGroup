@@ -53,9 +53,20 @@ create () {
 delete () {
     #Deletes a client's keys and certificates  
     #Params: $1 The clients directory
+    
+    #Source variables
+    cd $OG_openvpn_ersa;
+    source ./vars;
 
-    #Remove directory
+    #Move client's cert to a reachable directory
+    mv $OG_openvpn_keys/$1.crt $OG_openvpn_keys
+
+    #Revoke cert
+    ./revoke-full $1
+
+    #Remove keys and certs
     rm $OG_openvpn_keys/$1 -rf;
+    rm $OG_openvpn_keys/$1.crt -rf;
 }
 
 
