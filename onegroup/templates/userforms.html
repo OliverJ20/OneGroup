@@ -8,7 +8,7 @@
             <div class= "bodydiv" id= "formDiveft">
                 <h2>Enter User Details</h2>
                 <form form action="/userforms.html" id="detailsLeft" method="POST">
-                {% if form == 1 %}
+                {% if formType == 1 %}
                     <form action="{{ url_for('home') }}" vname="userForm" id="detailsLeft" method=post>
                         <p>Name</p>
                         <input type="text" name="name1" placeholder="Enter Name" maxlength="40" > </input>
@@ -36,7 +36,7 @@
                           <input type="submit" name="userforms" value="Send"></input>
                         </div>
                     </form>
-		{% else if form == 0 %}
+		{% elif formType == 0 %}
                     <!--Edit User Details Form!-->
 		    <p>Name</p>
                     <input type="text" name="name2" maxlength="40" required value="{{ username }}"> </input>
