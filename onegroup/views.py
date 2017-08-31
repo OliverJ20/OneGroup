@@ -46,38 +46,6 @@ mail = Mail(app)
 #     mail.send(msg)
 # )
 
-
-@app.route('/iptablesdata/', methods= ["POST"])
-def ipTablesRuleData():
-    """Handles the input for new iptables rules"""
-    if request.method == 'POST':
-
-        source = request.form["source"]
-        port = request.form["port"]
-        destination = request.form["destination"]
-        tableData = request.form["tableData"]
-        chainData = request.form["chainData"]
-        ifaceData = request.form["ifaceData"]
-        protData = request.form["protData"]
-        stateData = request.form["stateData"]
-        actionData = request.form["actionData"]
-
-# content = request.get_json()
-    #
-    # if content == None:
-    #     content = {"source": request.values("source"), "port": request.values("port"), "destination":request.values("destination"), "tableData": request.values("tableData"),
-    #                "chainData": request.values("chainData"), "ifaceData": request.values("ifaceData"), "protData":request.values("protData"), "stateData": request.values("stateData"), "actionData":request.values("actionData")};
-    #
-    # source = content["source"]
-    # port = content["port"]
-    # destination = content["destination"]
-    # tableData = content["tableData"]
-    # chainData = content["chainData"]
-    # ifaceData = content["ifaceData"]
-    # protData = content["protData"]
-    # stateData = content["stateData"]
-    # actionData = content["actionData"]
-
 def login_required(f):
     """
         Wraper for endpoints to perform an authentication check
@@ -315,18 +283,54 @@ def show_user_keys(username):
     return render_template('user_keys.html', username=username, distributed = downloaded, hash = hash)
     ##method to pull keys from database using username
 
-@app.route('/config/', methods=['GET', 'POST'])
+
+@app.route('/iptables/<ruleid>', methods=['GET','POST'])
+@admin_required
+def edit_iptable(ruleid):
+    """
+        Form to edit an iptables rule
+
+        rule : the id of the rule to edit
+
+        GET: Display the iptables editor form html
+        POST: Handles form data for a new iptables rule
+    """
+    rule = hl.getRule(ruleid)
+    if request.method == 'POST':
+        if rule["Policy"] == 1:
+            ip_dict = {
+                "Chain" : request.form["Chain"],
+                "Action" : requests.form["Action"]
+            }
+        else:
+            ip_dict = {
+                "Source" : request.form["source"],
+                "Source_Port" : request.form["sport"],
+                "Destination" : request.form["destination"],
+                "Destination_Port" : request.form["dport"],
+                "Table" : request.form["Table"],
+                "Chain" : request.form["Chain"],
+                "Input" : request.form["input"],
+                "Output" : request.form["output"],
+                "Protocol" : request.form["Protocol"],
+                "State" : request.form["State"],
+                "Action" : requests.form["Action"]
+            }
+            ip_string = hl.ipDictToString(ip_dict)
+            hl.updateIPRules(ruleid, ip_string)
+            return redirect('/config')
+
+    return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
+
+@app.route('/config/', methods=['GET'])
 @admin_required
 def show_config():
     """
         VPN Server configuration page 
  
         GET: Displays the configuration page html
-        POST: Handles form data for a new iptables rule 
     """
-    if request.method == 'POST':
-        passScript()
-    return render_template('config.html')
+    return render_template('config.html', firewall = hl.getIptablesRules())
 
 
 @app.route('/login/', methods=['GET', 'POST'])
