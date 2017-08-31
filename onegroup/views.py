@@ -739,7 +739,7 @@ def createNewUser(name, account, auth, email, pwd, group, expiry):
     
     #Check if the user creation was succesful
     if hl.createUser(name, account, auth, email = email, passwd = pwd, group = group, expiry = expiry):
-        user = hl.getUser("Email", recipientEmail[0])
+        user = hl.getUser("Email", email)
         hl.zipUserKeys(user['Keys'])
 
         if(auth == "Email"):
@@ -754,7 +754,7 @@ def createNewUser(name, account, auth, email, pwd, group, expiry):
         elif(auth == "Passphrase"):
             subjectTitle = "OneGroup account details"
             recipientEmail = [email]
-            bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
+            bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(pwd)
             emailMessage(subjectTitle, recipientEmail, bodyMessage)
         return True
     else:

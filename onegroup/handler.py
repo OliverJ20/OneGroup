@@ -32,16 +32,15 @@ def init_database():
 
     if db.retrieve("users") == None:
         #Insert test users
-        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "2018-01-14:1200"})
+        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
+        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
         db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Newadmin", "Email" : "newadmin@test.com", "Password" : sha256_crypt.hash("new"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "2017-09-14:1700"})
         
         #Test group users
-        db.insert("users", {"Name" : "Group01_1", "Email" : "one@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_1", "Key_Distributed" : 0, "Grp" : 1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Group01_2", "Email" : "two@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_2", "Key_Distributed" : 0, "Grp" : 1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Group01_3", "Email" : "three@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_3", "Key_Distributed" : 0, "Grp" : 1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1, "Expiry": "2018-01-14:1200"})
+        db.insert("users", {"Name" : "Group01_1", "Email" : "one@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_1", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
+        db.insert("users", {"Name" : "Group01_2", "Email" : "two@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_2", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
+        db.insert("users", {"Name" : "Group01_3", "Email" : "three@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_3", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
+        db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
 
     if db.retrieve("groups") == None:
         db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
@@ -658,7 +657,7 @@ def getUserClientConfig(user):
 
         Returns : String tuple (Internal,External) or None if the user has no config
     """
-    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user)
+    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user)
     with open(ccf,'r') as f:
         config = f.readline().split()
     
@@ -676,7 +675,7 @@ def updateUserClientConfig(user, source, destination):
         source : The internal network address for the user
         destination : The external network address for the user
     """
-    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user)
+    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user)
     with open(ccf,'w') as f:
         f.write("ifconfig-push {} {}".format(source,destination))
     
@@ -693,7 +692,7 @@ def deleteUserFromGroup(userID):
     
     #Remove the user's client config filei
     args = [
-        os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user["Keys"]),
+        os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user["Keys"]),
     ]
     callScript('rm',args)
 
@@ -720,10 +719,10 @@ def addRouteToConfig(network):
                 config.insert(endLine,"{} {}".format("route",formattedNetwork))
             #Else add section
             else:
-                config.append("")
-                config.append(commentStart)
-                config.append("{} {}".format("route",formattedNetwork))
-                config.append(commentEnd)
+                config.append("\n")
+                config.append(commentStart+"\n")
+                config.append("{} {}\n".format("route",formattedNetwork))
+                config.append(commentEnd+"\n")
 
             #Rewrite config file
             f.seek(0)
