@@ -45,25 +45,22 @@ mail = Mail(app)
 #     msg.body = "some text here" <--- the body of the email here
 #     mail.send(msg)
 # )
-#
-#
-# @app.route('/iptablesdata/', methods= ["POST"])
-# def ipTablesRuleData():
-#     """Handles the input for new iptables rules"""
-#     if request.method == 'POST':
-#         name = session['name']
-#         source = request.form["source"]
-#         port = request.form["port"]
-#         destination = request.form["destination"]
-#         tableData = request.form["tableData"]
-#         chainData = request.form["chainData"]
-#         ifaceData = request.form["ifaceData"]
-#         protData = request.form["protData"]
-#         stateData = request.form["stateData"]
-#         actionData = request.form["actionData"]
-#
-#         ip_string = hl.ipDictToString(hl.ipStringToDict(source, port,destination,tableData,chainData,ifaceData,protData,stateData,actionData))
-#         hl.updateIPRules(name,ip_string)
+
+
+@app.route('/iptablesdata/', methods= ["POST"])
+def ipTablesRuleData():
+    """Handles the input for new iptables rules"""
+    if request.method == 'POST':
+
+        source = request.form["source"]
+        port = request.form["port"]
+        destination = request.form["destination"]
+        tableData = request.form["tableData"]
+        chainData = request.form["chainData"]
+        ifaceData = request.form["ifaceData"]
+        protData = request.form["protData"]
+        stateData = request.form["stateData"]
+        actionData = request.form["actionData"]
 
 # content = request.get_json()
     #
@@ -84,7 +81,7 @@ mail = Mail(app)
 def login_required(f):
     """
         Wraper for endpoints to perform an authentication check
-
+        
         f : endpoint function to be wrapped
 
         returns f if logged in, else aborts with a 401 error
@@ -92,7 +89,8 @@ def login_required(f):
     @wraps(f)
     def login_decorator(*args, **kwargs):
         if not session.get('logged_in'):
-            return redirect(url_for('login'))
+            abort(401)
+            ##return redirect(url_for('login'))
         else:
             return f(*args, **kwargs)
     return login_decorator
@@ -101,7 +99,7 @@ def login_required(f):
 def admin_required(f):
     """
         Wraper for endpoints to perform an authentication check specifically for admin only pages
-
+        
         f : endpoint function to be wrapped
 
         returns f if logged in, else aborts with a 401 error
@@ -111,13 +109,13 @@ def admin_required(f):
         if session.get('logged_in') and session.get('type') == 'Admin':
             return f(*args, **kwargs)
         else:
-            return redirect(url_for('login'))
+            abort(401)
     return admin_decorator
 
 #make a new form to take packet type, source, destination and port as parameters
 #parameters given could be 3 of something or 17.
 #def ipTableForm():
-
+   
  #   packetType = Type:
   #  packetSource = Source:
    # packetDestination = Destination:
@@ -126,7 +124,7 @@ def admin_required(f):
 def client_required(f):
     """
         Wraper for endpoints to perform an authentication check specifically for client only pages
-
+        
         f : endpoint function to be wrapped
 
         returns f if logged in, else aborts with a 401 error
@@ -136,14 +134,14 @@ def client_required(f):
         if session.get('logged_in') and session.get('type') == 'Client':
             return f(*args, **kwargs)
         else:
-            return redirect(url_for('login'))
+            abort(401)
     return client_decorator
 
 
 def redirect_to_user(username):
     """
         Redirects the to a particular client's page
-
+        
         username : username of the client
 
         returns redirect to specified client's page
@@ -156,23 +154,19 @@ def render():
     """Endpoint placeholder to redirect to the login page"""
     return redirect(url_for('login'))
 
+
 @app.route('/index/', methods=['GET', 'POST'])
 @admin_required
 def home():
     """
         Main admin dashboard
-
-        GET: Surves the dashboard html
+        
+        GET: Surves the dashboard html  
         POST: Attempts to create a new client
             Displays confirmation message if creation is successful
             Flashes notification if user exists
     """
-    if request.method == 'POST':
-        #Error checking on user creation
-        if userforms():
-            return redirect(url_for('confirm', confirmed = 'Added Client'))
-        else:
-            flash("User already exists")
+    
 
     return render_template('index.html')
 
@@ -182,8 +176,8 @@ def home():
 def password():
     """
         Password reset page
-
-        GET: Surves password reset html
+        
+        GET: Surves password reset html  
         POST: Changes the user's password, displays confirmation message
     """
     if request.method == 'POST':
@@ -191,22 +185,22 @@ def password():
         return redirect(url_for('confirm', confirmed = 'Changed Password'))
     return render_template('password.html')
 
+
 @app.route('/users/', methods=['GET'])
 @admin_required
 def retrieve_user_page():
     """
         User management page for admins
-
-        GET: Surves the user management html with new admin notifications
+        
+        GET: Surves the user management html with new admin notifications 
     """
-    ##redirect(url_for('users'))
-    ##requests = hl.retrieveRequests("notifications")
-    return render_template('users.html', testdata = [
-        {"User": "MyName", "Request": 10},
-        {"User": "YourName", "Request": 5},
-        {"User": "TheirName", "Request": 7}
-    ], testdata2 = hl.retrieveRequests("users"))
-    ##return render_template('users.html', testdata = hl.retrieveRequests("notifications"))
+    users = hl.getUsers()
+    requests = hl.retrieveRequests() # [
+    #    {"User": "MyName", "Request": 10},
+    #    {"User": "YourName", "Request": 5},
+    #    {"User": "TheirName", "Request": 7}
+    #]
+    return render_template('users.html', testdata = requests, testdata2 = users) 
 
 
 @app.route('/approve_req/', methods=['POST'])
@@ -214,7 +208,7 @@ def retrieve_user_page():
 def approve_req():
     """
         Endpoint to handle the approval/denial of requests made to an admin
-
+        
         POST: If approve, perform the request. Else delete the request
     """
     reqName = request.form['user']
@@ -233,18 +227,19 @@ def approve_req():
             #hl.declineRequest(reqName)#, reqReq)
             return redirect('/users')
 
+
 @app.route('/delete_key/', methods=['POST'])
 @admin_required
 def delete_key():
     """
         Endpoint to handle the deletion of a user
-
+        
         POST: Redirect to the user management page
     """
-    name = request.form['name']
+    ID = request.form['name']
     if request.method == 'POST':
-        hl.deleteUser(name)
-    return redirect('/users')
+        hl.deleteUser(ID)
+        return redirect('/users')
 
 
 @app.route('/logs/')
@@ -252,8 +247,8 @@ def delete_key():
 def show_logs():
     """
         VPN log display page
-
-        GET: Surves the log display html
+        
+        GET: Surves the log display html 
     """
     return render_template('logs.html')
 
@@ -262,10 +257,10 @@ def show_logs():
 @client_required
 def userkey(hash):
     """
-        Surves the user's keys as a downloadable zip file
+        Surves the user's keys as a downloadable zip file 
 
         hash : unique name for the downloaded zip file
-
+        
         GET: If the keys have already been download: flash error message and logout
              Else: Offer keys to be downloaded
     """
@@ -282,7 +277,7 @@ def userkey(hash):
 def create_request():
     """
         Endpoint to create a new admin notification
-
+ 
         GET: Creates a notification and emails the admins detailing the request
     """
     name = session['name']
@@ -291,13 +286,13 @@ def create_request():
     #Send email to all admin accounts
     msg = """
         Request from {}:
-
+        
         ID: {}
 
         Request: Key Reset
-
+        
         This message is automatically generated, please do not reply as this account is not monitored.
-
+        
         """.format(name, requestId)
     emailMessage("New Request", adminEmails, msg)
     return redirect(url_for('confirm'), confirmed='New Key Request Sent!')
@@ -308,7 +303,7 @@ def create_request():
 def show_user_keys(username):
     """
         Client's personal page
-
+ 
         GET: Displays the client page html. Displays download button and generates hash if keys haven't been downloaded for this user
     """
     downloaded = hl.checkDistributeFlag(username)
@@ -320,53 +315,19 @@ def show_user_keys(username):
     return render_template('user_keys.html', username=username, distributed = downloaded, hash = hash)
     ##method to pull keys from database using username
 
-@app.route('/config/', methods=['GET'])
+@app.route('/config/', methods=['GET', 'POST'])
 @admin_required
 def show_config():
     """
-        VPN Server configuration page
-
-        GET: Displays the configuration page html, with iptables firewall rules
+        VPN Server configuration page 
+ 
+        GET: Displays the configuration page html
+        POST: Handles form data for a new iptables rule 
     """
-    return render_template('config.html', firewall = hl.getIptablesRules())
-
-@app.route('/iptables/<ruleid>', methods=['GET', 'POST'])
-@admin_required
-def edit_iptable(ruleid):
-    """
-        Form to edit an iptables rule
-
-        rule : the id of the rule to edit
-
-        GET: Displays the iptable editor form html
-        POST: Handles form data for a new iptables rule
-    """
-    rule = hl.getRule(ruleid)
     if request.method == 'POST':
-        if rule["Policy"] == 1:
-            ip_dict = {
-                "Chain" : request.form["Chain"],
-                "Action" : request.form["Action"]
-            }
-        else:
-            ip_dict = {
-                "Source" : request.form["source"],
-                "Source_Port" : request.form["sport"],
-                "Destination" : request.form["destination"],
-                "Destination_Port" : request.form["dport"], 
-                "Table" : request.form["Table"],
-                "Chain" : request.form["Chain"],
-                "Input" : request.form["input"],
-                "Output" : request.form["output"],
-                "Protocol" : request.form["Protocol"],
-                "State" : request.form["State"],
-                "Action" : request.form["Action"]
-            }
-        ip_string = hl.ipDictToString(ip_dict)
-        hl.updateIPRules(ruleid, ip_string)
-        return redirect('/config')
-        
-    return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
+        passScript()
+    return render_template('config.html')
+
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
@@ -431,6 +392,7 @@ def confirm():
     confirmed = request.values['confirmed']
     
     return render_template('confirm.html', confirmed=confirmed)
+
 
 @app.route('/forgot/', methods=['GET','POST'])
 def forgotPassword():
@@ -530,7 +492,7 @@ def logType(log):
         log : the log to fetch
  
         GET: If log is a valid log name, return json formatted log. 
-             Else aboirt 404
+             Else abort 404
     """
     filename = log_dir
     if log == "general":
@@ -541,6 +503,46 @@ def logType(log):
         abort(404)
 
     return jsonify({"logData" : hl.getLog(filename)})
+
+
+@app.route('/form/<form>', methods=['GET', 'POST'])
+@admin_required
+def fillform(form):
+    """
+        Displays the form for editing or creating single users
+
+        form : "add" for when admin user is creating a new user or ID,
+
+                where ID is the users ID to edit the user's information
+        
+        GET : If form is valid value display the correct form
+                Else abort 404
+
+        POST : Attempt to add data from form into database, if successful,
+                redirect to confirm endpoint or abort 404
+    """
+    if request.method == 'POST':
+        if form == "add":
+            #Error checking on user creation
+            if createNewUser():
+                return redirect(url_for('confirm', confirmed = 'New Client Addition Confirmed!'))
+            else:
+                flash("User already exists")
+        else:
+            if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2'])):
+                return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
+            else:
+                flash("Cannot Update User Information")
+    
+    if form == "add":
+        return render_template("userforms.html", formType=1)
+    else:
+        if hl.getUser("ID", form) != None:
+                #display edit userform from ID
+            user = hl.getUser("ID", form)
+            return render_template("userforms.html", formType=0, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
+        else:
+            abort(404)
 
 
 def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = None, attachmentFilePath = None):
@@ -569,6 +571,7 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
 
 
 @app.errorhandler(404)
+@app.errorhandler(401)
 def page_not_found(e):
     """
         Error handler for 404 and 401 errors
@@ -580,7 +583,7 @@ def page_not_found(e):
 
 
 #Function to create user and generate keys into a ZIP folder
-def userforms():
+def createNewUser():
     """
         Handles input of the new user form. 
 
@@ -604,6 +607,50 @@ def userforms():
             return True
         else:
             return False
+
+
+def passScript():
+    """
+        Pass variables obtioned in webform to bashscript
+        
+        Returns : True if POST request, Else False
+    """
+    if request.method == 'POST':
+        ipRules = "iptables"
+        table = request.form['TABLE']
+        if not table=="":
+            ipRules = ipRules + " -t " + table
+            
+        chain = request.form['CHAIN']
+        if not chain=="":
+            ipRules = ipRules + " -A " + chain
+            
+        packType = request.form['PROT']
+        if not packType=="":
+            ipRules = ipRules + " -p " + packType
+        elif packType=="" and not port=="":
+            ipRules = ipRules + " -p tcp"
+            
+        source = request.form['source']
+        if not source=="":
+             ipRules = ipRules + " -s " + source
+             
+        destination = request.form['destination']
+        if not destination=="":
+            ipRules = ipRules + " -d " + desination
+            
+        port = request.form['port']
+        if not port=="":
+            ipRules = ipRules + " -dport " + port
+            
+        action = request.form['ACTION']
+        if not action=="":
+            ipRules = ipRules + " -j " + action
+            
+        callScript('ip_rules.sh',[ipRules])
+        return True
+    else:
+        return False
 
 
 def passwordform(name = None):
@@ -701,9 +748,6 @@ def setConfig(debug):
     app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
     app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
-
-    #Iptables
-    hl.loadIptables()
 
 #
 #Cherrypy server base

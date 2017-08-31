@@ -73,20 +73,25 @@
                     <th>Connection Type</th>
                     <th>Delete Keys?</th>
                 </tr>
-                {%for users in testdata2%}
-                  <tr>
-                    <td>{{users["Name"]}}</td>
-                    <td>{{users["Email"]}}</td>
-                    <td>{{users["Auth_Type"]}}</td>
-                    <td>{{users["Account_Type"]}}</td>
-                    <td>
-                        <form action="{{ url_for('delete_key') }}" method=post>
-                        <input type="text" name="name" value= {{users["Name"]}} id = "hiddenInput" readonly>
-                        <input type="submit" value="Delete" id = "declineButton"></input>
-                        </form>
-                    </td>
-                  </tr>
-                {% endfor %}
+                {% if testdata2 != None %}
+                    {%for users in testdata2%}
+                      <tr>
+                        <td>{{users["Name"]}}</td>
+                        <td>{{users["Email"]}}</td>
+                        <td>{{users["Auth_Type"]}}</td>
+                        <td>{{users["Account_Type"]}}</td>
+                        <td>
+                            <a href="/form/{{users["ID"]}}">
+                                <button>Edit</button>
+                            </a>
+                            <form action="{{ url_for('delete_key') }}" method=post>
+                            <input type="text" name="name" value= {{users["ID"]}} id = "hiddenInput" readonly>
+                            <input type="submit" value="Delete" id = "declineButton"></input>
+                            </form>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                {% endif %}
               </table>
 
             <h2>Current Requests</h2>
@@ -99,18 +104,20 @@
                       <th>Request</th>
                       <th>Approval?</th>
                   </tr>
-                  {%for notifications in testdata%}
-                    <tr><td>{{notifications["User"]}}</td>
-                      <td>{{notifications["Request"]}}</td>
-                      <td><form action="{{ url_for('approve_req') }}" vname="approveForm" method=post>
-                        <input type="text" name="user" value= {{notifications["User"]}} id = "hiddenInput" readonly>
-                        <input type="text" name="request" value= {{notifications["Request"]}}  id = "hiddenInput" readonly>
-                        <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
-                        <input type="submit" name="reqOption" value="Decline" id = "declineButton"></input>
-                      </form>
-                      </td>
-                    </tr>
-                  {% endfor %}
+                    {% if testdata != None %}                                      
+                      {%for notifications in testdata%}
+                        <tr><td>{{notifications["User"]}}</td>
+                          <td>{{notifications["Request"]}}</td>
+                          <td><form action="{{ url_for('approve_req') }}" vname="approveForm" method=post>
+                            <input type="text" name="user" value= {{notifications["User"]}} id = "hiddenInput" readonly>
+                            <input type="text" name="request" value= {{notifications["Request"]}}  id = "hiddenInput" readonly>
+                            <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
+                            <input type="submit" name="reqOption" value="Decline" id = "declineButton"></input>
+                          </form>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                {% endif %}
                 </table>
             </div>
         </div>
