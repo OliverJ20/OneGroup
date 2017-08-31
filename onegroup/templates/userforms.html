@@ -7,7 +7,7 @@
         <div class= "bodydiv">
             <div class= "bodydiv" id= "formDiveft">
                 <h2>Enter User Details</h2>
-                <form form action="/userforms.html" id="detailsLeft" method="POST">
+                <form form action="" id="detailsLeft" method="POST">
                 {% if formType == 1 %}
                     <form action="{{ url_for('home') }}" vname="userForm" id="detailsLeft" method=post>
                         <p>Name</p>
@@ -27,7 +27,7 @@
 
                         <p>Authentication Type</p>
                         <select name="authType1">
-                            <option value="Password">Username & Password</option>
+                            <option value="Passphrase">Username & Password</option>
                             <option value="Radius">Radius</option>
                             <option value="Phone">Phone</option>
                         </select>
@@ -46,15 +46,30 @@
 
                     <p>Authentication Type</p>
                     <select name="authType2">
-                        <option value="Password">Username & Password</option>
-                        <option value="Radius">Radius</option>
-                        <option value="Phone">Phone</option>
+                        {% if authtype == "Passphrase" %}
+                            <option value="Passphrase" selected>Username & Password</option>
+                            <option value="Radius">Radius</option>
+                            <option value="Phone">Phone</option>
+                        {% elif authtype == "Radius" %}
+                            <option value="Passphrase">Username & Password</option>
+                            <option value="Radius" selected>Radius</option>
+                            <option value="Phone">Phone</option>
+                        {% else %}
+                            <option value="Passphrase">Username & Password</option>
+                            <option value="Radius">Radius</option>
+                            <option value="Phone" selected>Phone</option>
+                        {% endif %}
                     </select>
 
                     <p>Account Type</p>
                     <select name="accountType2">
-                        <option value="Client">Client</option>
-                        <option value="Admin">Admin</option>
+                        {% if accounttype == "Client" %} 
+                            <option value="Client" selected>Client</option>
+                            <option value="Admin">Admin</option>
+                        {% else %}
+                            <option value="Client">Client</option>
+                            <option value="Admin" selected>Admin</option>
+                        {% endif %}
                     </select>
                     <input type="submit" name="userforms" value="Send">
                 {% endif %}
