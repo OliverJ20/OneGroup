@@ -112,15 +112,44 @@ def loadIptables():
 #
 # User Methods
 #
-def deleteUser(name):
+def getUsers():
     """
-        Deletes a user and their keys from the database
+        Fetchs all users from the database
 
-        name  : User's name/username
+        Returns : List of all admin requests
+    """
+    db = Database(filename = filen)
+    users = db.retrieve("users")
+    db.close()
+    return users
+
+def getUser(key, value):
+    """
+        Gets a user from the database based on a single key/value pair
+
+        key   : The field to indentify the user by
+        value : The value to indentify the user by
+
+        Returns : dict the user's database entry
+
     """
     db = Database(filename = filen)
 
-    user = getUser("Name",name)
+    user = db.retrieve("users", {key : value})
+    
+    db.close()
+    
+    return user
+
+def deleteUser(ID):
+    """
+        Deletes a user and their keys from the database
+
+        ID  : User's database ID
+    """
+    db = Database(filename = filen)
+
+    user = getUser("ID",ID)
     
     #delete the users key/cert pair
     args = [
@@ -209,26 +238,6 @@ def createUserFilename(name):
         userFilen = userFilen.replace(char,"")
     
     return userFilen
-    
-
-def getUser(key, value):
-    """
-        Gets a user from the database based on a single key/value pair
-
-        key   : The field to indentify the user by
-        value : The value to indentify the user by
-
-        Returns : dict the user's database entry
-
-    """
-    db = Database(filename = filen)
-
-    user = db.retrieve("users", {key : value})
-    
-    db.close()
-    
-    return user
-
 
 
 def confirmLogin(email, password):
@@ -380,16 +389,14 @@ def changePassword(name, userinput):
     db.close()
 
 
-def retrieveRequests(table):
+def retrieveRequests():
     """
         Fetchs all active admin requests from the database
-
-        table : Table to retrieve the requests from
 
         Returns : List of all admin requests
     """
     db = Database(filename = filen)
-    requests =  db.retrieve(table)
+    requests =  db.retrieve("notifications")
     db.close()
     return requests
 
@@ -534,18 +541,19 @@ def getAdminEmails():
     return [x["Email"] for x in emails]
 
 
-def updateUser(username, email, authtype, accounttype):
+def updateUser(ID, username, email, authtype, accounttype):
     """
         Updates the information of a specified user from the users table
 
+        param: ID : 
         param: username :
         param: email :
         param: authtype :
         param: accounttype :
     """
     db = Database(filename=filen)
-    user = getUser("Name", username)['ID']
-    db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype}, ("ID", user))
+    #user = getUser("Name", username)['ID']
+    db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype}, ("ID", ID))
     db.close()
 
     return True

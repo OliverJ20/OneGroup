@@ -194,14 +194,13 @@ def retrieve_user_page():
         
         GET: Surves the user management html with new admin notifications 
     """
-    ##redirect(url_for('users'))
-    ##requests = hl.retrieveRequests("notifications")
-    return render_template('users.html', testdata = [
-        {"User": "MyName", "Request": 10},
-        {"User": "YourName", "Request": 5},
-        {"User": "TheirName", "Request": 7}
-    ], testdata2 = hl.retrieveRequests("users"))
-    ##return render_template('users.html', testdata = hl.retrieveRequests("notifications"))
+    users = hl.getUsers()
+    requests = hl.retrieveRequests() # [
+    #    {"User": "MyName", "Request": 10},
+    #    {"User": "YourName", "Request": 5},
+    #    {"User": "TheirName", "Request": 7}
+    #]
+    return render_template('users.html', testdata = requests, testdata2 = users) 
 
 
 @app.route('/approve_req/', methods=['POST'])
@@ -237,10 +236,10 @@ def delete_key():
         
         POST: Redirect to the user management page
     """
-    name = request.form['name']
+    ID = request.form['name']
     if request.method == 'POST':
-           ## OJ CODE GO HERE ##
-            return redirect('/users')
+        hl.deleteUser(ID)
+        return redirect('/users')
 
 
 @app.route('/logs/')
@@ -530,7 +529,7 @@ def fillform(form):
             else:
                 flash("User already exists")
         else:
-            if hl.updateUser(request.form['name2'], request.form['email2'], request.form['authType2'], request.form['accountType2']):
+            if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2'])):
                 return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
             else:
                 flash("Cannot Update User Information")
