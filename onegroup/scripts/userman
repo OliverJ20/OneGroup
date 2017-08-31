@@ -59,7 +59,7 @@ delete () {
     source ./vars;
 
     #Move client's cert to a reachable directory
-    mv $OG_openvpn_keys/$1.crt $OG_openvpn_keys
+    mv $OG_openvpn_keys/$1/$1.crt $OG_openvpn_keys
 
     #Revoke cert
     ./revoke-full $1

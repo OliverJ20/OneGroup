@@ -81,6 +81,9 @@ def loadConfig():
     except Exception as e:
         logging.error("Error reading config at line %s",e)
 
+    loadIptables()
+
+
 def loadIptables():
     """Retrieves the iptables rules from the database (if any) and applys those rules"""
     rules = getIptablesRules()
