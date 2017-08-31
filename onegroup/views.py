@@ -46,6 +46,11 @@ mail = Mail(app)
 #     mail.send(msg)
 # )
 
+
+
+
+
+
 def login_required(f):
     """
         Wraper for endpoints to perform an authentication check
@@ -121,6 +126,15 @@ def redirect_to_user(username):
 def render():
     """Endpoint placeholder to redirect to the login page"""
     return redirect(url_for('login'))
+
+
+
+@app.route("/log_download/", methods = ['GET'])
+def log_download(startDate,endDate):
+    logDir = hl.logDownload(startDate,endDate)
+    return send_file(logDir)
+     
+    
 
 
 @app.route('/index/', methods=['GET', 'POST'])
