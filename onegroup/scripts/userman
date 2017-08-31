@@ -54,6 +54,9 @@ delete () {
     #Deletes a client's keys and certificates  
     #Params: $1 The clients directory
 
+    #Revoke access
+
+    
     #Remove directory
     rm $OG_openvpn_keys/$1 -rf;
 }

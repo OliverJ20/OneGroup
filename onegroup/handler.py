@@ -31,9 +31,9 @@ def init_database():
 
     if db.retrieve("users") == None:
         #Insert test users
-        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0})
-        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0})
-        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Password", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0})
+        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0})
+        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0})
+        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0})
 
     #Close database
     db.close()
@@ -552,7 +552,6 @@ def updateUser(ID, username, email, authtype, accounttype):
         param: accounttype :
     """
     db = Database(filename=filen)
-    #user = getUser("Name", username)['ID']
     db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype}, ("ID", ID))
     db.close()
 
@@ -658,7 +657,6 @@ def ipStringToDict(ipString):
         
         Returns : Dictionary of values
     """
-    print(ipString)
     ipSplit = ipString.split()
     
     #If ipSplit is only 2 words, it's a policy rule
