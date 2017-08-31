@@ -150,7 +150,7 @@ def deleteUser(ID):
     db = Database(filename = filen)
 
     user = getUser("ID",ID)
-    
+ 
     #delete the users key/cert pair
     args = [
         "del",
@@ -158,7 +158,7 @@ def deleteUser(ID):
     ]
     callScript('userman',args)
     
-    db.delete("users", user)
+    db.delete("users", {"ID" : ID})
     db.close()
     return True
 

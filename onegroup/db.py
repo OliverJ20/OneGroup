@@ -81,7 +81,7 @@ class Database:
         values = tuple([keypairs[k] for k in keys])
         query = ''
         for key in keys:
-            query += " {} = ? AND".format(key)
+            query += " {} = {} AND".format(key, keypairs[key])
 
         query = query[:-4]
         self._db.execute('delete from {} where {}'.format(table, query))
