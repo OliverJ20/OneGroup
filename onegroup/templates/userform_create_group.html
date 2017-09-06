@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block header %}
+{% endblock %}
+{% block body %}
+<div id= "formDiv">        
+    <div class="contentDiv">
+        <div class= "bodydiv">
+            <div class= "bodydiv" id= "formDiveft">
+                <h2>Enter Group Details</h2>
+                <form action="{{ url_for('home') }}" vname="groupCreateForm" id="detailsLeft" method=post>
+                    <p>Group Name</p>
+                    <input type="text" name="groupname1" placeholder="Enter Group Name" maxlength="40" > </input>
+
+                    <p>Group Internal Network Address</p>
+                    <input type="text" name="internal1" placeholder="Enter Group Internal Network Address" onkeyup="checkForm()" maxlength="40"> </input>
+
+                    <p>Group External Network Address</p>
+                    <input type="text" name="external1" placeholder="Enter Group External Network Address" maxlength="40"> </input> #}
+
+                    <br></br>
+                    <div class= "bodydiv" div id = "submitDiv">
+                        <input type="submit" name="groupform1" value="Send"></input>
+                    </div>
+                </form> 
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
