@@ -90,7 +90,7 @@ def loadIptables():
     rules = getIptablesRules()
 
     #If there are no/not enough rules, use the defaults
-    if rules == None or len(rules) != len(iptables):
+    if rules == None or len(rules) < len(iptables):
         rules = iptables
         
         #Add the defaults to the database
@@ -295,6 +295,85 @@ def confirmUser(email):
         return True
     else:
         return False
+
+
+#
+# Group methods
+#
+
+def getGroup(group):
+    """
+        Retrieves a group's information and all it's users
+
+        group : Group's database ID
+
+        Returns dict of the group containing users
+    """
+    db = Database(filename = filen)
+    group = db.retrieve("groups",{"ID" : group})
+    
+    #Get the users in the group
+    group["Users"] = db.retrieve("users",{"Grp" : group}) 
+     
+    db.close()
+    return group
+
+
+def getAllGroups():
+    """
+        Retrieves all the groups in the database
+
+        Returns list of groups represented as dictonaries
+    """
+    db = Database(filename = filen)
+    groups = db.retrieve("groups")
+    db.close()
+    return groups
+
+def addGroup():
+    """
+        Adds a database record of a group and creates the firewall rule for the group
+
+    """
+    #Create database entry
+
+    #Add route to the server config if not already added
+
+    #Setup IPTables rule
+
+    #If specified, create users for the group
+
+
+def addUserToGroup(user, group):
+    """
+        Adds a user to a group and sets up their client config for that group
+
+        user  : The user's ID of the user to be added to the group
+        group : Group ID of the group to add the user to
+    """
+
+
+
+def deleteGroup(group):
+    """
+        Deletes a group from the database and users if specified
+
+        group : The group ID of the group to delete
+    """
+
+def deleteUserFromGroup(user, group):
+    """
+        Removes a user to a group and resets their client config
+
+        user  : The user's ID of the user to be removed to the group
+        group : Group ID of the group to remove the user from
+        
+    """
+
+def modifyGroup():
+    """
+        Edits a group's database entry and the appropriate iptables and user settings
+    """
 
 
 def genUrl(user,purpose):
