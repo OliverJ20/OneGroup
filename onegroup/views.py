@@ -527,15 +527,15 @@ def logType(log):
     return jsonify({"logData" : hl.getLog(filename)})
 
 
-@app.route('/form/<form>', methods=['GET', 'POST'])
+@app.route('/userform/<form>', methods=['GET', 'POST'])
 @admin_required
-def fillform(form):
+def filluserform(form):
     """
         Displays the form for editing or creating single users
 
-        form : "add" for when admin user is creating a new user or ID,
+        form :  "CU" for Create User
 
-                where ID is the users ID to edit the user's information
+                ID: the user ID in database to identify the unique entry
         
         GET : If form is valid value display the correct form
                 Else abort 404
@@ -544,28 +544,70 @@ def fillform(form):
                 redirect to confirm endpoint or abort 404
     """
     if request.method == 'POST':
-        if form == "add":
-            #Error checking on user creation
+        if form == "CU":
             if createNewUser():
-                return redirect(url_for('confirm', confirmed = 'New Client Addition Confirmed!'))
+                return redirect(url_for('confirm', confirmed = 'New User Addition Confirmed!'))
             else:
                 flash("User already exists")
-        else:
+        
+        elif hl.getUser("ID", form) != None:
             if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2'])):
                 return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
             else:
                 flash("Cannot Update User Information")
-    
-    if form == "add":
-        return render_template("userforms.html", formType=1)
-    else:
-        if hl.getUser("ID", form) != None:
-                #display edit userform from ID
-            user = hl.getUser("ID", form)
-            return render_template("userforms.html", formType=0, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
-        else:
+        else: #Must be fake input
             abort(404)
 
+
+    if form == "CU":
+        return render_template("userform_create_user.html")
+    elif hl.getUser("ID", form) != None:
+            user = hl.getUser("ID", form)
+            return render_template("userform_edit_user.html", username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
+    else: #Must be fake input
+        abort(404)            
+
+
+@app.route('/groupform/<form>', methods=['GET', 'POST'])
+@admin_required
+def fillgroupform(form):
+    """
+        Displays the form for editing or creating groups of users
+
+        form :  "CG" for Create Group
+        
+                ID: the group ID in database to identify the unique entry
+        
+        GET : If form is valid value display the correct form
+                Else abort 404
+
+        POST : Attempt to add data from form into database, if successful,
+                redirect to confirm endpoint or abort 404
+    """
+    if request.method == 'POST':
+        if form == "CG"
+            #TODO implementation of createNewGroup() - add to database table, and send key files?
+            if createNewGroup():
+                return redirect(url_for('confirm', confirmed = 'New Group Addition Confirmed!'))
+            else:
+                flash("Group already exists")
+        elif hl.getGroup("ID", form) != None:
+            #TODO hl.updateGroup in db
+            if hl.updateGroup(form, str(request.form['groupname2']), str(request.form['internal2']), str(request.form['external2']))
+                return redirect(url_for('confirm', confirmed = 'Group Information Successfully Updated'))
+            else:
+                flash("Cannot Update Group Information")
+        else: #Must be fake input
+            abort(404)
+    
+    if form == "CG":
+        return render_template("userform_create_group.html")
+    elif hl.getGroup("ID", form) != None:
+        group = hl.getGroup("ID", form)
+        return render_template("userform_edit_group.html", groupname=group["Name"], internal=group["Internal"], external=group["External"])
+    else: #Must be fake input
+        abort(404)
+        
 
 def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = None, attachmentFilePath = None):
     """
@@ -629,6 +671,10 @@ def createNewUser():
             return True
         else:
             return False
+
+
+def createNewGroup():
+    #TODO add to database table, and send key files
 
 
 def passScript():

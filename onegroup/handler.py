@@ -7,6 +7,7 @@ import shlex
 import os
 import logging
 import fileinput
+import re
 
 #Database and constants
 try:
@@ -31,12 +32,13 @@ def init_database():
 
     if db.retrieve("users") == None:
         #Insert test users
-        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0})
-        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0})
-        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0})
+        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1})
+        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1})
+        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1})
 
     #Close database
     db.close()
+
 
 def loadConfig():
     """Reads a config file and sets environment variables"""
@@ -89,7 +91,7 @@ def loadIptables():
     rules = getIptablesRules()
 
     #If there are no/not enough rules, use the defaults
-    if rules == None or len(rules) != len(iptables):
+    if rules == None or len(rules) < len(iptables):
         rules = iptables
         
         #Add the defaults to the database
@@ -126,6 +128,7 @@ def getUsers():
     db.close()
     return users
 
+
 def getUser(key, value):
     """
         Gets a user from the database based on a single key/value pair
@@ -143,6 +146,7 @@ def getUser(key, value):
     db.close()
     
     return user
+
 
 def deleteUser(ID):
     """
@@ -165,13 +169,16 @@ def deleteUser(ID):
     db.close()
     return True
 
-def createUser(name, passwd, email):
+
+def createUser(name, passwd, email, group = -1):
+
     """
         Creates a user entry in the database and generates key/cert pair
 
         name  : User's name/username
         passwd: User's password 
         email : User's email
+        group : User's group (-1 meaning no group)
 
         returns: true if successful, else false
     """
@@ -179,7 +186,7 @@ def createUser(name, passwd, email):
     db = Database(filename = filen)
 
     #Create user dictonary for database
-    user = {"Name" : name, "Email" : email, "Password": sha256_crypt.hash(passwd), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : createUserFilename(name), "Key_Distributed" : 0}
+    user = {"Name" : name, "Email" : email, "Password": sha256_crypt.hash(passwd), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : Group}
 
     #Check if user exists (Check both username and email)
     if getUser("Name",user["Name"]) != None or getUser("Email",user["Email"]) != None:
@@ -215,6 +222,7 @@ def zipUserKeys(user):
     ]
     callScript('userman',args)
     #subprocess.call(shlex.split('user_dist.sh {}'.format(user)))
+
 
 def createUserFilename(name):
     """
@@ -295,6 +303,85 @@ def confirmUser(email):
         return False
 
 
+#
+# Group methods
+#
+
+def getGroup(group):
+    """
+        Retrieves a group's information and all it's users
+
+        group : Group's database ID
+
+        Returns dict of the group containing users
+    """
+    db = Database(filename = filen)
+    group = db.retrieve("groups",{"ID" : group})
+    
+    #Get the users in the group
+    group["Users"] = db.retrieve("users",{"Grp" : group}) 
+     
+    db.close()
+    return group
+
+
+def getAllGroups():
+    """
+        Retrieves all the groups in the database
+
+        Returns list of groups represented as dictonaries
+    """
+    db = Database(filename = filen)
+    groups = db.retrieve("groups")
+    db.close()
+    return groups
+
+def addGroup():
+    """
+        Adds a database record of a group and creates the firewall rule for the group
+
+    """
+    #Create database entry
+
+    #Add route to the server config if not already added
+
+    #Setup IPTables rule
+
+    #If specified, create users for the group
+
+
+def addUserToGroup(user, group):
+    """
+        Adds a user to a group and sets up their client config for that group
+
+        user  : The user's ID of the user to be added to the group
+        group : Group ID of the group to add the user to
+    """
+
+
+
+def deleteGroup(group):
+    """
+        Deletes a group from the database and users if specified
+
+        group : The group ID of the group to delete
+    """
+
+def deleteUserFromGroup(user, group):
+    """
+        Removes a user to a group and resets their client config
+
+        user  : The user's ID of the user to be removed to the group
+        group : Group ID of the group to remove the user from
+        
+    """
+
+def modifyGroup():
+    """
+        Edits a group's database entry and the appropriate iptables and user settings
+    """
+
+
 def genUrl(user,purpose):
     """
         Generates a unique URL for password reset and fecthing keys
@@ -322,6 +409,7 @@ def genUrl(user,purpose):
 
     return url
 
+
 def genCode(user):
     """
         Generates a unique code to be used with URLS
@@ -332,6 +420,7 @@ def genCode(user):
     """
     secret = "{}{}".format(user,datetime.now().strftime("%Y%m%d%H%M%S%f"))
     return hashlib.sha512(secret.encode('UTF-8')).hexdigest()
+
 
 def checkCode(code,purpose):
     """
@@ -500,7 +589,7 @@ def callScript(script, params = []):
     #else:
     #    subprocess.call(shlex.split(call),shell=True)
 
-
+#TODO replace checkdistributedflag with this
 def validateKeysDownloaded(username):
     """
         Return the value of Key_Distributed for a specific user in the user's table
@@ -525,7 +614,6 @@ def createRequest(username, requestType):
     db.close()
     requestedId = db.retrieve("notifications", { "User" : username, "Request" : requestType })['ID']
     return requestedId
-
     
     
 def getAdminEmails():
@@ -548,19 +636,29 @@ def updateUser(ID, username, email, authtype, accounttype):
     """
         Updates the information of a specified user from the users table
 
-        param: ID : 
-        param: username :
-        param: email :
-        param: authtype :
-        param: accounttype :
+        param: ID : ID field of user as specified in the database
+        param: username : of the user
+        param: email : of the user
+        param: authtype : of the user
+        param: accounttype : of the user
     """
     db = Database(filename=filen)
     db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype}, ("ID", ID))
     db.close()
-
+    ##TODO check when input does not work
     return True
 
 
+def createGroup(Variables):
+    #TODO
+    
+
+
+def updateGroup(Variables):
+    #TODO
+    
+
+    
 #
 # Iptables commands
 #
@@ -579,6 +677,7 @@ def getIptablesRules():
     rules = db.retrieve('firewall')
     db.close()
     return rules
+
 
 def getRule(ruleid):
     """
@@ -715,3 +814,64 @@ def updateIPRules(ID, value):
 
     #Apply new rules
     loadIptables()
+
+
+def logDownload(startDate,endDate):
+    """
+        Creates a new log file with entries between the start and end dates
+
+        startDate : String starting date for the log
+        endDate : String ending date for the log
+
+        Returns : The the filepath to the new logfile 
+    """
+    logs = getLog(log_dir+"openvpn.log")
+    
+    #Error check the logfile
+    if logs == None:
+        return None
+
+    #Create datetime objects
+    datefmt = "%Y/%m/%d"
+    start = datetime.strptime(startDate,datefmt)        
+    end = datetime.strptime(endDate,datefmt)        
+
+    #Loop over the log file and grab entries between the start and end dates
+    newLog = []
+    started = False
+    for row in logs:
+        splitstr = re.split("[0-9]{4}")
+        
+        #Handle no date specified
+        if len(splitstr) == 1:
+            datestr = ""
+        else:
+            datestr = splitstr[0]
+
+        date = datetime.strptime(datestr,"%a %b %d %H:%M:%S %Y")
+        #If date falls between the start and end dates OR no date is specified but is within the two dates
+        if (start < date and date < end) or (datestr == "" and started):
+            newLog.append(row)
+            
+            if not started:
+                started = False
+
+        #Else check if the end date has been passed
+        elif date > end:
+            break
+
+    #Write the log to the file
+    now = datetime.now().strftime("%d%m%Y_%H%M%S")
+    newLogFile = os.getenv(tag+'working_dir',base_config['working_dir'])+"openvpn_{}.log".format(now)
+    with open(newLogFile,'w') as f:
+        for row in newLog:
+            f.write(row+"\n")
+
+    #return the new filepath
+    return newLogFile
+
+
+
+
+
+
