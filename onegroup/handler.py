@@ -32,9 +32,9 @@ def init_database():
 
     if db.retrieve("users") == None:
         #Insert test users
-        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0})
-        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0})
-        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0})
+        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1})
+        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1})
+        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1})
 
     #Close database
     db.close()
@@ -91,7 +91,7 @@ def loadIptables():
     rules = getIptablesRules()
 
     #If there are no/not enough rules, use the defaults
-    if rules == None or len(rules) != len(iptables):
+    if rules == None or len(rules) < len(iptables):
         rules = iptables
         
         #Add the defaults to the database
@@ -170,13 +170,15 @@ def deleteUser(ID):
     return True
 
 
-def createUser(name, passwd, email):
+def createUser(name, passwd, email, group = -1):
+
     """
         Creates a user entry in the database and generates key/cert pair
 
         name  : User's name/username
         passwd: User's password 
         email : User's email
+        group : User's group (-1 meaning no group)
 
         returns: true if successful, else false
     """
@@ -184,7 +186,7 @@ def createUser(name, passwd, email):
     db = Database(filename = filen)
 
     #Create user dictonary for database
-    user = {"Name" : name, "Email" : email, "Password": sha256_crypt.hash(passwd), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : createUserFilename(name), "Key_Distributed" : 0}
+    user = {"Name" : name, "Email" : email, "Password": sha256_crypt.hash(passwd), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : Group}
 
     #Check if user exists (Check both username and email)
     if getUser("Name",user["Name"]) != None or getUser("Email",user["Email"]) != None:
@@ -299,6 +301,85 @@ def confirmUser(email):
         return True
     else:
         return False
+
+
+#
+# Group methods
+#
+
+def getGroup(group):
+    """
+        Retrieves a group's information and all it's users
+
+        group : Group's database ID
+
+        Returns dict of the group containing users
+    """
+    db = Database(filename = filen)
+    group = db.retrieve("groups",{"ID" : group})
+    
+    #Get the users in the group
+    group["Users"] = db.retrieve("users",{"Grp" : group}) 
+     
+    db.close()
+    return group
+
+
+def getAllGroups():
+    """
+        Retrieves all the groups in the database
+
+        Returns list of groups represented as dictonaries
+    """
+    db = Database(filename = filen)
+    groups = db.retrieve("groups")
+    db.close()
+    return groups
+
+def addGroup():
+    """
+        Adds a database record of a group and creates the firewall rule for the group
+
+    """
+    #Create database entry
+
+    #Add route to the server config if not already added
+
+    #Setup IPTables rule
+
+    #If specified, create users for the group
+
+
+def addUserToGroup(user, group):
+    """
+        Adds a user to a group and sets up their client config for that group
+
+        user  : The user's ID of the user to be added to the group
+        group : Group ID of the group to add the user to
+    """
+
+
+
+def deleteGroup(group):
+    """
+        Deletes a group from the database and users if specified
+
+        group : The group ID of the group to delete
+    """
+
+def deleteUserFromGroup(user, group):
+    """
+        Removes a user to a group and resets their client config
+
+        user  : The user's ID of the user to be removed to the group
+        group : Group ID of the group to remove the user from
+        
+    """
+
+def modifyGroup():
+    """
+        Edits a group's database entry and the appropriate iptables and user settings
+    """
 
 
 def genUrl(user,purpose):
