@@ -7,6 +7,7 @@ import shlex
 import os
 import logging
 import fileinput
+import re
 
 #Database and constants
 try:
@@ -716,3 +717,63 @@ def updateIPRules(ID, value):
 
     #Apply new rules
     loadIptables()
+
+def logDownload(startDate,endDate):
+    """
+        Creates a new log file with entries between the start and end dates
+
+        startDate : String starting date for the log
+        endDate : String ending date for the log
+
+        Returns : The the filepath to the new logfile 
+    """
+    logs = getLog(log_dir+"openvpn.log")
+    
+    #Error check the logfile
+    if logs == None:
+        return None
+
+    #Create datetime objects
+    datefmt = "%Y/%m/%d"
+    start = datetime.strptime(startDate,datefmt)        
+    end = datetime.strptime(endDate,datefmt)        
+
+    #Loop over the log file and grab entries between the start and end dates
+    newLog = []
+    started = False
+    for row in logs:
+        splitstr = re.split("[0-9]{4}")
+        
+        #Handle no date specified
+        if len(splitstr) == 1:
+            datestr = ""
+        else:
+            datestr = splitstr[0]
+
+        date = datetime.strptime(datestr,"%a %b %d %H:%M:%S %Y")
+        #If date falls between the start and end dates OR no date is specified but is within the two dates
+        if (start < date and date < end) or (datestr == "" and started):
+            newLog.append(row)
+            
+            if not started:
+                started = False
+
+        #Else check if the end date has been passed
+        elif date > end:
+            break
+
+    #Write the log to the file
+    now = datetime.now().strftime("%d%m%Y_%H%M%S")
+    newLogFile = os.getenv(tag+'working_dir',base_config['working_dir'])+"openvpn_{}.log".format(now)
+    with open(newLogFile,'w') as f:
+        for row in newLog:
+            f.write(row+"\n")
+
+    #return the new filepath
+    return newLogFile
+
+
+
+
+
+
