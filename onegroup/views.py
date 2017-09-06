@@ -129,11 +129,15 @@ def render():
 
 
 
-@app.route("/log_download/", methods = ['GET'])
-def log_download(startDate,endDate):
-    logDir = hl.logDownload(startDate,endDate)
-    return send_file(logDir)
-     
+@app.route("/log_download/", methods = ['GET', 'POST'])
+def log_download():
+    startDate = request.form['eStart']
+    endDate = request.form['eEnd']
+    print(startDate)
+    print(endDate)
+    #logDir = hl.logDownload(startDate,endDate)
+    #return send_file(logDir)
+    return render_template('logs.html')
     
 
 
@@ -224,7 +228,7 @@ def delete_key():
         return redirect('/users')
 
 
-@app.route('/logs/')
+@app.route('/logs/', methods=['GET', 'POST'])
 @admin_required
 def show_logs():
     """

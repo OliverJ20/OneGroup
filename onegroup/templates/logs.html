@@ -14,9 +14,10 @@
                 </div>
                 <div id="exportSettings">
                     <h2>Export Settings</h2>
-                    <form action="." name="settings" id="fileSettings" onsubmit="validateForm()" method="POST">
+                    <form action="/log_download/" name="settings" id="fileSettings" onsubmit="validateForm()" method="POST">
                         Start: <input type="date" id="exportStart" name = "eStart"><br/>
                         End: <input type="date" id="exportEnd" name = "eEnd">
+                        <button id="export">Export Logs</button>
                     </form>
                 </div>
             </div>
@@ -28,8 +29,6 @@
             <br  />
             <div id="midDiv">
                 <center>
-                    <button id="preview">Preview Logs</button>
-                    <button id="export">Export Logs</button>
                 </center>
             </div>
             {% if False %}
