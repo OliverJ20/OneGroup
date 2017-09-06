@@ -39,6 +39,7 @@ def init_database():
     #Close database
     db.close()
 
+
 def loadConfig():
     """Reads a config file and sets environment variables"""
     #base config dictonary 
@@ -127,6 +128,7 @@ def getUsers():
     db.close()
     return users
 
+
 def getUser(key, value):
     """
         Gets a user from the database based on a single key/value pair
@@ -144,6 +146,7 @@ def getUser(key, value):
     db.close()
     
     return user
+
 
 def deleteUser(ID):
     """
@@ -166,7 +169,9 @@ def deleteUser(ID):
     db.close()
     return True
 
+
 def createUser(name, passwd, email, group = -1):
+
     """
         Creates a user entry in the database and generates key/cert pair
 
@@ -217,6 +222,7 @@ def zipUserKeys(user):
     ]
     callScript('userman',args)
     #subprocess.call(shlex.split('user_dist.sh {}'.format(user)))
+
 
 def createUserFilename(name):
     """
@@ -403,6 +409,7 @@ def genUrl(user,purpose):
 
     return url
 
+
 def genCode(user):
     """
         Generates a unique code to be used with URLS
@@ -413,6 +420,7 @@ def genCode(user):
     """
     secret = "{}{}".format(user,datetime.now().strftime("%Y%m%d%H%M%S%f"))
     return hashlib.sha512(secret.encode('UTF-8')).hexdigest()
+
 
 def checkCode(code,purpose):
     """
@@ -581,7 +589,7 @@ def callScript(script, params = []):
     #else:
     #    subprocess.call(shlex.split(call),shell=True)
 
-
+#TODO replace checkdistributedflag with this
 def validateKeysDownloaded(username):
     """
         Return the value of Key_Distributed for a specific user in the user's table
@@ -606,7 +614,6 @@ def createRequest(username, requestType):
     db.close()
     requestedId = db.retrieve("notifications", { "User" : username, "Request" : requestType })['ID']
     return requestedId
-
     
     
 def getAdminEmails():
@@ -629,19 +636,29 @@ def updateUser(ID, username, email, authtype, accounttype):
     """
         Updates the information of a specified user from the users table
 
-        param: ID : 
-        param: username :
-        param: email :
-        param: authtype :
-        param: accounttype :
+        param: ID : ID field of user as specified in the database
+        param: username : of the user
+        param: email : of the user
+        param: authtype : of the user
+        param: accounttype : of the user
     """
     db = Database(filename=filen)
     db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype}, ("ID", ID))
     db.close()
-
+    ##TODO check when input does not work
     return True
 
 
+def createGroup(Variables):
+    #TODO
+    
+
+
+def updateGroup(Variables):
+    #TODO
+    
+
+    
 #
 # Iptables commands
 #
@@ -660,6 +677,7 @@ def getIptablesRules():
     rules = db.retrieve('firewall')
     db.close()
     return rules
+
 
 def getRule(ruleid):
     """
@@ -796,6 +814,7 @@ def updateIPRules(ID, value):
 
     #Apply new rules
     loadIptables()
+
 
 def logDownload(startDate,endDate):
     """
