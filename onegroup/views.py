@@ -6,6 +6,7 @@ from paste.translogger import TransLogger
 from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
 from functools import wraps
+import re
 import os
 import logging
 
@@ -131,13 +132,21 @@ def render():
 
 @app.route("/log_download/", methods = ['GET', 'POST'])
 def log_download():
+    year_month_day = r"\d{4}-\d{1,2}-\d{1,2}";
+    
     startDate = request.form['eStart']
     endDate = request.form['eEnd']
-    print(startDate)
-    print(endDate)
-    #logDir = hl.logDownload(startDate,endDate)
-    #return send_file(logDir)
-    return render_template('logs.html')
+    matchStartDate= re.search(year_month_day, startDate);
+    matchEndDate= re.search(year_month_day, endDate);
+    if(matchStartDate and matchEndDate):
+        print(startDate)
+        print(endDate)
+        logDir = hl.logDownload(startDate,endDate)
+        print(logDir)
+        return send_file(logDir)
+    else:
+        flash("Please Use Valid Date Format: YYYY-MM-DD")
+        return render_template('logs.html')
     
 
 
@@ -183,7 +192,7 @@ def retrieve_user_page():
     users = hl.getUsers()
     groups = hl.getAllGroups()
     requests = hl.retrieveRequests()
-    return render_template('users.html', testdata = requests, testdata2 = users, dataG = groups) 
+    return render_template('users.html', testdata = requests, dataU = users, dataG = groups) 
 
 
 @app.route('/approve_req/', methods=['POST'])
@@ -524,11 +533,6 @@ def logType(log):
     return jsonify({"logData" : hl.getLog(filename)})
 
 
-def groupNumber():
-     return  hl.getAllGroups()
-
-
-
 @app.route('/userform/<form>', methods=['GET', 'POST'])
 @admin_required
 def filluserform(form):
@@ -562,7 +566,7 @@ def filluserform(form):
 
 
     if form == "CU":
-        return render_template("userform_create_user.html",groupNumbers =  groupNumber())
+        return render_template("userform_create_user.html")
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
             return render_template("userform_edit_user.html", username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
@@ -675,26 +679,15 @@ def createNewUser():
             return False
 
 
-
-def createNewGroup():
-    if request.method == 'POST':
-        groupname = request.form['groupname1']
-        internal = request.form['internal1']
-        external = request.form['external1']
-        if hl.creategroup(groupname, internal, external):
-           #todo user keys and number of users created. 
-            return True
-        else:
-            return False
-
-   # groupname1
-    #internal1
-   # external1
-    #TODO add to database table, and send key file
+##def createNewGroup():
+##    #TODO add to database table, and send key files
+##
+##
 
 def passScript():
     """
-        Pass variables obtioned in webform to bashscript      
+        Pass variables obtioned in webform to bashscript
+        
         Returns : True if POST request, Else False
     """
     if request.method == 'POST':

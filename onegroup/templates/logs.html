@@ -14,10 +14,10 @@
                 </div>
                 <div id="exportSettings">
                     <h2>Export Settings</h2>
-                    <form action="/log_download/" name="settings" id="fileSettings" onsubmit="validateForm()" method="POST">
-                        Start: <input type="date" id="exportStart" name = "eStart"><br/>
-                        End: <input type="date" id="exportEnd" name = "eEnd">
-                        <input type="submit" id="export">Export Logs</input>
+                    <form action="/log_download/" name="settings" id="fileSettings" method="POST">
+                        Start: <input type="date" id="exportStart" name = "eStart" onkeyup="testDate()"><br/>
+                        End: <input type="date" id="exportEnd" name = "eEnd" onkeyup="testDate()">
+                        <input type="submit" id="exportSubmit" name="logExport" value="Send">Export Logs</input>
                     </form>
                 </div>
             </div>

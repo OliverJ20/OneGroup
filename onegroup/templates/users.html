@@ -74,8 +74,8 @@
                     <th>Group</th>
                     <th>Delete Keys?</th>
                 </tr>
-                {% if testdata2 != None %}
-                    {%for users in testdata2%}
+                {% if dataU != None %}
+                    {%for users in dataU%}
                       <tr>
                         <td>{{users["Name"]}}</td>
                         <td>{{users["Email"]}}</td>
@@ -122,9 +122,9 @@
                 {% endif %}
                 </table>
 
-                {% if dataG != None %}
                 <h2>Current Groups</h2>
 
+                {% if dataG != None %}
                 <table>
                     <tr>
                         <th>Name</th>
@@ -133,9 +133,9 @@
                     </tr>
                         {%for groups in dataG%}
                           <tr>
-                            <td>{{users["Name"]}}</td>
-                            <td>{{users["Internal"]}}</td>
-                            <td>{{users["External"]}}</td>
+                            <td>{{groups["Name"]}}</td>
+                            <td>{{groups["Internal"]}}</td>
+                            <td>{{groups["External"]}}</td>
                           </tr>
                         {% endfor %}
                     {% endif %}

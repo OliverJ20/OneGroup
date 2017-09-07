@@ -227,6 +227,10 @@ footer    {
   display: none;
 }
 
+input#exportSubmit{
+    display: hidden;
+}
+
 nav ul    {
     margin-left: -8px;
     margin-top: -5%;

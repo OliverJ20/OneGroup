@@ -43,7 +43,8 @@ def init_database():
         db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1})
 
     if db.retrieve("groups") == None:
-        db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,5,6"})
+        db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
+
     
     #Close database
     db.close()
@@ -421,7 +422,6 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
             #Get new user ID and add user to the group
             user = getUser("Name",username)
             addUserToGroup(user, grp)
-
     db.close()
 
 def updateGroup(ID, group):

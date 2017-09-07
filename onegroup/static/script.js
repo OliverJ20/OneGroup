@@ -23,6 +23,21 @@ function testfunction()
     console.log ("hello there young one");
 }
 
+// function testDate()
+// {
+// var year_month_day = /^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/;
+// var day_month_year = /^(0[1-9]|[1-2][0-9]|3[0-1])-(0[1-9]|1[0-2])-[0-9]{4}$/;
+// var startValue = document.getElementById("exportStart").value;
+// var endValue = document.getElementById("exportEnd").value;
+// if((!(year_month_day.test(startValue)) || !(day_month_year.test(startValue))) && (!(year_month_day.test(endValue)) || !(day_month_year.test(endValue))))
+// {
+//     return false;
+// }
+// else{
+//     document.getElementById('exportSubmit').style.display = "block";
+// }
+// }
+
 function getIPTablesData()
 {
        
