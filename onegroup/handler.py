@@ -375,9 +375,6 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
         grp = db.retrieve("groups",group)["ID"]
         
         for i in range(kwargs.get("numUsers")):
-<<<<<<< HEAD
-            print("Just a test")
-=======
             #Create new user
             #TODO Polymorth create user to support auto generated users
             username = "{}_{}".format(name,i+1)
@@ -387,8 +384,6 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
             #Get new user ID and add user to the group
             user = getUser("Name",username)
             addUserToGroup(user, grp)
-
->>>>>>> 79df40d15eb5957dbed1775b4d7f6db1a9d474fa
     db.close()
 
 
