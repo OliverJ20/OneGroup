@@ -43,7 +43,7 @@ def init_database():
         db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1})
 
     if db.retrieve("groups") == None:
-        db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "ExternalNetwork" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
+        db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,5,6"})
     
     #Close database
     db.close()
@@ -359,7 +359,7 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     """
     #Create database entry
     db = Database(filename = filen)
-    group = {"Name" : name, "Internal" : internalNetwork, "ExternalNetwork" : externalNetwork, "Used_Octets" : ""}
+    group = {"Name" : name, "Internal" : internalNetwork, "External" : externalNetwork, "Used_Octets" : ""}
     db.insert("groups",group)
 
     #Add route to the server config if not already added
@@ -371,9 +371,18 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
 
     #If specified, create users for the group
     if kwargs.get("genUsers",False):
-        grp = db.retrieve("groups",group)
+        grp = db.retrieve("groups",group)["ID"]
+        
         for i in range(kwargs.get("numUsers")):
+            #Create new user
+            #TODO Polymorth create user to support auto generated users
+            username = "{}_{}".format(name,i+1)
+            email = "{}@test.com".format(username)
+            createUser(username, "AAAAAAAAAAA", email, group = grp)
             
+            #Get new user ID and add user to the group
+            user = getUser("Name",username)
+            addUserToGroup(user, grp)
 
     db.close()
 
@@ -385,8 +394,30 @@ def addUserToGroup(user, group):
         user  : The user's ID of the user to be added to the group
         group : Group ID of the group to add the user to
     """
+    #Get the used octets for the group
+    grp = getGroup(group)  
+    used = grp["Used_Octets"].split()        
+    
+    #Setup base internal and external addresses
+    internal = grp["Internal"].split("/")[0].split(".0")[0]
+    external = grp["External"].split("/")[0].split(".0")[0] 
 
+    #Determine endpoint pair to use
+    for pair in usable_octets:
+        strPair = "{},{}".format(pair[0],pair[1])
+        if strPair not in used:
+            internal = "{}.{}".format(internal,pair[0])
+            external = "{}.{}".format(external,pair[1])
+            grp["Used_Octets"] = "{} {}".format(grp["Used_Octets"],strPair)
+            break
 
+    #Setup client config file
+    usr = getUser("ID",user)
+    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(usr["Keys"])
+    with open(ccf,'w') as f:
+        f.write("ifconfig-push {} {}".format(internal,external))
+
+    #TODO Update group entry
 
 def deleteGroup(group):
     """
@@ -394,6 +425,7 @@ def deleteGroup(group):
 
         group : The group ID of the group to delete
     """
+    pass
 
 def deleteUserFromGroup(user, group):
     """
@@ -403,12 +435,13 @@ def deleteUserFromGroup(user, group):
         group : Group ID of the group to remove the user from
         
     """
+    pass
 
 def updateGroup():
     """
         Edits a group's database entry and the appropriate iptables and user settings
     """
-
+    pass
 
 def genUrl(user,purpose):
     """
