@@ -132,24 +132,13 @@ def render():
 
 @app.route("/log_download/", methods = ['GET', 'POST'])
 def log_download():
-    dash_year_month_day = r"\d{4}-\d{1,2}-\d{1,2}";
-    slash_year_month_day = r"\d{4}/\d{1,2/\d{1,2}";
+    year_month_day = r"\d{4}-\d{1,2}-\d{1,2}";
+    
     startDate = request.form['eStart']
     endDate = request.form['eEnd']
-    
-    matchDashStartDate= re.search(dash_year_month_day, startDate);
-    matchDashEndDate= re.search(dash_year_month_day, endDate);
-    
-    matchSlashStartDate= re.search(year_month_day, startDate);
-    matchSlashDashEndDate= re.search(year_month_day, endDate);
-
-    if(matchDashStartDate and matchDashEndDate):
-        startDate.split("/")
-        startDate= startDate[0] + "/" +startDate[1]+ "/" + startDate[2]
-        endDate= endDate[0] + "/" +endDate[1]+ "/" + endDate[2]
-        logDir = hl.logDownload(startDate,endDate)
-        return send_file(logDir)
-    if(matchSlashStartDate and matchSlashEndDate):
+    matchStartDate= re.search(year_month_day, startDate);
+    matchEndDate= re.search(year_month_day, endDate);
+    if(matchStartDate and matchEndDate):
         print(startDate)
         print(endDate)
         logDir = hl.logDownload(startDate,endDate)
@@ -157,7 +146,6 @@ def log_download():
         return send_file(logDir)
     else:
         flash("Please Use Valid Date Format: YYYY-MM-DD")
-        flash("Or Format: YYYY/MM/DD")
         return render_template('logs.html')
     
 

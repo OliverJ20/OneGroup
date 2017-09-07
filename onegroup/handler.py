@@ -903,7 +903,7 @@ def logDownload(startDate,endDate):
         return None
 
     #Create datetime objects
-    datefmt = "%Y/%m/%d"
+    datefmt = "%Y-%m-%d"
     start = datetime.strptime(startDate,datefmt)        
     end = datetime.strptime(endDate,datefmt)        
 
