@@ -190,8 +190,12 @@ def retrieve_user_page():
         GET: Surves the user management html with new admin notifications 
     """
     users = hl.getUsers()
+    print(users)
     groups = hl.getAllGroups()
+    print(groups)
+    print("YOYOYOYOYOYO")
     requests = hl.retrieveRequests()
+    print(requests)
     return render_template('users.html', testdata = requests, dataU = users, dataG = groups) 
 
 
