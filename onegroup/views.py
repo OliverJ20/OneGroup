@@ -132,18 +132,32 @@ def render():
 
 @app.route("/log_download/", methods = ['GET', 'POST'])
 def log_download():
-    year_month_day = r"\d{4}-\d{1,2}-\d{1,2}";
+    dash_year_month_day = r"\d{4}-\d{1,2}-\d{1,2}";
+    slash_year_month_day = r"\d{4}/\d{1,2/\d{1,2}";
     startDate = request.form['eStart']
     endDate = request.form['eEnd']
-    matchStartDate= re.search(year_month_day, startDate);
-    matchEndDate= re.search(year_month_day, endDate);
-    if(matchStartDate and matchEndDate):
+    
+    matchDashStartDate= re.search(dash_year_month_day, startDate);
+    matchDashEndDate= re.search(dash_year_month_day, endDate);
+    
+    matchSlashStartDate= re.search(year_month_day, startDate);
+    matchSlashDashEndDate= re.search(year_month_day, endDate);
+
+    if(matchDashStartDate and matchDashEndDate):
+        startDate.split("/")
+        startDate= startDate[0] + "/" +startDate[1]+ "/" + startDate[2]
+        endDate= endDate[0] + "/" +endDate[1]+ "/" + endDate[2]
+        logDir = hl.logDownload(startDate,endDate)
+        return send_file(logDir)
+    if(matchSlashStartDate and matchSlashEndDate):
         print(startDate)
         print(endDate)
         logDir = hl.logDownload(startDate,endDate)
+        print(logDir)
         return send_file(logDir)
     else:
         flash("Please Use Valid Date Format: YYYY-MM-DD")
+        flash("Or Format: YYYY/MM/DD")
         return render_template('logs.html')
     
 
@@ -531,11 +545,6 @@ def logType(log):
     return jsonify({"logData" : hl.getLog(filename)})
 
 
-def groupNumber():
-     return  hl.getAllGroups()
-
-
-
 @app.route('/userform/<form>', methods=['GET', 'POST'])
 @admin_required
 def filluserform(form):
@@ -569,7 +578,7 @@ def filluserform(form):
 
 
     if form == "CU":
-        return render_template("userform_create_user.html",groupNumbers =  groupNumber())
+        return render_template("userform_create_user.html")
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
             return render_template("userform_edit_user.html", username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
@@ -682,26 +691,15 @@ def createNewUser():
             return False
 
 
-
-def createNewGroup():
-    if request.method == 'POST':
-        groupname = request.form['groupname1']
-        internal = request.form['internal1']
-        external = request.form['external1']
-        if hl.creategroup(groupname, internal, external):
-           #todo user keys and number of users created. 
-            return True
-        else:
-            return False
-
-   # groupname1
-    #internal1
-   # external1
-    #TODO add to database table, and send key file
+##def createNewGroup():
+##    #TODO add to database table, and send key files
+##
+##
 
 def passScript():
     """
-        Pass variables obtioned in webform to bashscript      
+        Pass variables obtioned in webform to bashscript
+        
         Returns : True if POST request, Else False
     """
     if request.method == 'POST':
