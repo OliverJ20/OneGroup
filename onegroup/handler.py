@@ -173,9 +173,10 @@ def deleteUser(ID):
         user["Keys"],
     ]
     callScript('userman',args)
-    
+     
     db.delete("users", {"ID" : ID})
     db.close()
+
     return True
 
 
@@ -259,6 +260,22 @@ def createUserFilename(name):
     
     return userFilen
 
+def updateUser(ID, username, email, authtype, accounttype, group):
+    """
+        Updates the information of a specified user from the users table
+
+        ID : ID field of user as specified in the database
+        username : of the user
+        email : of the user
+        authtype : of the user
+        accounttype : of the user
+        group : user's group
+    """
+    db = Database(filename=filen)
+    db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype, "Grp" : group}, ("ID", ID))
+    db.close()
+    ##TODO check when input does not work
+    return True
 
 def confirmLogin(email, password):
     """
@@ -315,6 +332,16 @@ def confirmUser(email):
 #
 # Group methods
 #
+def getAllGroups():
+    """
+        Retrieves all the groups in the database
+
+        Returns list of groups represented as dictonaries
+    """
+    db = Database(filename = filen)
+    groups = db.retrieve("groups")
+    db.close()
+    return groups
 
 def getGroup(group):
     """
@@ -328,22 +355,30 @@ def getGroup(group):
     group = db.retrieve("groups",{"ID" : group})
     
     #Get the users in the group
-    group["Users"] = db.retrieve("users",{"Grp" : group}) 
+    group["Users"] = getUsersInGroup(group) 
      
     db.close()
     return group
 
-
-def getAllGroups():
+def getUsersInGroup(group):
     """
-        Retrieves all the groups in the database
+        Returns a list of all the users in the group
 
-        Returns list of groups represented as dictonaries
+        group : Group's database ID
+
+        Returns list of user dictonaries
     """
     db = Database(filename = filen)
-    groups = db.retrieve("groups")
+    users = db.retrieve("users",{"Grp",group})
     db.close()
-    return groups
+
+    #Check if empty of single user
+    if users == None:
+        users = []
+    elif isinstance(users,dict):   
+        users = [users]
+
+    return users
 
 def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     """
@@ -360,14 +395,17 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     #Create database entry
     db = Database(filename = filen)
     group = {"Name" : name, "Internal" : internalNetwork, "External" : externalNetwork, "Used_Octets" : ""}
-    db.insert("groups",group)
 
     #Add route to the server config if not already added
     #TODO perform check of server config
 
     #Setup IPTables rule
-    rule = {"Chain" : "FORWARD", "Input" : "tun0", "Source" : internalNetwork, "Destination" : externalNetwork, "Action" : "ACCEPT"} 
+    rule = ipDictToString({"Chain" : "FORWARD", "Input" : "tun0", "Source" : internalNetwork, "Destination" : externalNetwork, "Action" : "ACCEPT"})
     addIPRule(rule)
+    group["Rule"] = db.retrieve("firewall",{"Rule",rule})["ID"]
+
+    #Add group to the database
+    db.insert("groups",group)
 
     #If specified, create users for the group
     if kwargs.get("genUsers",False):
@@ -386,6 +424,75 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
 
     db.close()
 
+def updateGroup(ID, group):
+    """
+        Edits a group's database entry and the appropriate iptables and user settings
+
+        NOTE: ID and Rule fields cannot be changed
+
+        ID : Group's database ID
+        group : Dictonary containing the new values for that group
+    """
+    db = Database(filename = filen)
+    oldGroup = getGroup(ID)
+
+    #Checks a new IPTables rule is required 
+    if ("Internal" in group and group["Internal"] != oldGroup["Internal"]) or ("External" in group and group["External"] != oldGroup["External"]):
+        
+        #Update IPTables rule
+        rule = ipStringToDict(getRule(oldGroup["Rule"]))
+        if "Internal" in group:
+            rule["Source"] = group["Internal"]
+            
+        if "External" in group:
+            rule["Destination"] = group["External"]
+
+        updateIPRule(oldGroup["Rule"],ipDictToString(rule))
+
+        #TODO Update server route in server config
+        
+        #Update all the user's client configs
+        for user in getUsersInGroup(ID):
+            #Get the current client config for the user
+            config = getUserClientConfig(user["Keys"])
+            if config != None:
+                internal = "{}.{}".format(rule["Source"].split(".0/")[0],config[0].split(".")[-1])
+                external = "{}.{}".format(rule["Destination"].split(".0/")[0],config[1].split(".")[-1])
+                updateUserClientConfig(user["Keys"],internal,external)
+
+    #Removed ID and Rule fields
+    group.del("ID")
+    group.del("Rule")
+
+    #Update Group entry
+    db.update("groups",group,("ID",ID))
+    db.close()
+
+
+def deleteGroup(group,deleteUsers = False):
+    """
+        Deletes a group from the database and users if specified
+
+        group : The group ID of the group to delete
+        deleteUsers : Boolean flag to determine if the users of the group should be deleted as well
+    """
+    db = Database(filename = filen)
+
+    #Delete the IPTables rule
+    removeIPRule(getGroup(group)["Rule"])
+    
+    #TODO Remove route from server config
+
+    #Delete group entry
+    db.delete("groups",{"ID" : group})
+    db.close()
+
+    #Delete user if deleteUsers == True, else just remove them from the group
+    for user in getUserInGroup(group):
+        if deleteUsers:
+            deleteUser(user["ID"])        
+        else:
+            deleteUserFromGroup(user["ID"])
 
 def addUserToGroup(user, group):
     """
@@ -403,45 +510,74 @@ def addUserToGroup(user, group):
     external = grp["External"].split("/")[0].split(".0")[0] 
 
     #Determine endpoint pair to use
-    for pair in usable_octets:
-        strPair = "{},{}".format(pair[0],pair[1])
-        if strPair not in used:
-            internal = "{}.{}".format(internal,pair[0])
-            external = "{}.{}".format(external,pair[1])
-            grp["Used_Octets"] = "{} {}".format(grp["Used_Octets"],strPair)
-            break
+    if used == "":
+        pair = usable_octets[0]
+        internal = "{}.{}".format(internal,pair[0])
+        external = "{}.{}".format(external,pair[1])
+        grp["Used_Octets"] = "{},{}".format(pair[0],pair[1])
+    else: 
+        for pair in usable_octets:
+            strPair = "{},{}".format(pair[0],pair[1])
+            if strPair not in used:
+                internal = "{}.{}".format(internal,pair[0])
+                external = "{}.{}".format(external,pair[1])
+                grp["Used_Octets"] = "{} {}".format(grp["Used_Octets"],strPair)
+                break
 
     #Setup client config file
     usr = getUser("ID",user)
-    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(usr["Keys"])
+    updateUserClientConfig(usr["Keys"],internal,external)
+
+    #Update the group's entry to show the used octets
+    updateGroup(grp)
+
+def getUserClientConfig(user):
+    """
+        Reads the users client config and returns their internal and external IP addresses
+
+        user : The user's key name
+
+        Returns : String tuple (Internal,External) or None if the user has no config
+    """
+    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user)
+    with open(ccf,'r') as f:
+        config = f.readline().split()
+    
+    if len(config) != 3:
+        return None
+
+    return (config[1],config[2])
+
+
+def updateUserClientConfig(user, source, destination):
+    """ 
+        Updates s user's client configuration file. Created file if it doesn't exist
+
+        user : The user's key name
+        source : The internal network address for the user
+        destination : The external network address for the user
+    """
+    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user)
     with open(ccf,'w') as f:
-        f.write("ifconfig-push {} {}".format(internal,external))
+        f.write("ifconfig-push {} {}".format(source,destination))
+    
 
-    #TODO Update group entry
+def deleteUserFromGroup(userID):
+    """
+        Removes a user from a group and resets their client config
 
-def deleteGroup(group):
+        userID : The user's ID of the user to be removed to the group
     """
-        Deletes a group from the database and users if specified
+    #Change user's Group entry in the database
+    user = getUser("ID",userID)
+    updateUser(userID, user["Name"], user["Email"], user["Auth_Type"], user["Account_Type"], -1) 
+    
+    #Remove the user's client config filei
+    args = [
+        os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user["Keys"]),
+    ]
+    callScript('rm',args)
 
-        group : The group ID of the group to delete
-    """
-    pass
-
-def deleteUserFromGroup(user, group):
-    """
-        Removes a user to a group and resets their client config
-
-        user  : The user's ID of the user to be removed to the group
-        group : Group ID of the group to remove the user from
-        
-    """
-    pass
-
-def updateGroup():
-    """
-        Edits a group's database entry and the appropriate iptables and user settings
-    """
-    pass
 
 def genUrl(user,purpose):
     """
@@ -692,23 +828,6 @@ def getAdminEmails():
     db.close()
     return [x["Email"] for x in emails]
 
-#TODO Implement changing of user groups
-def updateUser(ID, username, email, authtype, accounttype):
-    """
-        Updates the information of a specified user from the users table
-
-        param: ID : ID field of user as specified in the database
-        param: username : of the user
-        param: email : of the user
-        param: authtype : of the user
-        param: accounttype : of the user
-    """
-    db = Database(filename=filen)
-    db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype}, ("ID", ID))
-    db.close()
-    ##TODO check when input does not work
-    return True
-
 
 #
 # Iptables commands
@@ -887,6 +1006,20 @@ def updateIPRules(ID, value):
     loadIptables()
 
 
+def removeIPRules(ID):
+    """ 
+        Removes and IPTables rule from the database and updates the current rules on the system
+
+        ID : ID of the rule
+    """
+    db = Database(filename=filen)
+    db.delete("firewall", {"ID", ID})
+    db.close()
+
+    #Apply new rules
+    loadIptables()
+
+
 def logDownload(startDate,endDate):
     """
         Creates a new log file with entries between the start and end dates
@@ -903,7 +1036,7 @@ def logDownload(startDate,endDate):
         return None
 
     #Create datetime objects
-    datefmt = "%Y/%m/%d"
+    datefmt = "%Y-%m-%d"
     start = datetime.strptime(startDate,datefmt)        
     end = datetime.strptime(endDate,datefmt)        
 
@@ -911,15 +1044,17 @@ def logDownload(startDate,endDate):
     newLog = []
     started = False
     for row in logs:
-        splitstr = re.split("[0-9]{4}")
+        splitstr = re.split("[0-9]{4}", row)
         
         #Handle no date specified
         if len(splitstr) == 1:
             datestr = ""
+            #Date is set to now to fail the first if condition
+            date = datetime.now()
         else:
             datestr = splitstr[0]
-
-        date = datetime.strptime(datestr,"%a %b %d %H:%M:%S %Y")
+            date = datetime.strptime(datestr,"%a %b %d %H:%M:%S %Y")
+        
         #If date falls between the start and end dates OR no date is specified but is within the two dates
         if (start < date and date < end) or (datestr == "" and started):
             newLog.append(row)
