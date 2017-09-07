@@ -708,7 +708,8 @@ def updateUser(ID, username, email, authtype, accounttype):
     db.close()
     ##TODO check when input does not work
     return True
- 
+
+
 #
 # Iptables commands
 #

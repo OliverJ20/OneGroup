@@ -6,7 +6,7 @@
             <div id="logSettings">
                 <h2>Log Settings</h2>
                 <div id="infoDiv">
-                    <h2>Time</h2>
+                    <h2>Search</h2>
                     <form action="." name="timeStamp" id="timeBracket" onsubmit="validateForm()" method="POST">
                         Date: <input id="dateStart" onkeyup="tableFilter()">
                         Activity: <input type="date" id="dateEnd" name="endDate" onkeyup="tableFilter()">
@@ -14,7 +14,10 @@
                 </div>
                 <div id="exportSettings">
                     <h2>Export Settings</h2>
-                    <form action="." name="settings" id="fileSettings" onsubmit="validateForm()" method="POST">
+                    <form action="/log_download/" name="settings" id="fileSettings" onsubmit="validateForm()" method="POST">
+                        Start: <input type="date" id="exportStart" name = "eStart"><br/>
+                        End: <input type="date" id="exportEnd" name = "eEnd">
+                        <input type="submit" id="export">Export Logs</input>
                     </form>
                 </div>
             </div>
@@ -26,8 +29,6 @@
             <br  />
             <div id="midDiv">
                 <center>
-                    <button id="preview">Preview Logs</button>
-                    <button id="export">Export Logs</button>
                 </center>
             </div>
             {% if False %}

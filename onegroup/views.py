@@ -129,11 +129,15 @@ def render():
 
 
 
-@app.route("/log_download/", methods = ['GET'])
-def log_download(startDate,endDate):
-    logDir = hl.logDownload(startDate,endDate)
-    return send_file(logDir)
-     
+@app.route("/log_download/", methods = ['GET', 'POST'])
+def log_download():
+    startDate = request.form['eStart']
+    endDate = request.form['eEnd']
+    print(startDate)
+    print(endDate)
+    #logDir = hl.logDownload(startDate,endDate)
+    #return send_file(logDir)
+    return render_template('logs.html')
     
 
 
@@ -177,12 +181,9 @@ def retrieve_user_page():
         GET: Surves the user management html with new admin notifications 
     """
     users = hl.getUsers()
-    requests = hl.retrieveRequests() # [
-    #    {"User": "MyName", "Request": 10},
-    #    {"User": "YourName", "Request": 5},
-    #    {"User": "TheirName", "Request": 7}
-    #]
-    return render_template('users.html', testdata = requests, testdata2 = users) 
+    groups = hl.getAllGroups()
+    requests = hl.retrieveRequests()
+    return render_template('users.html', testdata = requests, testdata2 = users, dataG = groups) 
 
 
 @app.route('/approve_req/', methods=['POST'])
@@ -224,7 +225,7 @@ def delete_key():
         return redirect('/users')
 
 
-@app.route('/logs/')
+@app.route('/logs/', methods=['GET', 'POST'])
 @admin_required
 def show_logs():
     """
@@ -523,6 +524,11 @@ def logType(log):
     return jsonify({"logData" : hl.getLog(filename)})
 
 
+def groupNumber():
+     return  hl.getAllGroups()
+
+
+
 @app.route('/userform/<form>', methods=['GET', 'POST'])
 @admin_required
 def filluserform(form):
@@ -556,7 +562,7 @@ def filluserform(form):
 
 
     if form == "CU":
-        return render_template("userform_create_user.html")
+        return render_template("userform_create_user.html",groupNumbers =  groupNumber())
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
             return render_template("userform_edit_user.html", username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
@@ -581,7 +587,7 @@ def fillgroupform(form):
                 redirect to confirm endpoint or abort 404
     """
     if request.method == 'POST':
-        if form == "CG"
+        if form == "CG":
             #TODO implementation of createNewGroup() - add to database table, and send key files?
             if createNewGroup():
                 return redirect(url_for('confirm', confirmed = 'New Group Addition Confirmed!'))
@@ -589,7 +595,7 @@ def fillgroupform(form):
                 flash("Group already exists")
         elif hl.getGroup("ID", form) != None:
             #TODO hl.updateGroup in db
-            if hl.updateGroup(form, str(request.form['groupname2']), str(request.form['internal2']), str(request.form['external2']))
+            if hl.updateGroup(form, str(request.form['groupname2']), str(request.form['internal2']), str(request.form['external2'])):
                 return redirect(url_for('confirm', confirmed = 'Group Information Successfully Updated'))
             else:
                 flash("Cannot Update Group Information")
@@ -669,14 +675,26 @@ def createNewUser():
             return False
 
 
-def createNewGroup():
-    #TODO add to database table, and send key files
 
+def createNewGroup():
+    if request.method == 'POST':
+        groupname = request.form['groupname1']
+        internal = request.form['internal1']
+        external = request.form['external1']
+        if hl.creategroup(groupname, internal, external):
+           #todo user keys and number of users created. 
+            return True
+        else:
+            return False
+
+   # groupname1
+    #internal1
+   # external1
+    #TODO add to database table, and send key file
 
 def passScript():
     """
-        Pass variables obtioned in webform to bashscript
-        
+        Pass variables obtioned in webform to bashscript      
         Returns : True if POST request, Else False
     """
     if request.method == 'POST':

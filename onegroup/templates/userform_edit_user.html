@@ -41,6 +41,14 @@
                             <option value="Admin" selected>Admin</option>
                         {% endif %}
                     </select>
+		    <p>Assign Group</p>
+                    <select name="authType1">
+                        <option value="-1">No Group</option>
+                       	{% for groupNumber in groupNumbers %}
+			<option value="{{ groupNumber }}">{{ groupNumber }}</option>
+			{% endfor %}
+                    </select>
+		    
                     <input type="submit" name="groupform2" value="Send">
                 </form>
             </div>

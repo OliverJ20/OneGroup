@@ -29,7 +29,17 @@
                         <option value="Radius">Radius</option>
                         <option value="Phone">Phone</option>
                     </select>
+		    <br>
+		    <p>Assign Group</p>
+                    <select name="authType1">
+                        <option value="-1">No group</option>
+                       	{% for groupNumber in groupNumbers %}
+			<option value="{{ groupNumber }}">{{ groupNumber }}</option>
+			{% endfor %}
+                    </select>
+		    
                     <br></br>
+
                     <div class= "bodydiv" div id = "submitDiv">
                       <input type="submit" name="userform1" value="Send"></input>
                     </div>
