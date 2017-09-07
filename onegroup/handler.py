@@ -384,7 +384,6 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
             #Get new user ID and add user to the group
             user = getUser("Name",username)
             addUserToGroup(user, grp)
-
     db.close()
 
 
