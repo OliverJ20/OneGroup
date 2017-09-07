@@ -6,6 +6,7 @@ from paste.translogger import TransLogger
 from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
 from functools import wraps
+import re
 import os
 import logging
 
@@ -131,13 +132,19 @@ def render():
 
 @app.route("/log_download/", methods = ['GET', 'POST'])
 def log_download():
+    year_month_day = r"\d{4}-\d{1,2}-\d{1,2}";
     startDate = request.form['eStart']
     endDate = request.form['eEnd']
-    print(startDate)
-    print(endDate)
-    #logDir = hl.logDownload(startDate,endDate)
-    #return send_file(logDir)
-    return render_template('logs.html')
+    matchStartDate= re.search(year_month_day, startDate);
+    matchEndDate= re.search(year_month_day, endDate);
+    if(matchStartDate and matchEndDate):
+        print(startDate)
+        print(endDate)
+        logDir = hl.logDownload(startDate,endDate)
+        return send_file(logDir)
+    else:
+        flash("Please Use Valid Date Format: YYYY-MM-DD")
+        return render_template('logs.html')
     
 
 
@@ -183,7 +190,7 @@ def retrieve_user_page():
     users = hl.getUsers()
     groups = hl.getAllGroups()
     requests = hl.retrieveRequests()
-    return render_template('users.html', testdata = requests, testdata2 = users, dataG = groups) 
+    return render_template('users.html', testdata = requests, dataU = users, dataG = groups) 
 
 
 @app.route('/approve_req/', methods=['POST'])

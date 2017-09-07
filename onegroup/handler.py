@@ -43,7 +43,7 @@ def init_database():
         db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1})
 
     if db.retrieve("groups") == None:
-        db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "ExternalNetwork" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
+        db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
     
     #Close database
     db.close()
@@ -359,7 +359,7 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     """
     #Create database entry
     db = Database(filename = filen)
-    group = {"Name" : name, "Internal" : internalNetwork, "ExternalNetwork" : externalNetwork, "Used_Octets" : ""}
+    group = {"Name" : name, "Internal" : internalNetwork, "External" : externalNetwork, "Used_Octets" : ""}
     db.insert("groups",group)
 
     #Add route to the server config if not already added
@@ -373,8 +373,7 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     if kwargs.get("genUsers",False):
         grp = db.retrieve("groups",group)
         for i in range(kwargs.get("numUsers")):
-            
-
+            print("Just a test")
     db.close()
 
 
