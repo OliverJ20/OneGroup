@@ -129,11 +129,15 @@ def render():
 
 
 
-@app.route("/log_download/", methods = ['GET'])
-def log_download(startDate,endDate):
-    logDir = hl.logDownload(startDate,endDate)
-    return send_file(logDir)
-     
+@app.route("/log_download/", methods = ['GET', 'POST'])
+def log_download():
+    startDate = request.form['eStart']
+    endDate = request.form['eEnd']
+    print(startDate)
+    print(endDate)
+    #logDir = hl.logDownload(startDate,endDate)
+    #return send_file(logDir)
+    return render_template('logs.html')
     
 
 
@@ -177,12 +181,9 @@ def retrieve_user_page():
         GET: Surves the user management html with new admin notifications 
     """
     users = hl.getUsers()
-    requests = hl.retrieveRequests() # [
-    #    {"User": "MyName", "Request": 10},
-    #    {"User": "YourName", "Request": 5},
-    #    {"User": "TheirName", "Request": 7}
-    #]
-    return render_template('users.html', testdata = requests, testdata2 = users) 
+    groups = hl.getAllGroups()
+    requests = hl.retrieveRequests()
+    return render_template('users.html', testdata = requests, testdata2 = users, dataG = groups) 
 
 
 @app.route('/approve_req/', methods=['POST'])
@@ -224,7 +225,7 @@ def delete_key():
         return redirect('/users')
 
 
-@app.route('/logs/')
+@app.route('/logs/', methods=['GET', 'POST'])
 @admin_required
 def show_logs():
     """
@@ -674,6 +675,7 @@ def createNewUser():
             return False
 
 
+
 def createNewGroup():
     if request.method == 'POST':
         groupname = request.form['groupname1']
@@ -688,8 +690,7 @@ def createNewGroup():
    # groupname1
     #internal1
    # external1
-    #TODO add to database table, and send key files
-
+    #TODO add to database table, and send key file
 
 def passScript():
     """

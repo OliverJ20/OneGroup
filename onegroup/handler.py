@@ -35,7 +35,16 @@ def init_database():
         db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1})
         db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1})
         db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1})
+        
+        #Test group users
+        db.insert("users", {"Name" : "Group01_1", "Email" : "one@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_1", "Key_Distributed" : 0, "Grp" : 1})
+        db.insert("users", {"Name" : "Group01_2", "Email" : "two@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_2", "Key_Distributed" : 0, "Grp" : 1})
+        db.insert("users", {"Name" : "Group01_3", "Email" : "three@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_3", "Key_Distributed" : 0, "Grp" : 1})
+        db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1})
 
+    if db.retrieve("groups") == None:
+        db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "ExternalNetwork" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
+    
     #Close database
     db.close()
 
@@ -336,18 +345,37 @@ def getAllGroups():
     db.close()
     return groups
 
-def addGroup():
+def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     """
         Adds a database record of a group and creates the firewall rule for the group
 
+        name : New group's name
+        internalNetwork : Network address space of the interal network using slash notation (Eg. 10.8.1.0/24)
+        ExternalNetwork : Network address space of the External network using slash notation (Eg. 192.168.1.0/24)
+
+        Keyword args:
+        genUsers : Boolean to determine if users should be made for the group
+        numUsers : Number of users to be generated for the group. Is not checked if genUsers is False
     """
     #Create database entry
+    db = Database(filename = filen)
+    group = {"Name" : name, "Internal" : internalNetwork, "ExternalNetwork" : externalNetwork, "Used_Octets" : ""}
+    db.insert("groups",group)
 
     #Add route to the server config if not already added
+    #TODO perform check of server config
 
     #Setup IPTables rule
+    rule = {"Chain" : "FORWARD", "Input" : "tun0", "Source" : internalNetwork, "Destination" : externalNetwork, "Action" : "ACCEPT"} 
+    addIPRule(rule)
 
     #If specified, create users for the group
+    if kwargs.get("genUsers",False):
+        grp = db.retrieve("groups",group)
+        for i in range(kwargs.get("numUsers")):
+            
+
+    db.close()
 
 
 def addUserToGroup(user, group):
@@ -376,7 +404,7 @@ def deleteUserFromGroup(user, group):
         
     """
 
-def modifyGroup():
+def updateGroup():
     """
         Edits a group's database entry and the appropriate iptables and user settings
     """
@@ -631,7 +659,7 @@ def getAdminEmails():
     db.close()
     return [x["Email"] for x in emails]
 
-
+#TODO Implement changing of user groups
 def updateUser(ID, username, email, authtype, accounttype):
     """
         Updates the information of a specified user from the users table
@@ -649,16 +677,6 @@ def updateUser(ID, username, email, authtype, accounttype):
     return True
 
 
-#def createGroup(Variables):
-    #TODO
-    
-
-
-#def updateGroup(Variables):
-    #TODO
-    
-
-    
 #
 # Iptables commands
 #
@@ -806,8 +824,28 @@ def ipStringToDict(ipString):
     
     return ipDict
 
+def addIPRule(rule):
+    """ 
+        Adds a new IPTables rule to the database
+
+        rule : The string representation of the rule
+    """
+    db = Database(filename=filen)
+    db.insert("firewall", {"Rule": rule})
+    db.close()
+
+    #Apply new rule
+    loadIptables()
+
+
 
 def updateIPRules(ID, value):
+    """ 
+        Updates an IPTables rule entry in the database
+
+        ID : ID of the rule
+        value : The new rule string
+    """
     db = Database(filename=filen)
     db.update("firewall", {"Rule": value}, ("ID", ID))
     db.close()

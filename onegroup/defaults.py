@@ -15,6 +15,7 @@ tag = 'OG_'
 base_config = {
     "openvpn_keys" : "/etc/openvpn/keys",
     "openvpn_ersa" : "/etc/openvpn/easy-rsa",
+    "openvpn_ccd" : "/etc/openvpn/ccd",
     "openvpn_server_config" : "/etc/openvpn/server.conf",
     "openvpn_client_config" : "/etc/openvpn/client.conf",
     "secret" : "RANDOM",
