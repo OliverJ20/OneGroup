@@ -123,19 +123,27 @@
                 </table>
 
                 <h2>Current Groups</h2>
-
-                {% if dataG != None %}
                 <table>
                     <tr>
                         <th>Name</th>
                         <th>Internal Network</th>
                         <th>External Network</th>
                     </tr>
-                        {%for groups in dataG%}
+                    {% if dataG != None %}
+                        {%for members in dataG%}
                           <tr>
-                            <td>{{groups["Name"]}}</td>
-                            <td>{{groups["Internal"]}}</td>
-                            <td>{{groups["External"]}}</td>
+                            <td>{{members['Name']}}</td>
+                            <td>{{members['Internal']}}</td>
+                            <td>{{members['External']}}</td>
+                            <td>
+                                <a href="/groupform/{{members["ID"]}}">
+                                    <button>Edit</button>
+                                </a>
+                                <form action="{{ url_for('delete_key') }}" method=post>
+                                <input type="text" name="name" value= {{members["ID"]}} id = "hiddenInput" readonly>
+                                <input type="submit" value="Delete" id = "declineButton"></input>
+                                </form>
+                            </td>
                           </tr>
                         {% endfor %}
                     {% endif %}

@@ -44,6 +44,7 @@ def init_database():
 
     if db.retrieve("groups") == None:
         db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
+        db.insert("groups",{"Name" : "Group02", "Internal" : "10.9.1.0/24", "External" : "192.128.3.0/24", "Used_Octets" : "1,2,4,5"})
 
     
     #Close database
