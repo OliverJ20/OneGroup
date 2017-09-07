@@ -1,7 +1,7 @@
 #Imports
 from passlib.hash import sha256_crypt
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
 import subprocess
 import shlex
 import os
@@ -1029,6 +1029,7 @@ def logDownload(startDate,endDate):
 
         Returns : The the filepath to the new logfile 
     """
+    print(log_dir)
     logs = getLog(log_dir+"openvpn.log")
     
     #Error check the logfile
@@ -1043,16 +1044,21 @@ def logDownload(startDate,endDate):
     #Loop over the log file and grab entries between the start and end dates
     newLog = []
     started = False
+    datematch = re.compile("[A-Za-z]{3} [A-Za-z]{3} [ 0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4} ")
     for row in logs:
-        splitstr = re.split("[0-9]{4}", row)
-        
-        #Handle no date specified
-        if len(splitstr) == 1:
+        print(row)
+        match = datematch.match(row)
+        if match == None:    
             datestr = ""
-            #Date is set to now to fail the first if condition
-            date = datetime.now()
         else:
-            datestr = splitstr[0]
+            datestr = str(match.group()[:-1])
+        
+        print(datestr)
+        #Handle no date specified
+        if len(datestr) == 0:
+            #Date is set to before the starting date to fail the first if condition
+            date = start - timedelta(days = 1)
+        else:
             date = datetime.strptime(datestr,"%a %b %d %H:%M:%S %Y")
         
         #If date falls between the start and end dates OR no date is specified but is within the two dates
@@ -1068,7 +1074,7 @@ def logDownload(startDate,endDate):
 
     #Write the log to the file
     now = datetime.now().strftime("%d%m%Y_%H%M%S")
-    newLogFile = os.getenv(tag+'working_dir',base_config['working_dir'])+"openvpn_{}.log".format(now)
+    newLogFile = os.getenv(tag+'working_dir',working_dir)+"/openvpn_{}.log".format(now)
     with open(newLogFile,'w') as f:
         for row in newLog:
             f.write(row+"\n")
