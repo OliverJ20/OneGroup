@@ -648,15 +648,15 @@ def updateUser(ID, username, email, authtype, accounttype):
     ##TODO check when input does not work
     return True
 
-
-def createGroup(Variables):
-    #TODO
-    
-
-
-def updateGroup(Variables):
-    #TODO
-    
+##
+##def createGroup(Variables):
+##    #TODO
+##    
+##
+##
+##def updateGroup(Variables):
+##    #TODO
+##    
 
     
 #

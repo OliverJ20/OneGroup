@@ -71,6 +71,7 @@
                     <th>Address</th>
                     <th>Authentication</th>
                     <th>Connection Type</th>
+                    <th>Group</th>
                     <th>Delete Keys?</th>
                 </tr>
                 {% if testdata2 != None %}
@@ -80,6 +81,7 @@
                         <td>{{users["Email"]}}</td>
                         <td>{{users["Auth_Type"]}}</td>
                         <td>{{users["Account_Type"]}}</td>
+                        <td>{{users["Grp"]}}</td>
                         <td>
                             <a href="/form/{{users["ID"]}}">
                                 <button>Edit</button>
@@ -119,6 +121,25 @@
                       {% endfor %}
                 {% endif %}
                 </table>
+
+                {% if dataG != None %}
+                <h2>Current Groups</h2>
+
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Internal Network</th>
+                        <th>External Network</th>
+                    </tr>
+                        {%for groups in dataG%}
+                          <tr>
+                            <td>{{users["Name"]}}</td>
+                            <td>{{users["Internal"]}}</td>
+                            <td>{{users["External"]}}</td>
+                          </tr>
+                        {% endfor %}
+                    {% endif %}
+                  </table>
             </div>
         </div>
         </center>
