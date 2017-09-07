@@ -15,8 +15,8 @@
                 <div id="exportSettings">
                     <h2>Export Settings</h2>
                     <form action="/log_download/" name="settings" id="fileSettings" method="POST">
-                        Start: <input type="date" id="exportStart" name = "eStart" onkeyup="testDate()"><br/>
-                        End: <input type="date" id="exportEnd" name = "eEnd" onkeyup="testDate()">
+                        Start: <input type="date" id="exportStart" name = "eStart"><br/>
+                        End: <input type="date" id="exportEnd" name = "eEnd">
                         <input type="submit" id="exportSubmit" name="logExport" value="Send">Export Logs</input>
                     </form>
                 </div>
@@ -36,7 +36,7 @@
             </div>
             {% endif %}
 
-        <div id="logTable" align="center" style="margin-top: 10px; overflow-y: scroll;">
+        <div id="logTable" align="center" style="margin-top: 10%; overflow-y: scroll;">
           <form>
 
 
