@@ -649,12 +649,12 @@ def updateUser(ID, username, email, authtype, accounttype):
     return True
 
 
-def createGroup(Variables):
+#def createGroup(Variables):
     #TODO
     
 
 
-def updateGroup(Variables):
+#def updateGroup(Variables):
     #TODO
     
 
