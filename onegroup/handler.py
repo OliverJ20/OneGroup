@@ -398,7 +398,7 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     group = {"Name" : name, "Internal" : internalNetwork, "External" : externalNetwork, "Used_Octets" : ""}
 
     #Add route to the server config if not already added
-    #TODO perform check of server config
+    addRouteToConfig(internalNetwork)
 
     #Setup IPTables rule
     rule = ipDictToString({"Chain" : "FORWARD", "Input" : "tun0", "Source" : internalNetwork, "Destination" : externalNetwork, "Action" : "ACCEPT"})
@@ -449,20 +449,22 @@ def updateGroup(ID, group):
 
         updateIPRule(oldGroup["Rule"],ipDictToString(rule))
 
-        #TODO Update server route in server config
-        
+        #Update server route in server config
+        if "Internal" in group and group["Internal"] != oldGroup["Internal"]: 
+            updateRouteInConfig(oldGroup["Internal"],group["Internal"])
+
         #Update all the user's client configs
         for user in getUsersInGroup(ID):
             #Get the current client config for the user
             config = getUserClientConfig(user["Keys"])
             if config != None:
                 internal = "{}.{}".format(rule["Source"].split(".0/")[0],config[0].split(".")[-1])
-                external = "{}.{}".format(rule["Destination"].split(".0/")[0],config[1].split(".")[-1])
+                external = "{}.{}".format(rule["Source"].split(".0/")[0],config[1].split(".")[-1])
                 updateUserClientConfig(user["Keys"],internal,external)
 
     #Removed ID and Rule fields
-    group.del("ID")
-    group.del("Rule")
+    del group["ID"]
+    del group["Rule"]
 
     #Update Group entry
     db.update("groups",group,("ID",ID))
@@ -481,7 +483,8 @@ def deleteGroup(group,deleteUsers = False):
     #Delete the IPTables rule
     removeIPRule(getGroup(group)["Rule"])
     
-    #TODO Remove route from server config
+    #Remove route from server config
+    deleteRouteInConfig(group["Internal"])
 
     #Delete group entry
     db.delete("groups",{"ID" : group})
@@ -505,9 +508,8 @@ def addUserToGroup(user, group):
     grp = getGroup(group)  
     used = grp["Used_Octets"].split()        
     
-    #Setup base internal and external addresses
-    internal = grp["Internal"].split("/")[0].split(".0")[0]
-    external = grp["External"].split("/")[0].split(".0")[0] 
+    #Setup base addresse
+    base = grp["Internal"].split("/")[0].split(".0")[0]
 
     #Determine endpoint pair to use
     if used == "":
@@ -519,8 +521,8 @@ def addUserToGroup(user, group):
         for pair in usable_octets:
             strPair = "{},{}".format(pair[0],pair[1])
             if strPair not in used:
-                internal = "{}.{}".format(internal,pair[0])
-                external = "{}.{}".format(external,pair[1])
+                internal = "{}.{}".format(base,pair[0])
+                external = "{}.{}".format(base,pair[1])
                 grp["Used_Octets"] = "{} {}".format(grp["Used_Octets"],strPair)
                 break
 
@@ -577,6 +579,150 @@ def deleteUserFromGroup(userID):
         os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user["Keys"]),
     ]
     callScript('rm',args)
+
+
+def addRouteToConfig(network):
+    """
+        Adds a new route to the openvpn server config
+        
+        network : The network to push the route for
+    """
+    #Get Formatted network
+    formattedNetwork = getFormattedNetwork(network) 
+
+    #Check if the line already exists
+    #if so, do nothing, else add it to the config
+    line = checkRouteExists(network,formattedNetwork) 
+    if line == -1: 
+        filename = os.getenv(tag+'openvpn_server_config',base_config['openvpn_server_config']) 
+        with open(filename,'r+') as f:
+            config = f.readlines()
+            #Check if onegroup additions section has been added
+            if commentStart+"\n" in config:
+                endLine = congfig.index(commentEnd+"\n")
+                config.insert(endLine,"{} {}".format("route",formattedNetwork))
+            #Else add section
+            else:
+                config.append("")
+                config.append(commentStart)
+                config.append("{} {}".format("route",formattedNetwork))
+                config.append(commentEnd)
+
+            #Rewrite config file
+            f.seek(0)
+            for i in config:
+                i.strip()
+                f.write(i)
+
+        #Restart openvpn to enact changes
+        handleOpenvpn("restart")
+
+def updateRouteInConfig(oldNetwork,newNetwork):
+    """
+        Updates an existing route in the openvpn server config
+        
+        oldNetwork : The existing network route in the config
+        newNetwork : The network route to replace the existing route
+    """
+    #Find the existing route in the file
+    #If the route doesn't exist, add it to the config
+    line = checkRouteExists(oldNetwork,getFormattedNetwork(oldNetwork)) 
+    if line == -1:
+        addRouteToConfig(newNetwork)
+    else:
+        filename = os.getenv(tag+'openvpn_server_config',base_config['openvpn_server_config']) 
+        with open(filename,'r+') as f:
+            config = f.readlines()
+            #Check if new network already exists for safety
+            newNetworkFmt = getFormattedNetwork(newNetwork)
+            if checkRouteExists(newNetwork,newNetworkFmt) != -1:
+                #Just remove the old network as the new one exists
+                config.remove(config[line])
+            else:
+                config[line] = getFormattedNetwork(newNetwork)
+            
+            #Rewrite config file
+            f.seek(0)
+            for i in config:
+                i.strip()
+                f.write(i)
+
+    #Restart openvpn to enact changes
+    handleOpenvpn("restart")
+
+def deleteRouteInConfig(network):
+    """
+        Deletes a route from the openvpn server config
+        
+        network : The network to delete the route for
+    """
+    #Get Formatted network
+    formattedNetwork = getFormattedNetwork(network) 
+
+    #Check if the line exists
+    #if so, delete it, else do nothing
+    line = checkRouteExists(network,formattedNetwork) 
+    if line != -1: 
+        filename = os.getenv(tag+'openvpn_server_config',base_config['openvpn_server_config']) 
+        with open(filename,'r+') as f:
+            config = f.readlines()
+            config.remove(config[line])
+
+            #Rewrite config file
+            f.seek(0)
+            for i in config:
+                i.strip()
+                f.write(i)
+
+        #Restart openvpn to enact changes
+        handleOpenvpn("restart")
+
+def checkRouteExists(network,formattedNetwork):
+    """
+        Checks if a route for a network already exists in the config
+
+        network : the network in slash notation (Eg 10.8.1.0/24)
+        formattedNetwork : network but as a string with seperated netmask (Eg 10.8.1.0 255.255.255.0)
+
+        Returns line number if found, else -1
+    """
+    #Make comparison list
+    compare = ["route {}".format(network),"route {}".format(formattedNetwork)]
+
+    #Iterate over file
+    filename = os.getenv(tag+'openvpn_server_config',base_config['openvpn_server_config']) 
+    with open(filename) as f:
+        for num, line in enumerate(f,1):
+            if any([x for x in compare if x == line]):
+                return num
+
+    #If reached here, the route is not in the file
+    return -1
+
+def getFormattedNetwork(network):
+    """
+        Takes a network address and returns a string in the format of ADDRESS NETMASK
+
+        network : network in slash notation (Eg 10.8.1.0/24)
+
+        Returns string in the format of ADDRESS NETMASK 
+    """
+    #Split network into address and subnet mask
+    address = network.split("/")
+    if len(address) == 2:
+        maskbit = address[1]
+        address = address[0]
+    else:
+        maskbit = 0
+    
+    #TODO Support more netmask other than /0 and /24
+    if maskbit == 0:
+        mask = "0.0.0.0"
+    else:
+        mask = "255.255.255.0"
+
+    return "{} {}".format(address, mask)
+
 
 
 def genUrl(user,purpose):
@@ -785,6 +931,25 @@ def callScript(script, params = []):
     subprocess.call(call,shell=True)
     #else:
     #    subprocess.call(shlex.split(call),shell=True)
+
+def handleOpenvpn(action):
+    """
+        Makes a call to the openvpn service
+
+        action : Action to perform on the openvpn server
+
+        valid actions:
+            start
+            stop
+            restart
+    """
+    #Check if action valid
+    if action not in ["start","stop","restart"]:
+        logging.error("Invalid action passed to openvpn service")
+    
+    call = "systemctl {} openvpn".format(action)
+    subprocess.call(call,shell=True)
+
 
 #TODO replace checkdistributedflag with this
 def validateKeysDownloaded(username):

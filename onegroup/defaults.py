@@ -10,6 +10,11 @@ config_path_backup = "/usr/local/onegroup/"+config_file
 keys_dir = working_dir+"/keys/"
 log_dir = "/var/log/"
 
+
+#SERVER CONFIG ADDITIONS START AND END SECTIONS
+commentStart = "# Onegroup Additions"
+commentEnd = "# End Onegroup Additions"
+
 #STANDARD CONFIG
 tag = 'OG_'
 base_config = {
