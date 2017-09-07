@@ -461,9 +461,9 @@ def updateGroup(ID, group):
                 updateUserClientConfig(user["Keys"],internal,external)
 
     #Removed ID and Rule fields
-    group.del("ID")
-    group.del("Rule")
-
+    del group["ID"]
+    del group["Rule"]
+              
     #Update Group entry
     db.update("groups",group,("ID",ID))
     db.close()
