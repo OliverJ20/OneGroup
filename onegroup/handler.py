@@ -44,6 +44,7 @@ def init_database():
 
     if db.retrieve("groups") == None:
         db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
+
     
     #Close database
     db.close()
@@ -371,9 +372,23 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
 
     #If specified, create users for the group
     if kwargs.get("genUsers",False):
-        grp = db.retrieve("groups",group)
+        grp = db.retrieve("groups",group)["ID"]
+        
         for i in range(kwargs.get("numUsers")):
+<<<<<<< HEAD
             print("Just a test")
+=======
+            #Create new user
+            #TODO Polymorth create user to support auto generated users
+            username = "{}_{}".format(name,i+1)
+            email = "{}@test.com".format(username)
+            createUser(username, "AAAAAAAAAAA", email, group = grp)
+            
+            #Get new user ID and add user to the group
+            user = getUser("Name",username)
+            addUserToGroup(user, grp)
+
+>>>>>>> 79df40d15eb5957dbed1775b4d7f6db1a9d474fa
     db.close()
 
 
@@ -384,8 +399,30 @@ def addUserToGroup(user, group):
         user  : The user's ID of the user to be added to the group
         group : Group ID of the group to add the user to
     """
+    #Get the used octets for the group
+    grp = getGroup(group)  
+    used = grp["Used_Octets"].split()        
+    
+    #Setup base internal and external addresses
+    internal = grp["Internal"].split("/")[0].split(".0")[0]
+    external = grp["External"].split("/")[0].split(".0")[0] 
 
+    #Determine endpoint pair to use
+    for pair in usable_octets:
+        strPair = "{},{}".format(pair[0],pair[1])
+        if strPair not in used:
+            internal = "{}.{}".format(internal,pair[0])
+            external = "{}.{}".format(external,pair[1])
+            grp["Used_Octets"] = "{} {}".format(grp["Used_Octets"],strPair)
+            break
 
+    #Setup client config file
+    usr = getUser("ID",user)
+    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(usr["Keys"])
+    with open(ccf,'w') as f:
+        f.write("ifconfig-push {} {}".format(internal,external))
+
+    #TODO Update group entry
 
 def deleteGroup(group):
     """
@@ -393,6 +430,7 @@ def deleteGroup(group):
 
         group : The group ID of the group to delete
     """
+    pass
 
 def deleteUserFromGroup(user, group):
     """
@@ -402,12 +440,13 @@ def deleteUserFromGroup(user, group):
         group : Group ID of the group to remove the user from
         
     """
+    pass
 
 def updateGroup():
     """
         Edits a group's database entry and the appropriate iptables and user settings
     """
-
+    pass
 
 def genUrl(user,purpose):
     """
@@ -674,6 +713,7 @@ def updateUser(ID, username, email, authtype, accounttype):
     db.close()
     ##TODO check when input does not work
     return True
+
 
 #
 # Iptables commands
