@@ -345,6 +345,7 @@ def getAllGroups():
     db.close()
     return groups
 
+
 def getGroup(group):
     """
         Retrieves a group's information and all it's users
@@ -361,6 +362,7 @@ def getGroup(group):
      
     db.close()
     return group
+
 
 def getUsersInGroup(group):
     """
@@ -381,6 +383,7 @@ def getUsersInGroup(group):
         users = [users]
 
     return users
+
 
 def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     """
@@ -415,7 +418,7 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
         
         for i in range(kwargs.get("numUsers")):
             #Create new user
-            #TODO Polymorth create user to support auto generated users
+            #TODO Polymorph create user to support auto generated users
             username = "{}_{}".format(name,i+1)
             email = "{}@test.com".format(username)
             createUser(username, "AAAAAAAAAAA", email, group = grp)
@@ -424,6 +427,7 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
             user = getUser("Name",username)
             addUserToGroup(user, grp)
     db.close()
+
 
 def updateGroup(ID, group):
     """
@@ -498,6 +502,7 @@ def deleteGroup(group,deleteUsers = False):
         else:
             deleteUserFromGroup(user["ID"])
 
+
 def addUserToGroup(user, group):
     """
         Adds a user to a group and sets up their client config for that group
@@ -533,6 +538,7 @@ def addUserToGroup(user, group):
 
     #Update the group's entry to show the used octets
     updateGroup(grp)
+
 
 def getUserClientConfig(user):
     """
@@ -618,6 +624,7 @@ def addRouteToConfig(network):
         #Restart openvpn to enact changes
         handleOpenvpn("restart")
 
+
 def updateRouteInConfig(oldNetwork,newNetwork):
     """
         Updates an existing route in the openvpn server config
@@ -651,6 +658,7 @@ def updateRouteInConfig(oldNetwork,newNetwork):
     #Restart openvpn to enact changes
     handleOpenvpn("restart")
 
+
 def deleteRouteInConfig(network):
     """
         Deletes a route from the openvpn server config
@@ -678,6 +686,7 @@ def deleteRouteInConfig(network):
         #Restart openvpn to enact changes
         handleOpenvpn("restart")
 
+
 def checkRouteExists(network,formattedNetwork):
     """
         Checks if a route for a network already exists in the config
@@ -699,6 +708,7 @@ def checkRouteExists(network,formattedNetwork):
 
     #If reached here, the route is not in the file
     return -1
+
 
 def getFormattedNetwork(network):
     """
@@ -723,7 +733,6 @@ def getFormattedNetwork(network):
         mask = "255.255.255.0"
 
     return "{} {}".format(address, mask)
-
 
 
 def genUrl(user,purpose):
@@ -862,6 +871,7 @@ def declineRequest(reqName):#, reqReq):
     db.close()
     return True
 
+
 # Work in Progress
 # def retrieveFlags(name):
 #     db = Database(filename = filen)
@@ -932,6 +942,7 @@ def callScript(script, params = []):
     subprocess.call(call,shell=True)
     #else:
     #    subprocess.call(shlex.split(call),shell=True)
+
 
 def handleOpenvpn(action):
     """
@@ -1141,6 +1152,7 @@ def ipStringToDict(ipString):
                        'Source': source, 'Source_Port': sourceport, 'Destination': destination,'Destination_Port': port, 'State':stateData, 'Action': actionData}
     
     return ipDict
+
 
 def addIPRule(rule):
     """ 

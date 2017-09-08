@@ -48,10 +48,6 @@ mail = Mail(app)
 # )
 
 
-
-
-
-
 def login_required(f):
     """
         Wraper for endpoints to perform an authentication check
@@ -86,6 +82,7 @@ def admin_required(f):
             abort(401)
     return admin_decorator
 
+
 #make a new form to take packet type, source, destination and port as parameters
 #parameters given could be 3 of something or 17.
 #def ipTableForm():
@@ -94,6 +91,7 @@ def admin_required(f):
   #  packetSource = Source:
    # packetDestination = Destination:
    # packetPort = Port:
+
 
 def client_required(f):
     """
@@ -127,7 +125,6 @@ def redirect_to_user(username):
 def render():
     """Endpoint placeholder to redirect to the login page"""
     return redirect(url_for('login'))
-
 
 
 @app.route("/log_download/", methods = ['GET', 'POST'])
@@ -349,6 +346,7 @@ def edit_iptable(ruleid):
             return redirect('/config')
 
     return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
+
 
 @app.route('/config/', methods=['GET'])
 @admin_required
@@ -596,13 +594,11 @@ def fillgroupform(form):
     """
     if request.method == 'POST':
         if form == "CG":
-            #TODO implementation of createNewGroup() - add to database table, and send key files?
             if createNewGroup():
                 return redirect(url_for('confirm', confirmed = 'New Group Addition Confirmed!'))
             else:
-                flash("Group already exists")
+                abort(404)
         elif hl.getGroup("ID", form) != None:
-            #TODO hl.updateGroup in db
             if hl.updateGroup(form, str(request.form['groupname2']), str(request.form['internal2']), str(request.form['external2'])):
                 return redirect(url_for('confirm', confirmed = 'Group Information Successfully Updated'))
             else:
@@ -683,11 +679,32 @@ def createNewUser():
             return False
 
 
-##def createNewGroup():
-##    #TODO add to database table, and send key files
-##
-##
+def createNewGroup():
+    """
+        Handles input of the new group form. 
 
+        If user creation is successful returns back to calling function
+
+        returns : True if group created, False otherwise
+    """
+    if request.method == 'POST':
+        print("MADE IT")
+        groupname = request.form['groupname1']
+        internal = request.form['internal1']
+        external = request.form['external1']
+        userNo = request.form['usersNo1']
+        if int(userNo) == 0:
+            if hl.createGroup(groupname, internal, external):
+                print("MADE IT HERE TOO")
+                return True
+        elif int(userNo) > 0:
+            #TODO send key files if generated users
+            if hl.createGroup(groupname, internal, external, True, userNo):
+                return True
+
+        return False
+
+    
 def passScript():
     """
         Pass variables obtioned in webform to bashscript
@@ -760,6 +777,7 @@ def randompassword():
     size = random.randint(8, 12)
     return ''.join(random.choice(characters) for x in range(size))
 
+
 def emailform():
     """
         Handles input for email confirmation forms
@@ -827,6 +845,7 @@ def setConfig(debug):
     app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
     app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
+
 
 #
 #Cherrypy server base
