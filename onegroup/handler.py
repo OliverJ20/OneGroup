@@ -198,7 +198,7 @@ def createUser(name, passwd, email, group = -1):
     db = Database(filename = filen)
 
     #Create user dictonary for database
-    user = {"Name" : name, "Email" : email, "Password": sha256_crypt.hash(passwd), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : Group}
+    user = {"Name" : name, "Email" : email, "Password": sha256_crypt.hash(passwd), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : group}
 
     #Check if user exists (Check both username and email)
     if getUser("Name",user["Name"]) != None or getUser("Email",user["Email"]) != None:
@@ -355,13 +355,13 @@ def getGroup(group):
         Returns dict of the group containing users
     """
     db = Database(filename = filen)
-    group = db.retrieve("groups",{"ID" : group})
+    grp = db.retrieve("groups",{"ID" : group})
     
     #Get the users in the group
-    group["Users"] = getUsersInGroup(group) 
+    grp["Users"] = getUsersInGroup(group) 
      
     db.close()
-    return group
+    return grp
 
 
 def getUsersInGroup(group):
@@ -373,7 +373,7 @@ def getUsersInGroup(group):
         Returns list of user dictonaries
     """
     db = Database(filename = filen)
-    users = db.retrieve("users",{"Grp",group})
+    users = db.retrieve("users",{"Grp":group})
     db.close()
 
     #Check if empty of single user
@@ -405,9 +405,9 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     addRouteToConfig(internalNetwork)
 
     #Setup IPTables rule
-    rule = ipDictToString({"Chain" : "FORWARD", "Input" : "tun0", "Source" : internalNetwork, "Destination" : externalNetwork, "Action" : "ACCEPT"})
+    rule = ipDictToString({"Table": "","Chain": "FORWARD","Input": "tun0","Output": "", "Protocol": "","Source" : internalNetwork,"Source_Port": "", "Destination": externalNetwork,"Destination_Port": "","State": "","Action": "ACCEPT"})
     addIPRule(rule)
-    group["Rule"] = db.retrieve("firewall",{"Rule",rule})["ID"]
+    group["Rule"] = db.retrieve("firewall",{"Rule":rule})["ID"]
 
     #Add group to the database
     db.insert("groups",group)
@@ -424,10 +424,10 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
             createUser(username, "AAAAAAAAAAA", email, group = grp)
             
             #Get new user ID and add user to the group
-            user = getUser("Name",username)
+            user = getUser("Name",username)["ID"]
             addUserToGroup(user, grp)
     db.close()
-
+    return True
 
 def updateGroup(ID, group):
     """
@@ -470,7 +470,8 @@ def updateGroup(ID, group):
     #Removed ID and Rule fields
     del group["ID"]
     del group["Rule"]
-    
+    del group["Users"]
+ 
     #Update Group entry
     db.update("groups",group,("ID",ID))
     db.close()
@@ -537,7 +538,7 @@ def addUserToGroup(user, group):
     updateUserClientConfig(usr["Keys"],internal,external)
 
     #Update the group's entry to show the used octets
-    updateGroup(grp)
+    updateGroup(group,grp)
 
 
 def getUserClientConfig(user):
@@ -1070,7 +1071,9 @@ def ipDictToString(ip_dict):
         packType = ip_dict['Protocol']
         if not packType=="":
             ipRules = ipRules + " -p " + packType
-        elif packType=="" and not port=="":
+        #TODO This statement breaks because port doesn't exist yet
+        # Temp fix inserted
+        elif packType=="" and not True#port=="":
             ipRules = ipRules + " -p tcp"
             
         source = ip_dict['Source']
@@ -1083,7 +1086,7 @@ def ipDictToString(ip_dict):
              
         destination = ip_dict['Destination']
         if not destination=="":
-            ipRules = ipRules + " -d " + desination
+            ipRules = ipRules + " -d " + destination
             
         port = ip_dict['Destination_Port']
         if not port=="":

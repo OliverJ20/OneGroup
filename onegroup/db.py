@@ -58,6 +58,7 @@ class Database:
 
     
     def update(self, table, row, ID):
+        print(table, row, ID)
         #Create set method
         setStr = ""
         for k in row:

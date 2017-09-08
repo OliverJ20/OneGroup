@@ -598,7 +598,7 @@ def fillgroupform(form):
                 return redirect(url_for('confirm', confirmed = 'New Group Addition Confirmed!'))
             else:
                 abort(404)
-        elif hl.getGroup("ID", form) != None:
+        elif hl.getGroup(form) != None:
             if hl.updateGroup(form, str(request.form['groupname2']), str(request.form['internal2']), str(request.form['external2'])):
                 return redirect(url_for('confirm', confirmed = 'Group Information Successfully Updated'))
             else:
@@ -608,8 +608,8 @@ def fillgroupform(form):
     
     if form == "CG":
         return render_template("userform_create_group.html")
-    elif hl.getGroup("ID", form) != None:
-        group = hl.getGroup("ID", form)
+    elif hl.getGroup(form) != None:
+        group = hl.getGroup(form)
         return render_template("userform_edit_group.html", groupname=group["Name"], internal=group["Internal"], external=group["External"])
     else: #Must be fake input
         abort(404)
@@ -699,7 +699,7 @@ def createNewGroup():
                 return True
         elif int(userNo) > 0:
             #TODO send key files if generated users
-            if hl.createGroup(groupname, internal, external, True, userNo):
+            if hl.createGroup(groupname, internal, external, genUsers=True, numUsers=int(userNo)):
                 return True
 
         return False
