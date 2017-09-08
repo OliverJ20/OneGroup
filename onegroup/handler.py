@@ -1046,6 +1046,17 @@ def ipDictToString(ip_dict):
         
         Returns : String of dictionary values
     """
+    table =""
+    inputFace =""
+    outputFace =""
+    packType =""
+    source =""
+    sourceport =""
+    destination =""
+    port =""
+    state =""
+    action =""
+    
     if len(ip_dict) == 2:
         ipRules = " -A " + ip_dict['CHAIN']
         ipRules = ipRules + " -j " + ip_dict['ACTION']
@@ -1071,9 +1082,8 @@ def ipDictToString(ip_dict):
         packType = ip_dict['Protocol']
         if not packType=="":
             ipRules = ipRules + " -p " + packType
-        #TODO This statement breaks because port doesn't exist yet
-        # Temp fix inserted
-        elif packType=="" and not True#port=="":
+
+        elif packType=="" and port=="":
             ipRules = ipRules + " -p tcp"
             
         source = ip_dict['Source']
