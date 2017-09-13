@@ -52,6 +52,7 @@ button    {
     padding: 10px 20px;
     font-size: 11px;
     min-width: 76px;
+    float:left;
 }
 
 button:hover    {
@@ -215,6 +216,7 @@ footer    {
   font-size: 11px;
   background-color: #db2727;
   min-width: 76px;
+  float: left;
 }
 
 #approveButton:hover{
