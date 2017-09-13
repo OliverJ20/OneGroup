@@ -72,7 +72,8 @@
                     <th>Authentication</th>
                     <th>Connection Type</th>
                     <th>Group</th>
-                    <th>Delete Keys?</th>
+                    <th>Expiry</th>
+                    <th>Options</th>
                 </tr>
                 {% if dataU != None %}
                     {%for users in dataU%}
@@ -82,6 +83,7 @@
                         <td>{{users["Auth_Type"]}}</td>
                         <td>{{users["Account_Type"]}}</td>
                         <td>{{users["Grp"]}}</td>
+                        <td>{{users["Expiry"]}}</td>
                         <td>
                             <a href="/form/{{users["ID"]}}">
                                 <button>Edit</button>
@@ -128,6 +130,7 @@
                         <th>Name</th>
                         <th>Internal Network</th>
                         <th>External Network</th>
+                        <th>Options</th>
                     </tr>
                     {% if dataG != None %}
                         {%for members in dataG%}

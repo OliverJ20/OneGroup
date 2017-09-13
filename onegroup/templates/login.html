@@ -4,7 +4,7 @@
     <body>
         <center>
         </br>
-            <img src="static/logoblue.png"
+            <img src="{{ url_for('static', filename = 'logoblue.png') }}"
                  width="150" height="75"/>
                  <div id="alertDiv">
                  {% with messages = get_flashed_messages() %}

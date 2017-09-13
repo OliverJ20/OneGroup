@@ -559,7 +559,7 @@ def filluserform(form):
                 flash("User already exists")
         
         elif hl.getUser("ID", form) != None:
-            if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2'])):
+            if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2']),str(request.form['expiry2'])):
                 return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
             else:
                 flash("Cannot Update User Information")
