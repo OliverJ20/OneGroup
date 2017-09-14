@@ -7,7 +7,7 @@
             TODO OJ MAKE POLICY FORM CHAIN AND ACTION STUFF.
 
         -->
-           <form  vname="ipform" method=post>
+           <form action="" vname="ipform" method=post>
             <label for = "Policy">Policy: </label>
                <br>
            <select value = "CHAIN" id = "Chain" name = "Chain" >
@@ -101,10 +101,13 @@
                     <option value ="SNAT">SNAT</option>
                 {% endif %}
             </select>
-           <br>
+           <br  />
+           <div class= "bodydiv" div id = "submitDiv">
+               <input type="submit" name="iptables1" value="Send"></input>
+           </div>
         </form>
     {% else %}
-        <form  vname="ipform" method=post>
+        <form action="" vname="ipform" method=post>
             <label for ="source">Source</label>
             <br/>
             <input type = "text" id = "source"  name = "source" value = '{{rule["Source"]}}'>
@@ -294,8 +297,9 @@
                 {% endif %}
             </select>
             <br  />
-
-            <input type = "button" id = "iptablesSubmit" class = "iptablesSubmit" value = "submit" onclick = "getIPTablesData()"> 
+            <div class= "bodydiv" div id = "submitDiv">
+                 <input type="submit" name="iptables1" value="Send"></input>
+            </div> 
         </form>
     {% endif %}
     </body>

@@ -1167,8 +1167,8 @@ def ipDictToString(ip_dict):
     action =""
     
     if len(ip_dict) == 2:
-        ipRules = " -A " + ip_dict['CHAIN']
-        ipRules = ipRules + " -j " + ip_dict['ACTION']
+        ipRules = " -A " + ip_dict['Chain']
+        ipRules = ipRules + " -j " + ip_dict['Action']
     else:
         ipRules = ip_dict['Chain']
         

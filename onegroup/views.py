@@ -338,7 +338,7 @@ def edit_iptable(ruleid):
         if rule["Policy"] == 1:
             ip_dict = {
                 "Chain" : request.form["Chain"],
-                "Action" : requests.form["Action"]
+                "Action" : request.form["Action"]
             }
         else:
             ip_dict = {
@@ -352,11 +352,11 @@ def edit_iptable(ruleid):
                 "Output" : request.form["output"],
                 "Protocol" : request.form["Protocol"],
                 "State" : request.form["State"],
-                "Action" : requests.form["Action"]
+                "Action" : request.form["Action"]
             }
-            ip_string = hl.ipDictToString(ip_dict)
-            hl.updateIPRules(ruleid, ip_string)
-            return redirect('/config')
+        ip_string = hl.ipDictToString(ip_dict)
+        hl.updateIPRules(ruleid, ip_string)
+        return redirect(url_for('show_config'))
 
     return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
 
