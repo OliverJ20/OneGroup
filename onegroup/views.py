@@ -685,31 +685,26 @@ def createNewUser():
         expiry = request.form['expiry1']
         #Check if the user creation was succesful
         if hl.createUser(name, accountType, authType, passwd = password,email = email, expiry = expiry):
-             user = hl.getUser("Email", recipientEmail[0])
-             hl.zipUserKeys(user['Keys'])
-          
-          if(auth == "Email")
-               subjectTitle = "OneGroup account keys"
-               recipientEmail =[email]
-               bodyMessage = "here are your keys"
-               attachmentName = "user keys"
-               filename = keys_dir + user['Keys'] + '.zip'
-               attachmentFilePath = filename
-               emailMessage(subjectTitle, recipientEmail, bodyMessage,attachmentName, attachmentFilePath)  
+            user = hl.getUser("Email", recipientEmail[0])
+            hl.zipUserKeys(user['Keys'])
 
-                 
-          elif(auth == "Passphrase"):
-                
-                 subjectTitle = "OneGroup account details"
-                 recipientEmail = [email]
-                 bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
-                 emailMessage(subjectTitle, recipientEmail, bodyMessage)
-                
-            return True        
+            if(auth == "Email"):
+                subjectTitle = "OneGroup account keys"
+                recipientEmail =[email]
+                bodyMessage = "here are your keys"
+                attachmentName = "user keys"
+                filename = keys_dir + user['Keys'] + '.zip'
+                attachmentFilePath = filename
+                emailMessage(subjectTitle, recipientEmail, bodyMessage,attachmentName, attachmentFilePath)
+
+            elif(auth == "Passphrase"):
+                subjectTitle = "OneGroup account details"
+                recipientEmail = [email]
+                bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
+                emailMessage(subjectTitle, recipientEmail, bodyMessage)
+            return True
         else:
-            return False
-
-        
+            return False        
 
 
 def createNewGroup():
@@ -884,7 +879,7 @@ def setKeyExpiry():
         Adds job to the scheduler and starts the scheduler
     """
     #Add key expiry job to run every hour
-    sched.add_job(hl.checkExpiredKeys(),'cron',minute=0,id='key_expire_job')
+    sched.add_job(hl.checkExpiredKeys,'cron',minute=0,id='key_expire_job')
     
     #Start scheduler
     sched.start()
