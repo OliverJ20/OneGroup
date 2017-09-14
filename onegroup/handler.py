@@ -182,29 +182,31 @@ def deleteUser(ID):
     return True
 
 
-def createUser(name, passwd, email, group = -1):
+def createUser(name, accountType, authType, email = '', passwd = '', group = -1):
 
     """
         Creates a user entry in the database and generates key/cert pair
 
-        name  : User's name/username
-        passwd: User's password 
-        email : User's email
-        group : User's group (-1 meaning no group)
+        name        : User's name/username
+        accountType : The account type of the user (Client, Admin)
+        authType    : The authorisation type of the user (Passphrase, Email, None) (Admin must use Passphrase) 
+        email       : User's email (blank if not set. Cannot be set if authType is None)
+        passwd      : User's password (blank if not set. Can only be set if authType is Passphrase. Admin must use a password)
+        group       : User's group (-1 meaning no group) 
 
         returns: true if successful, else false
     """
     #Connect to the database
     db = Database(filename = filen)
 
-    #Create user dictonary for database
-    user = {"Name" : name, "Email" : email, "Password": sha256_crypt.hash(passwd), "Auth_Type" : "Password", "Account_Type" : "Client", "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : group}
-
-    #Check if user exists (Check both username and email)
-    if getUser("Name",user["Name"]) != None or getUser("Email",user["Email"]) != None:
-        logging.error("Error creating user %s user exists",name)
+    #Error checking
+    if not validateNewUser(name, accountType, authType, email, passwd):   
         return False
-    
+
+    #Create user dictonary for database
+    password = sha256_crypt.hash(passwd) if passwd != '' else passwd 
+    user = {"Name" : name, "Email" : email, "Password": password, "Auth_Type" : authType, "Account_Type" : accountType, "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : group}
+ 
     #create the users key/cert pair
     args = [
         "add",
@@ -220,6 +222,101 @@ def createUser(name, passwd, email, group = -1):
     db.close()
     return True
           
+def updateUser(ID, username, email, authtype, accounttype, group, expiry):
+    """
+        Updates the information of a specified user from the users table
+
+        ID : ID field of user as specified in the database
+        username : of the user
+        email : of the user
+        authtype : of the user
+        accounttype : of the user
+        group : user's group
+
+        Returns True if successful else false
+    """
+    #Error checking
+    if not validateNewUser(name, accountType, authType, email, passwd):   
+        return False
+    else:
+        oldUser = getUser("ID",ID)
+
+        #Check New username isn't used
+        if oldUser["Name"] != username and getUser("Name", username) != None:
+            return False
+        #Check new email isn't used
+        elif oldUser["Email"] != email and getUser("Name", email) != None:
+            return False
+
+    #Update user data
+    db = Database(filename=filen)
+    try:
+        db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype, "Grp" : group, "Expiry": expiry}, ("ID", ID))
+    except:
+        db.close()
+        return False
+
+    db.close()
+    return True
+
+def validateNewUser(name, accountType, authType, email, passwd, existing = True):
+    """
+        Checks entered form data for invalid data specified below
+
+        name        : User's name/username
+        accountType : The account type of the user (Client, Admin)
+        authType    : The authorisation type of the user (Passphrase, Email, None) (Admin must use Passphrase) 
+        email       : User's email (blank if not set. Cannot be set if authType is None)
+        passwd      : User's password (blank if not set. Can only be set if authType is Passphrase. Admin must use a password)
+        existing    : Flag to perform checks for existing username and email
+
+        returns: true if valid, else false
+    """
+    #Invalid account type
+    if accountType not in ["Client","Admin"]:
+        logging.error("Error validating user %s invalid account type: %s",name,accountType)
+        return False
+    #Invalid authentication type
+    elif authType not in ["Passphrase","Email","None"]:
+        logging.error("Error validating user %s invalid authentication type: %s",name,authType)
+        return False
+    
+    #Admin account but not passphrase authentication 
+    elif accountType == "Admin" and authType != "Passphrase":
+        logging.error("Error validating user %s attempted to make an Admin account without a passphrase",name)
+        return False
+    
+    #Email not set
+    elif email == '' and authType != "None": 
+        logging.error("Error validating user %s Email not set for authentication type: %s",name,accountType)
+        return False
+    #Email incorrectly set
+    elif email != '' and authType == "None":
+        logging.error("Error validating user %s Email set for authentication type None",name,accountType)
+        return False
+    
+    #Password not set
+    elif paaswd == '' and authType == "Passphrase": 
+        logging.error("Error validating user %s Password not set for authentication type Passphrase",name)
+        return False
+    #Password incorrectly set
+    elif passwd != '' and authType != "Passphrase":
+        logging.error("Error validating user %s Password set for authentication type: %s",name,accountType)
+        return False
+
+    #Name already exists
+    if existing:
+        if getUser("Name",user["Name"]) != None:
+            logging.error("Error validating user %s Name in use",name)
+            return False
+        #Email already in use
+        elif authType != "None" and getUser("Email",user["Email"]) != None: 
+            logging.error("Error validating user %s Email in use",name)
+            return False
+    
+    #Form data is correct
+    return True
+
 
 def zipUserKeys(user):
     """
@@ -262,22 +359,6 @@ def createUserFilename(name):
     
     return userFilen
 
-def updateUser(ID, username, email, authtype, accounttype, group, expiry):
-    """
-        Updates the information of a specified user from the users table
-
-        ID : ID field of user as specified in the database
-        username : of the user
-        email : of the user
-        authtype : of the user
-        accounttype : of the user
-        group : user's group
-    """
-    db = Database(filename=filen)
-    db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype, "Grp" : group, "Expiry": expiry}, ("ID", ID))
-    db.close()
-    ##TODO check when input does not work
-    return True
 
 def confirmLogin(email, password):
     """
