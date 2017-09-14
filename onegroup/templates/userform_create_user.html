@@ -26,12 +26,12 @@
                     <p>Authentication Type</p>
                     <select name="authType1">
                         <option value="Passphrase">Username & Password</option>
-                        <option value="Radius">Radius</option>
-                        <option value="Phone">Phone</option>
+                        <option value="Radius">Email</option>
+                        <option value="Phone">Null</option>
                     </select>
 		    <br>
 		    <p>Assign Group</p>
-                    <select name="authType1">
+                    <select name="groupNumber1">
                         <option value="-1">No group</option>
                        	{% for groupNumber in groupNumbers %}
 			<option value="{{ groupNumber }}">{{ groupNumber }}</option>

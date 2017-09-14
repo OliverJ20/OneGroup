@@ -666,17 +666,40 @@ def createNewUser():
         # password = request.form['pass1']
         password = randompassword()
         email = request.form['email1']
+        auth_type = request.form["authType1"]
+         
+
         #Check if the user creation was succesful
-        if hl.createUser(name,password,email):
-            subjectTitle = "OneGroup account details"
-            recipientEmail = [email]
-            bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
-            emailMessage(subjectTitle, recipientEmail, bodyMessage)
-            user = hl.getUser("Email", recipientEmail[0])
-            hl.zipUserKeys(user['Keys'])
-            return True
+        if hl.createUser(name,accountType,auth_type,email=email,passwd =password);
+             user = hl.getUser("Email", recipientEmail[0])
+             hl.zipUserKeys(user['Keys'])
+          
+          if(auth_type == "Email")
+               subjectTitle = "OneGroup account keys"
+               recipientEmail =[email]
+               bodyMessage = "here are your keys"
+               attachmentName = "user keys"
+               filename = keys_dir + user['Keys'] + '.zip'
+               attachmentFilePath = filename
+               emailMessage(subjectTitle, recipientEmail, bodyMessage,attachmentName, attachmentFilePath)  
+                 
+
+    
+          elif(authType == "Passphrase"):
+                
+                 subjectTitle = "OneGroup account details"
+                 recipientEmail = [email]
+                 bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
+                 emailMessage(subjectTitle, recipientEmail, bodyMessage)
+                
+                 
+
+            
+            return True        
         else:
             return False
+
+        
 
 
 def createNewGroup():
