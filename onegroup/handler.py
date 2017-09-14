@@ -183,7 +183,7 @@ def deleteUser(ID):
     return True
 
 
-def createUser(name, accountType, authType, email = '', passwd = '', group = -1):
+def createUser(name, accountType, authType, email = '', passwd = '', group = -1, expiry= ''):
 
     """
         Creates a user entry in the database and generates key/cert pair
@@ -201,7 +201,7 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1)
     db = Database(filename = filen)
 
     #Error checking
-    if not validateNewUser(name, accountType, authType, email, passwd):   
+    if not validateNewUser(name, accountType, authType, email, passwd, expiry):   
         return False
 
     #Create user dictonary for database
@@ -237,7 +237,7 @@ def updateUser(ID, username, email, authtype, accounttype, group, expiry):
         Returns True if successful else false
     """
     #Error checking
-    if not validateNewUser(name, accountType, authType, email, passwd):   
+    if not validateNewUser(name, accountType, authType, email, passwd, expiry):   
         return False
     else:
         oldUser = getUser("ID",ID)
@@ -260,7 +260,7 @@ def updateUser(ID, username, email, authtype, accounttype, group, expiry):
     db.close()
     return True
 
-def validateNewUser(name, accountType, authType, email, passwd, existing = True):
+def validateNewUser(name, accountType, authType, email, passwd, expiry, existing = True):
     """
         Checks entered form data for invalid data specified below
 
@@ -297,13 +297,14 @@ def validateNewUser(name, accountType, authType, email, passwd, existing = True)
         return False
     
     #Password not set
-    elif paaswd == '' and authType == "Passphrase": 
+    elif passwd == '' and authType == "Passphrase": 
         logging.error("Error validating user %s Password not set for authentication type Passphrase",name)
         return False
     #Password incorrectly set
     elif passwd != '' and authType != "Passphrase":
         logging.error("Error validating user %s Password set for authentication type: %s",name,accountType)
         return False
+    #Expiry incorrectly set
 
     #Name already exists
     if existing:
