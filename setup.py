@@ -71,7 +71,8 @@ setup(
         'flask-mail',
         'cherrypy',
         'passlib',
-        'paste'
+        'paste',
+        'apscheduler'
     ],
     scripts=[
         'onegroup/scripts/userman',
