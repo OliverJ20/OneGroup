@@ -679,8 +679,12 @@ def createNewUser():
         # password = request.form['pass1']
         password = randompassword()
         email = request.form['email1']
+        auth = request.form['authType1']
+        account = request.form['accountType1']
+        group = request.form['groupType1']
+        expiry = request.form['expiry1']
         #Check if the user creation was succesful
-        if hl.createUser(name,password,email):
+        if hl.createUser(name, accountType, authType, passwd = password,email = email, expiry = expiry):
             subjectTitle = "OneGroup account details"
             recipientEmail = [email]
             bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)

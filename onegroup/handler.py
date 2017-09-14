@@ -95,7 +95,7 @@ def loadConfig():
     except Exception as e:
         logging.error("Error reading config at line %s",e)
 
-    #loadIptables()
+    loadIptables()
 
 
 def loadIptables():
@@ -206,7 +206,7 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
 
     #Create user dictonary for database
     password = sha256_crypt.hash(passwd) if passwd != '' else passwd 
-    user = {"Name" : name, "Email" : email, "Password": password, "Auth_Type" : authType, "Account_Type" : accountType, "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : group}
+    user = {"Name" : name, "Email" : email, "Password": password, "Auth_Type" : authType, "Account_Type" : accountType, "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : group, "Expiry": expiry}
  
     #create the users key/cert pair
     args = [
@@ -305,7 +305,9 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         logging.error("Error validating user %s Password set for authentication type: %s",name,accountType)
         return False
     #Expiry incorrectly set
-
+    elif expiry == 'test':
+        logging.error("Error validating user %s Expiry set for authentication type: %s",name,expiry)
+        return False
     #Name already exists
     if existing:
         if getUser("Name",user["Name"]) != None:
@@ -361,29 +363,6 @@ def createUserFilename(name):
     
     return userFilen
 
-def checkExpiredKeys():
-    """
-        Checks all the keys in the database to see if they have expired. If so, remove them
-    """
-    now = datetime.now()
-    for user in getUsers():
-        #If the user's key doesn't expire, skip
-        if user["Expiry"] == "":
-            continue
-
-        #If expired, delete the keys
-        expire = datetime.strptime("%Y-%m-%d:%H%M")   
-        if expire > now:
-            #Check setting to determine if the user should be deleted on key expiration 
-            if os.getenv(tag+'delete_on_expire',base_config['delete_on_expire']).lower() == "true":
-                deleteUser(user["ID"])
-            else:
-                args = [
-                    "del",
-                    user["Keys"],
-                ]
-                callScript('userman',args)
-             
 
 def confirmLogin(email, password):
     """
@@ -1378,4 +1357,9 @@ def logDownload(startDate,endDate):
 
     #return the new filepath
     return newLogFile
+
+
+
+
+
 

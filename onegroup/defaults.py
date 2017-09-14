@@ -24,7 +24,7 @@ base_config = {
     "openvpn_server_config" : "/etc/openvpn/server.conf",
     "openvpn_client_config" : "/etc/openvpn/client.conf",
     "secret" : "RANDOM",
-    "delete_on_expire" : "False"
+    "delete_on_expire" : "False",
     "server_port" : 80,
     "server_host" : '0.0.0.0',
     "email" : "email@domain.com",
