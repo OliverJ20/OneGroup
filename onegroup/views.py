@@ -193,7 +193,17 @@ def retrieve_user_page():
     print("YOYOYOYOYOYO")
     requests = hl.retrieveRequests()
     print(requests)
-    return render_template('users.html', testdata = requests, dataU = users, dataG = groups) 
+    """rLen =0;
+    uLen =0;
+    gLen =0;
+    if(requests!=None):
+        rLen=len(requests)
+    uLen=len(users)
+    gLen=len(groups)
+    print(rLen)
+    print(uLen)
+    print(gLen)"""
+    return render_template('users.html', dataR = requests, dataU = users, dataG = groups) 
 
 
 @app.route('/approve_req/', methods=['POST'])
