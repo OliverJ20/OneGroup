@@ -7,46 +7,74 @@
         <div class= "bodydiv">
             <div class= "bodydiv" id= "formDiveft">
                 <h2>Enter User Details</h2>
-                <form action="{{ url_for('home') }}" vname="userCreateForm" id="detailsLeft" method=post>
-                    <p>Name</p>
-                    <input type="text" name="name1" placeholder="Enter Name" maxlength="40" > </input>
+                <!-- What account is being created !-->
+		{% if postback < 0 %} 
+		    <form action="{{ url_for('filluserform', form='AC') }}" vname="userAccount" id="detailsLeft" method=post>
+		        <p>Account Type</p>
+                        <select name="accountType1">
+			    <option disabled selected value> -- Select -- </option>
+                            <option value="Client">Client</option>
+                            <option value="Admin">Admin</option>
+                        </select>                
 
-                    <p>Email</p>
-                    <input type="text" name="email1" placeholder="Enter Email" onkeyup="checkForm()" maxlength="40"> </input>
-
-                    {# <p>Password</p> #}
-                    {# <input type="text" name="pass1" placeholder="Enter Password" maxlength="40"> </input> #}
-
-                    <p>Account Type</p>
-                    <select name="accountType1">
-                        <option value="Client">Client</option>
-                        <option value="Admin">Admin</option>
-                    </select>
-
-                    <p>Authentication Type</p>
-                    <select name="authType1">
-                        <option value="Passphrase">Username & Password</option>
-                        <option value="Radius">Email</option>
-                        <option value="Phone">Null</option>
-                    </select>
-		    <br>
-		    <p>Assign Group</p>
-                    <select name="groupType1">
-                        <option value="-1">No group</option>
-                       	{% for groupNumber in groupNumbers %}
-			<option value="{{ groupNumber }}">{{ groupNumber }}</option>
-			{% endfor %}
-                    </select>
-                    
-                    <br>
-                    <p>Expiry</p>
-                    <input type="text" name="expiry1" placeholder="Enter Expiry Date" maxlength="40" > </input>
+		        <div class= "bodydiv" div id = "submitDiv">
+                          <input type="submit" name="userform1" value="OK"></input>
+                        </div>
+                    </form>
+                {% endif %}
+			
+		{% if account == "Client" %}
+                    <form action="{{ url_for('filluserform', form='AU') }}" vname="userAuthentication" id="detailsLeft" method=post>
+			<p>Authentication Type</p>
+                        <select name="authType1">
+			    {% if auth == "NULL" %} <option disabled selected value> -- Select -- </option> {% endif %}
+                            <option {% if auth == "Passphrase" %} selected {% endif %} value="Passphrase">Username & Password</option>
+                            <option {% if auth == "Email" %} selected {% endif %} value="Email">Email</option>
+                            <option {% if auth == "None" %} selected {% endif %} value="None">None</option>
+                        </select>
 		    
-                    <br></br>
+		        <div class= "bodydiv" div id = "submitDiv">
+                            <input type="submit" name="userform1" value="OK"></input>
+                        </div>
+		    </form>
+		{% endif %}
+		
+		<form action="{{ url_for('filluserform' , form='DE')}}" vname="userCreateForm" id="detailsLeft" method=post>
+		    {% if auth != "NULL"%} 
+		        <p>Name</p>
+                        <input type="text" name="name1" placeholder="Enter Name" maxlength="40" > </input>
+		    {% endif %}
 
-                    <div class= "bodydiv" div id = "submitDiv">
-                      <input type="submit" name="userform1" value="Send"></input>
-                    </div>
+	            {% if auth == "Passphrase" or auth == "Email" or account == "Admin" %}    
+                        <p>Email</p>
+                        <input type="text" name="email1" placeholder="Enter Email" onkeyup="checkForm()" maxlength="40"> </input>
+		    {% endif %}
+
+	   	    {% if auth == "Passphrase" or account == "Admin" %} 
+                        {# <p>Password</p> #} <!-- CHECK WHETHER PASSWORD SHOULD BE AVAILABLE ON HERE !-->
+                        {# <input type="text" name="pass1" placeholder="Enter Password" maxlength="40"> </input> #}
+		    {% endif %}
+	
+		    {% if account == "Client" and auth != "NULL" %} 
+		        <p>Assign Group</p>
+                        <select name="groupId1">
+                            <option value="-1" selected>No group</option>
+                            {% for groupNumber in groupNumbers %}
+			        <option value="{{ groupNumber }}">{{ groupNumber }}</option>
+			    {% endfor %}
+                        </select>
+                    
+                        <p>Expiry</p>
+                        <input type="text" name="expiry1" placeholder="Enter Expiry Date" maxlength="40" > </input>
+                        <br  />
+                        <br  />
+		    {% endif %}
+
+		    {% if postback > 0 and auth != "NULL" %}
+                        <div class= "bodydiv" div id = "submitDiv">
+                         <input type="submit" name="userform1" value="Send"></input>
+                        </div>
+		    {% endif %}
                 </form>
             </div>
         </div>

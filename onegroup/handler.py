@@ -310,11 +310,11 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         return False
     #Name already exists
     if existing:
-        if getUser("Name",user["Name"]) != None:
+        if getUser("Name", name) != None:
             logging.error("Error validating user %s Name in use",name)
             return False
         #Email already in use
-        elif authType != "None" and getUser("Email",user["Email"]) != None: 
+        elif authType != "None" and getUser("Email", email) != None: 
             logging.error("Error validating user %s Email in use",name)
             return False
     
@@ -530,7 +530,7 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
             #TODO Polymorph create user to support auto generated users
             username = "{}_{}".format(name,i+1)
             email = "{}@test.com".format(username)
-            createUser(username, "AAAAAAAAAAA", email, group = grp)
+            createUser(username, "Client", "None", email = email, group = grp)
             
             #Get new user ID and add user to the group
             user = getUser("Name",username)["ID"]
