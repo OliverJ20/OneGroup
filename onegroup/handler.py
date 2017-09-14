@@ -35,6 +35,7 @@ def init_database():
         db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "Test"})
         db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "Test"})
         db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "Test"})
+        db.insert("users", {"Name" : "Newadmin", "Email" : "newadmin@test.com", "Password" : sha256_crypt.hash("new"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "Test"})
         
         #Test group users
         db.insert("users", {"Name" : "Group01_1", "Email" : "one@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_1", "Key_Distributed" : 0, "Grp" : 1, "Expiry": "Test"})
@@ -94,7 +95,7 @@ def loadConfig():
     except Exception as e:
         logging.error("Error reading config at line %s",e)
 
-    loadIptables()
+    #loadIptables()
 
 
 def loadIptables():
@@ -359,6 +360,29 @@ def createUserFilename(name):
     
     return userFilen
 
+def checkExpiredKeys():
+    """
+        Checks all the keys in the database to see if they have expired. If so, remove them
+    """
+    now = datetime.now()
+    for user in getUsers():
+        #If the user's key doesn't expire, skip
+        if user["Expiry"] == "":
+            continue
+
+        #If expired, delete the keys
+        expire = datetime.strptime("%Y-%m-%d:%H%M")   
+        if expire > now:
+            #Check setting to determine if the user should be deleted on key expiration 
+            if os.getenv(tag+'delete_on_expire',base_config['delete_on_expire']).lower() == "true":
+                deleteUser(user["ID"])
+            else:
+                args = [
+                    "del",
+                    user["Keys"],
+                ]
+                callScript('userman',args)
+             
 
 def confirmLogin(email, password):
     """
@@ -1353,9 +1377,4 @@ def logDownload(startDate,endDate):
 
     #return the new filepath
     return newLogFile
-
-
-
-
-
 

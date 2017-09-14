@@ -2,13 +2,15 @@
 import cherrypy 
 import random
 import string
-from paste.translogger import TransLogger
-from flask_mail import Message, Mail
-from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
-from functools import wraps
 import re
 import os
 import logging
+
+from functools import wraps
+from paste.translogger import TransLogger
+from flask_mail import Message, Mail
+from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
+from apscheduler.schedulers.background import BackgroundScheduler
 
 try:
     from onegroup.defaults import *
@@ -20,6 +22,7 @@ except:
 
 app = Flask(__name__)
 mail = Mail(app)
+sched = BackgroundScheduler()
 
 #app.config.from_object(__name__)
 
@@ -193,7 +196,17 @@ def retrieve_user_page():
     print("YOYOYOYOYOYO")
     requests = hl.retrieveRequests()
     print(requests)
-    return render_template('users.html', testdata = requests, dataU = users, dataG = groups) 
+    """rLen =0;
+    uLen =0;
+    gLen =0;
+    if(requests!=None):
+        rLen=len(requests)
+    uLen=len(users)
+    gLen=len(groups)
+    print(rLen)
+    print(uLen)
+    print(gLen)"""
+    return render_template('users.html', dataR = requests, dataU = users, dataG = groups) 
 
 
 @app.route('/approve_req/', methods=['POST'])
@@ -869,6 +882,16 @@ def setConfig(debug):
     app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
 
+def setKeyExpiry():
+    """
+        Adds job to the scheduler and starts the scheduler
+    """
+    #Add key expiry job to run every hour
+    sched.add_job(hl.checkExpiredKeys(),'cron',minute=0,id='key_expire_job')
+    
+    #Start scheduler
+    sched.start()
+
 
 #
 #Cherrypy server base
@@ -884,10 +907,13 @@ def run_server(development=False):
     
     #Set the configuration
     setConfig(development)
-    
+
+    #Setup key expiry 
+    setKeyExpiry()
+ 
     #Run development server if in development mode
     if development:
-        app.run()
+        app.run(use_reloader=False)
 
         #Delete config
         for key in base_config:

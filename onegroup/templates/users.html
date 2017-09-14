@@ -2,67 +2,6 @@
 {% block body %}
     <body>
         <center>
-        <div class="contentDiv" >
-            <div class= "contentDiv" id= "bodydiv">
-                <h2>User Information</h2>
-            </div>
-            <div id= "bodydivleft">
-                <h2>User Permissions</h2>
-                <div class="tableTitleDiv">
-                    <p>User</p>
-                </div>
-                <div class="tableTitleDiv">
-                    <p>Group</p>
-                </div>
-                <div class="tableTitleDiv">
-                    <p>Deny Access</p>
-                </div>
-                <div class="tableContentDiv">
-                    <p>Search Users:</p> <input type="text">
-                    <button onclick="myFunction()">Search</button>
-                </div>
-                <div class="tableContentDiv">
-                    <p>Select Group</p>
-                    <select>
-                        <option value="1">Group 1</option>
-                        <option value="2">Group 2</option>
-                    </select>
-                </div>
-                <div class="tableContentDiv">
-                    <p>Deny Access?</p>
-                    <input type="checkbox" name="deny" value="denied">
-                </div>
-                <button onclick="myFunction()">Confirm Changes</button>
-            </div>
-            <div id= "bodydivright">
-                <h2>Group Permissions</h2>
-                <div class="tableTitleDiv">
-                    <p>User</p>
-                </div>
-                <div class="tableTitleDiv">
-                    <p>Group</p>
-                </div>
-                <div class="tableTitleDiv">
-                    <p>Deny Access</p>
-                </div>
-                <div class="tableContentDiv">
-                    <p>Search Users:</p> <input type="text">
-                    <button onclick="myFunction()">Search</button>
-                </div>
-                <div class="tableContentDiv">
-                    <p>Select Group</p>
-                    <select>
-                        <option value="1">Group 1</option>
-                        <option value="2">Group 2</option>
-                    </select>
-                </div>
-                <div class="tableContentDiv">
-                    <p>Deny Access?</p>
-                    <input type="checkbox" name="deny" value="denied">
-                </div>
-                <button onclick="myFunction()">Confirm Changes</button>
-
-            </div>
             <h1> Current Activity </h1>
 
             <table>
@@ -76,6 +15,7 @@
                     <th>Options</th>
                 </tr>
                 {% if dataU != None %}
+                    {% if dataU[0] is mapping%}  
                     {%for users in dataU%}
                       <tr>
                         <td>{{users["Name"]}}</td>
@@ -95,6 +35,26 @@
                         </td>
                       </tr>
                     {% endfor %}
+                    {% endif %}
+                    {% if dataU[0] is not mapping %}
+                    <tr>
+                        <td>{{dataU["Name"]}}</td>
+                        <td>{{dataU["Email"]}}</td>
+                        <td>{{dataU["Auth_Type"]}}</td>
+                        <td>{{dataU["Account_Type"]}}</td>
+                        <td>{{dataU["Grp"]}}</td>
+                        <td>{{dataU["Expiry"]}}</td>
+                        <td>
+                            <a href="/form/{{dataU["ID"]}}">
+                                <button>Edit</button>
+                            </a>
+                            <form action="{{ url_for('delete_key') }}" method=post>
+                            <input type="text" name="name" value= {{dataU["ID"]}} id = "hiddenInput" readonly>
+                            <input type="submit" value="Delete" id = "declineButton"></input>
+                            </form>
+                        </td>
+                      </tr>
+                    {% endif %}
                 {% endif %}
               </table>
 
@@ -108,8 +68,9 @@
                       <th>Request</th>
                       <th>Approval?</th>
                   </tr>
-                    {% if testdata != None %}                                      
-                      {%for notifications in testdata%}
+                    {% if dataR != None %}      
+                    {% if dataR is mapping %}                     
+                      {%for notifications in dataR %}
                         <tr><td>{{notifications["User"]}}</td>
                           <td>{{notifications["Request"]}}</td>
                           <td><form action="{{ url_for('approve_req') }}" vname="approveForm" method=post>
@@ -121,6 +82,19 @@
                           </td>
                         </tr>
                       {% endfor %}
+                      {% endif %}
+                      {% if dataR is not mapping %} 
+                      <tr><td>{{dataR["User"]}}</td>
+                        <td>{{dataR["Request"]}}</td>
+                        <td><form action="{{ url_for('approve_req') }}" vname="approveForm" method=post>
+                          <input type="text" name="user" value= {{dataR["User"]}} id = "hiddenInput" readonly>
+                          <input type="text" name="request" value= {{dataR["Request"]}}  id = "hiddenInput" readonly>
+                          <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
+                          <input type="submit" name="reqOption" value="Decline" id = "declineButton"></input>
+                        </form>
+                        </td>
+                      </tr>
+                      {% endif %}
                 {% endif %}
                 </table>
 
@@ -133,22 +107,40 @@
                         <th>Options</th>
                     </tr>
                     {% if dataG != None %}
-                        {%for members in dataG%}
-                          <tr>
-                            <td>{{members['Name']}}</td>
-                            <td>{{members['Internal']}}</td>
-                            <td>{{members['External']}}</td>
+                        {% if dataG[0] is mapping %}
+                            {%for members in dataG %}
+                            <tr>
+                                <td>{{members['Name']}}</td>
+                                <td>{{members['Internal']}}</td>
+                                <td>{{members['External']}}</td>
+                                <td>
+                                    <a href="/groupform/{{members["ID"]}}">
+                                        <button>Edit</button>
+                                    </a>
+                                    <form action="{{ url_for('delete_key') }}" method=post>
+                                    <input type="text" name="name" value= {{members["ID"]}} id = "hiddenInput" readonly>
+                                    <input type="submit" value="Delete" id = "declineButton"></input>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+                        {% if dataG[0] is not mapping %}
+                        <tr>
+                            <td>{{dataG['Name']}}</td>
+                            <td>{{dataG['Internal']}}</td>
+                            <td>{{dataG['External']}}</td>
                             <td>
-                                <a href="/groupform/{{members["ID"]}}">
+                                <a href="/groupform/{{dataG["ID"]}}">
                                     <button>Edit</button>
                                 </a>
                                 <form action="{{ url_for('delete_key') }}" method=post>
-                                <input type="text" name="name" value= {{members["ID"]}} id = "hiddenInput" readonly>
+                                <input type="text" name="name" value= {{dataG["ID"]}} id = "hiddenInput" readonly>
                                 <input type="submit" value="Delete" id = "declineButton"></input>
                                 </form>
                             </td>
-                          </tr>
-                        {% endfor %}
+                        </tr>
+                        {% endif %}
                     {% endif %}
                   </table>
             </div>
