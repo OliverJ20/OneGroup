@@ -15,9 +15,18 @@ function hideButton(){
 
 function displayForm() {
    document.getElementById('formDivleft').style.display = "block";
-   
-
 }
+
+function testDisplay() {
+    var e = document.getElementByName("accountType1");
+    var strUser = e.options[e.selectedIndex].value;
+    console.log(strUser);
+    console.log("Usr");
+    if(strUser == "Client"){
+        document.getElementByName('authType1').style.display = "block";
+    }
+ }
+
 function testfunction()
 {
     console.log ("hello there young one");
