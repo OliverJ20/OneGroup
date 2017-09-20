@@ -578,6 +578,7 @@ def filluserform(form):
 ##                //SHOW NAME, EMAIL, PASS
 
     if request.method == 'POST':
+        #CREATE USER SECOND STEP
         if form == "AC":
             #Store Account Type in session variable 
             if request.form['accountType1'] == "Client":
@@ -588,7 +589,8 @@ def filluserform(form):
                 return render_template("userform_create_user.html", postback = 1, account = "Admin", auth = "Passphrase")
             else:
                 abort(404)
-             
+
+        #CREATE USER THIRD STEP
         elif form == "AU":
             #Store Auth Type in session variable
             if request.form['authType1'] == "Passphrase":
@@ -602,6 +604,8 @@ def filluserform(form):
                 return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "None")
             else:
                 abort(404)
+
+        #CREATE USER FOURTH STEP -> ALL DONE
         elif form == "DE":
             #MAKE SURE ALL VALUE THAT ARE NOT PART OF REQUEST.FORM DO NOT THROW 400 BAD REQUEST ERROR
             name = request.form['name1']
@@ -631,22 +635,62 @@ def filluserform(form):
                 return redirect(url_for('confirm', confirmed = 'New User Addition Confirmed!'))
             else:
                 flash("User already exists")
-                    
-        elif hl.getUser("ID", form) != None:
-            if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2']), str(request.form['expiry2'])):
+
+        #EDIT USER SECOND STEP        
+        elif form == "ET":
+            if request.form['authType2'] == "Passphrase":
+                session['user']["Auth_Type"] = "Passphrase"
+                return render_template("userform_create_user.html", postback = 1, accounttype = "Client", authtype = "Passphrase")
+            elif request.form['authType2'] == "Email":
+                session['user']["Auth_Type"] = "Email"
+                return render_template("userform_create_user.html", postback = 1, accounttype = "Client", authtype = "Email")
+            elif request.form['authType2'] == "None":
+                session['user']["Auth_Type"] = "None"
+                return render_template("userform_create_user.html", postback = 1, accounttype = "Client", authtype = "None")
+            else:
+                abort(404)
+
+
+        #EDIT USER THIRD STEP - ALL DONE
+        elif form == "EU":
+            #MAKE SURE ALL VALUE THAT ARE NOT PART OF REQUEST.FORM DO NOT THROW 400 BAD REQUEST ERROR
+            session['user']["Name"] = request.form['name1']                
+            
+            if session['user']["Auth_Type"] == "Passphrase" or session['user']["Auth_Type"] == "Email":
+                email = request.form['email2']
+            else:
+                email = ""
+
+            if session['user']["Account_Type"] == "Client":
+                group = request.form['groupId2']
+                expiry = request.form['expiry2']
+            else:
+                group = -1
+                expiry = ""
+                
+
+            if hl.updateUser(session['user']["ID"], session['user']):
+                session.pop('user', None)
                 return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
             else:
                 flash("Cannot Update User Information")
         else: #Must be fake input
             abort(404)
 
-
+    #CREATE USER FIRST STEP
     if form == "CU":
         return render_template("userform_create_user.html", postback = -1, account = "NULL", auth = "NULL")
+    #EDIT USER FIRST STEP
     elif hl.getUser("ID", form) != None:
-            user = hl.getUser("ID", form)
-            #Should Group No. be updated -> Do the keys need to be redownloaded?
-            return render_template("userform_edit_user.html", username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
+        session['user'] = hl.getUser("ID", form)
+        #FIRST SHOW CLIENT AUTH_TYPE
+        if session['user']["Account_Type"] == "Client":
+            return render_template("userform_edit_user.html", postback = -1, accounttype = session['user']["Account_Type"], authtype = session['user']["Auth_Type"])
+        elif session['user']["Account_Type"] == "Admin":
+            return render_template("userform_edit_user.html", postback = -1, accounttype = session['user']["Account_Type"], username = session['user']["Name"],
+                                   email = session['user']["Email"])
+        else:
+            abort(404)
     else: #Must be fake input
         abort(404)            
 

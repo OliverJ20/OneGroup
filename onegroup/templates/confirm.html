@@ -6,7 +6,7 @@
             <div class="contentDiv">
                <img src="{{ url_for('static', filename = 'logoblue.png') }}"
                      width="150" height="75"/>
-                <h1>{{ confirmed }} Confirmed!</h1>
+                <h1>{{ confirmed }}</h1>
                 <form action="{{ url_for('confirm') }}" method=post>
                     <input type="submit" name="Home" value="Return To Home"> </input>
                 </form>
