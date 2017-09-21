@@ -324,7 +324,7 @@ def show_user_keys(username):
  
         GET: Displays the client page html. Displays download button and generates hash if keys haven't been downloaded for this user
     """
-    if hl.getUser({"Name" : username}) != None:
+    if hl.getUser("Name", username) != None:
         downloaded = hl.checkDistributeFlag(username)
         #Prevent Replay Attacks by downloading keys
         hash = None
@@ -783,7 +783,7 @@ def page_not_found(e):
         Returns : login template and flashes error message
     """
     flash("Error: Try Something Different This Time")
-    return render_template('login.html'), 404
+    return redirect(url_for('login'))
 
 
 #Function to create user and generate keys into a ZIP folder
