@@ -247,6 +247,18 @@ def delete_key():
         hl.deleteUser(ID)
         return redirect('/users')
 
+@app.route('/delete_group/', methods=['POST'])
+@admin_required
+def delete_group():
+    """
+        Endpoint to handle the deletion of a group
+        
+        POST: Redirect to the user management page
+    """
+    ID = request.form['name']
+    if request.method == 'POST':
+        hl.deleteGroup(ID)
+        return redirect('/users')
 
 @app.route('/logs/', methods=['GET', 'POST'])
 @admin_required
@@ -564,15 +576,76 @@ def filluserform(form):
         POST : Attempt to add data from form into database, if successful,
                 redirect to confirm endpoint or abort 404
     """
+
+##    //ACCOUNT TYPE
+##        //IF Client account = Client
+##                //Show AUTH TYPE
+##                        //IF Passphrase auth = Passphrase
+##                                //SHOW NAME, EMAIL, PASS, GROUP, EXPIRY
+##                        //IF Email auth = Email
+##                                //SHOW NAME, EMAIL, GROUP, EXPIRY
+##                        //IF None auth = None
+##                                //SHOW NAME, GROUP, EXPIRY
+##        //IF ADMIN account = Admin
+##                //SHOW NAME, EMAIL, PASS
+
     if request.method == 'POST':
-        if form == "CU":
-            if createNewUser():
+        if form == "AC":
+            #Store Account Type in session variable 
+            if request.form['accountType1'] == "Client":
+                session['accountType'] = "Client"
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "NULL")
+            elif request.form['accountType1'] == "Admin":
+                session['accountType'] = "Admin"
+                return render_template("userform_create_user.html", postback = 1, account = "Admin", auth = "Passphrase")
+            else:
+                abort(404)
+             
+        elif form == "AU":
+            #Store Auth Type in session variable
+            if request.form['authType1'] == "Passphrase":
+                session['authType'] = "Passphrase"
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Passphrase")
+            elif request.form['authType1'] == "Email":
+                session['authType'] = "Email"
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Email")
+            elif request.form['authType1'] == "None":
+                session['authType'] = "None"
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "None")
+            else:
+                abort(404)
+        elif form == "DE":
+            #MAKE SURE ALL VALUE THAT ARE NOT PART OF REQUEST.FORM DO NOT THROW 400 BAD REQUEST ERROR
+            name = request.form['name1']
+
+            auth = session['authType']
+            session.pop('authType', None)
+            
+            account = session['accountType']
+            session.pop('accountType', None)
+            
+            
+            if auth == "Passphrase" or auth == "Email":
+                pwd = randompassword() #Default Generation or Not
+                email = request.form['email1']
+            else:
+                pwd = ""
+                email = ""
+
+            if account == "Client":
+                group = request.form['groupId1']
+                expiry = request.form['expiry1']
+            else:
+                group = -1
+                expiry = ""
+                
+            if createNewUser(name, account, auth, email, pwd, group, expiry):
                 return redirect(url_for('confirm', confirmed = 'New User Addition Confirmed!'))
             else:
                 flash("User already exists")
-        
+                    
         elif hl.getUser("ID", form) != None:
-            if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2']),str(request.form['expiry2'])):
+            if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2']), str(request.form['expiry2'])):
                 return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
             else:
                 flash("Cannot Update User Information")
@@ -581,9 +654,10 @@ def filluserform(form):
 
 
     if form == "CU":
-        return render_template("userform_create_user.html")
+        return render_template("userform_create_user.html", postback = -1, account = "NULL", auth = "NULL")
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
+            #Should Group No. be updated -> Do the keys need to be redownloaded?
             return render_template("userform_edit_user.html", username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
     else: #Must be fake input
         abort(404)            
@@ -666,7 +740,7 @@ def page_not_found(e):
 
 
 #Function to create user and generate keys into a ZIP folder
-def createNewUser():
+def createNewUser(name, account, auth, email, pwd, group, expiry):
     """
         Handles input of the new user form. 
 
@@ -674,37 +748,29 @@ def createNewUser():
 
         returns : True if user created, else False
     """
-    if request.method == 'POST':
-        name = request.form['name1']
-        # password = request.form['pass1']
-        password = randompassword()
-        email = request.form['email1']
-        auth = request.form['authType1']
-        account = request.form['accountType1']
-        group = request.form['groupType1']
-        expiry = request.form['expiry1']
-        #Check if the user creation was succesful
-        if hl.createUser(name, accountType, authType, passwd = password,email = email, expiry = expiry):
-            user = hl.getUser("Email", recipientEmail[0])
-            hl.zipUserKeys(user['Keys'])
+    
+    #Check if the user creation was succesful
+    if hl.createUser(name, account, auth, email = email, passwd = pwd, group = group, expiry = expiry):
+        user = hl.getUser("Email", email)
+        hl.zipUserKeys(user['Keys'])
 
-            if(auth == "Email"):
-                subjectTitle = "OneGroup account keys"
-                recipientEmail =[email]
-                bodyMessage = "here are your keys"
-                attachmentName = "user keys"
-                filename = keys_dir + user['Keys'] + '.zip'
-                attachmentFilePath = filename
-                emailMessage(subjectTitle, recipientEmail, bodyMessage,attachmentName, attachmentFilePath)
+        if(auth == "Email"):
+            subjectTitle = "OneGroup account keys"
+            recipientEmail =[email]
+            bodyMessage = "here are your keys"
+            attachmentName = "user keys"
+            filename = keys_dir + user['Keys'] + '.zip'
+            attachmentFilePath = filename
+            emailMessage(subjectTitle, recipientEmail, bodyMessage,attachmentName, attachmentFilePath)
 
-            elif(auth == "Passphrase"):
-                subjectTitle = "OneGroup account details"
-                recipientEmail = [email]
-                bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
-                emailMessage(subjectTitle, recipientEmail, bodyMessage)
-            return True
-        else:
-            return False        
+        elif(auth == "Passphrase"):
+            subjectTitle = "OneGroup account details"
+            recipientEmail = [email]
+            bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(pwd)
+            emailMessage(subjectTitle, recipientEmail, bodyMessage)
+        return True
+    else:
+        return False        
 
 
 def createNewGroup():
@@ -726,7 +792,6 @@ def createNewGroup():
                 print("MADE IT HERE TOO")
                 return True
         elif int(userNo) > 0:
-            #TODO send key files if generated users
             if hl.createGroup(groupname, internal, external, genUsers=True, numUsers=int(userNo)):
                 return True
 
@@ -919,12 +984,29 @@ def run_server(development=False):
         cherrypy.tree.graft(app_logged,'/')
 
         #Configure web server
-        cherrypy.config.update({
+        config = {
             'engine.autoreload_on': True,
             'log.screen': True,
             'server.socket_port': int(os.getenv(tag+'server_port',base_config['server_port'])),
             'server.socket_host': os.getenv(tag+'server_host',base_config['server_host'])        
-        })
+        }
+
+        #Check if ssl is configured correctly and if so apply it
+        ssl_cert = os.getenv(tag+'server_ssl_cert',base_config['server_ssl_cert']) 
+        ssl_key = os.getenv(tag+'server_ssl_private',base_config['server_ssl_private']) 
+        ssl_chain = os.getenv(tag+'server_ssl_cert_chain',base_config['server_ssl_cert_chain']) 
+        
+        if ssl_cert != "None" and ssl_key != "None":
+            config['server.ssl_module'] = 'builtin'
+            config['server.socket_port'] = 443
+            config['server.ssl_certificate'] = ssl_cert
+            config['server.ssl_private_key'] = ssl_key
+
+            if ssl_chain != "None":
+                config['server.ssl_certificate_chain'] = ssl_chain
+
+        #Apply config
+        cherrypy.config.update(config) 
 
         #Start WSGI web server
         cherrypy.engine.start()

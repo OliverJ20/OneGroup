@@ -18,16 +18,16 @@
                     <select name="authType2">
                         {% if authtype == "Passphrase" %}
                             <option value="Passphrase" selected>Username & Password</option>
-                            <option value="Radius">Radius</option>
-                            <option value="Phone">Phone</option>
-                        {% elif authtype == "Radius" %}
+                            <option value="Email">Email</option>
+                            <option value="None">None</option>
+                        {% elif authtype == "Email" %}
                             <option value="Passphrase">Username & Password</option>
-                            <option value="Radius" selected>Radius</option>
-                            <option value="Phone">Phone</option>
+                            <option value="Email" selected>Email</option>
+                            <option value="None">None</option>
                         {% else %}
                             <option value="Passphrase">Username & Password</option>
-                            <option value="Radius">Radius</option>
-                            <option value="Phone" selected>Phone</option>
+                            <option value="Email">Email</option>
+                            <option value="None" selected>None</option>
                         {% endif %}
                     </select>
 

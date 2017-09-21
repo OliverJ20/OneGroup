@@ -32,16 +32,15 @@ def init_database():
 
     if db.retrieve("users") == None:
         #Insert test users
-        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Newadmin", "Email" : "newadmin@test.com", "Password" : sha256_crypt.hash("new"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1, "Expiry": "2017-09-14:1700"})
+        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
+        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
+        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
         
         #Test group users
-        db.insert("users", {"Name" : "Group01_1", "Email" : "one@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_1", "Key_Distributed" : 0, "Grp" : 1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Group01_2", "Email" : "two@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_2", "Key_Distributed" : 0, "Grp" : 1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Group01_3", "Email" : "three@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_3", "Key_Distributed" : 0, "Grp" : 1, "Expiry": "2018-01-14:1200"})
-        db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1, "Expiry": "2018-01-14:1200"})
+        db.insert("users", {"Name" : "Group01_1", "Email" : "one@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_1", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
+        db.insert("users", {"Name" : "Group01_2", "Email" : "two@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_2", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
+        db.insert("users", {"Name" : "Group01_3", "Email" : "three@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_3", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
+        db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
 
     if db.retrieve("groups") == None:
         db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
@@ -223,36 +222,35 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
     db.close()
     return True
           
-def updateUser(ID, username, email, authtype, accounttype, group, expiry):
+def updateUser(ID, newuser):
     """
         Updates the information of a specified user from the users table
 
         ID : ID field of user as specified in the database
-        username : of the user
-        email : of the user
-        authtype : of the user
-        accounttype : of the user
-        group : user's group
+        newuser : Dictionary containing updated data for the user
 
         Returns True if successful else false
     """
     #Error checking
-    if not validateNewUser(name, accountType, authType, email, passwd, expiry):   
+    if not validateNewUser(newuser['Name'], newuser["Account_Type"], newuser["Auth_Type"], newuser["Email"], newuser["Password"], newuser["Expiry"]):   
         return False
     else:
         oldUser = getUser("ID",ID)
 
         #Check New username isn't used
-        if oldUser["Name"] != username and getUser("Name", username) != None:
+        if oldUser["Name"] != newuser['Name'] and getUser("Name", newuser["Name"]) != None:
             return False
         #Check new email isn't used
-        elif oldUser["Email"] != email and getUser("Name", email) != None:
+        elif oldUser["Email"] != newuser["Email"] and getUser("Name", newuser["Email"]) != None:
             return False
+
+    #Remove id from newuser
+    newuser.pop("ID")
 
     #Update user data
     db = Database(filename=filen)
     try:
-        db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype, "Grp" : group, "Expiry": expiry}, ("ID", ID))
+        db.update("users", newuser, ("ID", ID))
     except:
         db.close()
         return False
@@ -269,7 +267,7 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         authType    : The authorisation type of the user (Passphrase, Email, None) (Admin must use Passphrase) 
         email       : User's email (blank if not set. Cannot be set if authType is None)
         passwd      : User's password (blank if not set. Can only be set if authType is Passphrase. Admin must use a password)
-        existing    : Flag to perform checks for existing username and email
+        existing    : Flag to perf/orm checks for existing username and email
 
         returns: true if valid, else false
     """
@@ -310,11 +308,11 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         return False
     #Name already exists
     if existing:
-        if getUser("Name",user["Name"]) != None:
+        if getUser("Name", name) != None:
             logging.error("Error validating user %s Name in use",name)
             return False
         #Email already in use
-        elif authType != "None" and getUser("Email",user["Email"]) != None: 
+        elif authType != "None" and getUser("Email", email) != None: 
             logging.error("Error validating user %s Email in use",name)
             return False
     
@@ -349,7 +347,7 @@ def checkExpiredKeys():
 
         #If expired, delete the keys
         expire = datetime.strptime(user["Expiry"],"%Y-%m-%d:%H%M")   
-        if expire > now:
+        if expire < now:
             #Check setting to determine if the user should be deleted on key expiration 
             if os.getenv(tag+'delete_on_expire',base_config['delete_on_expire']).lower() == "true":
                 deleteUser(user["ID"])
@@ -527,10 +525,8 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
         
         for i in range(kwargs.get("numUsers")):
             #Create new user
-            #TODO Polymorph create user to support auto generated users
             username = "{}_{}".format(name,i+1)
-            email = "{}@test.com".format(username)
-            createUser(username, "AAAAAAAAAAA", email, group = grp)
+            createUser(username, "Client", "None", group = grp)
             
             #Get new user ID and add user to the group
             user = getUser("Name",username)["ID"]
@@ -658,7 +654,7 @@ def getUserClientConfig(user):
 
         Returns : String tuple (Internal,External) or None if the user has no config
     """
-    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user)
+    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user)
     with open(ccf,'r') as f:
         config = f.readline().split()
     
@@ -676,7 +672,7 @@ def updateUserClientConfig(user, source, destination):
         source : The internal network address for the user
         destination : The external network address for the user
     """
-    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user)
+    ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user)
     with open(ccf,'w') as f:
         f.write("ifconfig-push {} {}".format(source,destination))
     
@@ -689,11 +685,12 @@ def deleteUserFromGroup(userID):
     """
     #Change user's Group entry in the database
     user = getUser("ID",userID)
-    updateUser(userID, user["Name"], user["Email"], user["Auth_Type"], user["Account_Type"], -1) 
+    user["Grp"] = -1
+    updateUser(userID, user) 
     
     #Remove the user's client config filei
     args = [
-        os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"{}".format(user["Keys"]),
+        os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user["Keys"]),
     ]
     callScript('rm',args)
 
@@ -716,14 +713,14 @@ def addRouteToConfig(network):
             config = f.readlines()
             #Check if onegroup additions section has been added
             if commentStart+"\n" in config:
-                endLine = congfig.index(commentEnd+"\n")
-                config.insert(endLine,"{} {}".format("route",formattedNetwork))
+                endLine = config.index(commentEnd+"\n")
+                config.insert(endLine,"{} {}\n".format("route",formattedNetwork))
             #Else add section
             else:
-                config.append("")
-                config.append(commentStart)
-                config.append("{} {}".format("route",formattedNetwork))
-                config.append(commentEnd)
+                config.append("\n")
+                config.append(commentStart+"\n")
+                config.append("{} {}\n".format("route",formattedNetwork))
+                config.append(commentEnd+"\n")
 
             #Rewrite config file
             f.seek(0)
