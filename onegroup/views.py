@@ -780,7 +780,6 @@ def createNewGroup():
                 print("MADE IT HERE TOO")
                 return True
         elif int(userNo) > 0:
-            #TODO send key files if generated users
             if hl.createGroup(groupname, internal, external, genUsers=True, numUsers=int(userNo)):
                 return True
 

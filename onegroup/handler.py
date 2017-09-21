@@ -222,36 +222,35 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
     db.close()
     return True
           
-def updateUser(ID, username, email, authtype, accounttype, group, expiry):
+def updateUser(ID, newuser):
     """
         Updates the information of a specified user from the users table
 
         ID : ID field of user as specified in the database
-        username : of the user
-        email : of the user
-        authtype : of the user
-        accounttype : of the user
-        group : user's group
+        newuser : Dictionary containing updated data for the user
 
         Returns True if successful else false
     """
     #Error checking
-    if not validateNewUser(name, accountType, authType, email, passwd, expiry):   
+    if not validateNewUser(newuser['Name'], newuser["Account_Type"], newuser["Auth_Type"], newuser["Email"], newuser["Password"], newuser["Expiry"]):   
         return False
     else:
         oldUser = getUser("ID",ID)
 
         #Check New username isn't used
-        if oldUser["Name"] != username and getUser("Name", username) != None:
+        if oldUser["Name"] != newuser['Name'] and getUser("Name", newuser["Name"]) != None:
             return False
         #Check new email isn't used
-        elif oldUser["Email"] != email and getUser("Name", email) != None:
+        elif oldUser["Email"] != newuser["Email"] and getUser("Name", newuser["Email"]) != None:
             return False
+
+    #Remove id from newuser
+    newuser.pop("ID")
 
     #Update user data
     db = Database(filename=filen)
     try:
-        db.update("users", {"Name" : username, "Email" : email, "Auth_Type" : authtype, "Account_Type" : accounttype, "Grp" : group, "Expiry": expiry}, ("ID", ID))
+        db.update("users", newuser, ("ID", ID))
     except:
         db.close()
         return False
@@ -268,7 +267,7 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         authType    : The authorisation type of the user (Passphrase, Email, None) (Admin must use Passphrase) 
         email       : User's email (blank if not set. Cannot be set if authType is None)
         passwd      : User's password (blank if not set. Can only be set if authType is Passphrase. Admin must use a password)
-        existing    : Flag to perform checks for existing username and email
+        existing    : Flag to perf/orm checks for existing username and email
 
         returns: true if valid, else false
     """
@@ -526,10 +525,8 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
         
         for i in range(kwargs.get("numUsers")):
             #Create new user
-            #TODO Polymorph create user to support auto generated users
             username = "{}_{}".format(name,i+1)
-            email = "{}@test.com".format(username)
-            createUser(username, "Client", "None", email = email, group = grp)
+            createUser(username, "Client", "None", group = grp)
             
             #Get new user ID and add user to the group
             user = getUser("Name",username)["ID"]
@@ -688,7 +685,8 @@ def deleteUserFromGroup(userID):
     """
     #Change user's Group entry in the database
     user = getUser("ID",userID)
-    updateUser(userID, user["Name"], user["Email"], user["Auth_Type"], user["Account_Type"], -1) 
+    user["Grp"] = -1
+    updateUser(userID, user) 
     
     #Remove the user's client config filei
     args = [
