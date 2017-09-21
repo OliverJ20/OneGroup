@@ -973,12 +973,29 @@ def run_server(development=False):
         cherrypy.tree.graft(app_logged,'/')
 
         #Configure web server
-        cherrypy.config.update({
+        config = {
             'engine.autoreload_on': True,
             'log.screen': True,
             'server.socket_port': int(os.getenv(tag+'server_port',base_config['server_port'])),
             'server.socket_host': os.getenv(tag+'server_host',base_config['server_host'])        
-        })
+        }
+
+        #Check if ssl is configured correctly and if so apply it
+        ssl_cert = os.getenv(tag+'server_ssl_cert',base_config['server_ssl_cert']) 
+        ssl_key = os.getenv(tag+'server_ssl_private',base_config['server_ssl_private']) 
+        ssl_chain = os.getenv(tag+'server_ssl_cert_chain',base_config['server_ssl_cert_chain']) 
+        
+        if ssl_cert != "None" and ssl_key != "None":
+            config['server.ssl_module'] = 'builtin'
+            config['server.socket_port'] = 443
+            config['server.ssl_certificate'] = ssl_cert
+            config['server.ssl_private_key'] = ssl_key
+
+            if ssl_chain != "None":
+                config['server.ssl_certificate_chain'] = ssl_chain
+
+        #Apply config
+        cherrypy.config.update(config) 
 
         #Start WSGI web server
         cherrypy.engine.start()
