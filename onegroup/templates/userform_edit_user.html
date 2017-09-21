@@ -7,56 +7,52 @@
         <div class= "bodydiv">
             <div class= "bodydiv" id= "formDiveft">
                 <h2>Enter User Details</h2>
-                <form action="{{ url_for('home') }}" vname="userEditForm" id="detailsLeft" method=post>
-		    <p>Name</p>
-                    <input type="text" name="name2" maxlength="40" required value="{{ username }}"> </input>
+		<!-- Only clients can have different authentication types !-->
+		{% if accounttype == "Client" %}
+                    <form action="{{ url_for('filluserform', form='ET') }}" vname="userAuthentication" id="detailsLeft" method=post>
+			<p>Authentication Type</p>
+                        <select name="authType1">
+                            <option {% if authtype == "Passphrase" %} selected {% endif %} value="Passphrase">Username & Password</option>
+                            <option {% if authtype == "Email" %} selected {% endif %} value="Email">Email</option>
+                            <option {% if authtype == "None" %} selected {% endif %} value="None">None</option>
+                        </select>
+		    
+		        <div class= "bodydiv" div id = "submitDiv">
+                            <input type="submit" name="userform1" value="OK"></input>
+                        </div>
+		    </form>
+		{% endif %}
+                
+                {% if postback > 0 %}
+		    <form action="{{ url_for('filluserform' , form='EU')}}" vname="userEditForm" id="detailsLeft" method=post> 
+		        <p>Name</p>
+                        <input type="text" name="name2" maxlength="40" required value="{{ username }}"> </input>
 
-                    <p>Email</p>
-                    <input type="text" name="email2" maxlength="40" required value="{{ email }}"> </input>
-
-                    <p>Authentication Type</p>
-                    <select name="authType2">
-                        {% if authtype == "Passphrase" %}
-                            <option value="Passphrase" selected>Username & Password</option>
-                            <option value="Email">Email</option>
-                            <option value="None">None</option>
-                        {% elif authtype == "Email" %}
-                            <option value="Passphrase">Username & Password</option>
-                            <option value="Email" selected>Email</option>
-                            <option value="None">None</option>
-                        {% else %}
-                            <option value="Passphrase">Username & Password</option>
-                            <option value="Email">Email</option>
-                            <option value="None" selected>None</option>
-                        {% endif %}
-                    </select>
-
-                    <p>Account Type</p>
-                    <select name="accountType2">
-                        {% if accounttype == "Client" %} 
-                            <option value="Client" selected>Client</option>
-                            <option value="Admin">Admin</option>
-                        {% else %}
-                            <option value="Client">Client</option>
-                            <option value="Admin" selected>Admin</option>
-                        {% endif %}
-                    </select>
-		    <p>Assign Group</p>
-                    <select name="authType1">
-                        <option value="-1">No Group</option>
-                       	{% for groupNumber in groupNumbers %}
-			<option value="{{ groupNumber }}">{{ groupNumber }}</option>
-			{% endfor %}
-                    </select>
-
-                    <br>
-                    <p>Expiry</p>
-                    <input type="text" name="expiry2" placeholder="Enter Expiry Date" maxlength="40" > </input>
-
-                    <br></br>
-
-                    <input type="submit" name="groupform2" value="Send">
-                </form>
+	                {% if authtype == "Passphrase" or authtype == "Email" or accounttype == "Admin" %}    
+                            <p>Email</p>
+                            <input type="text" name="email2" maxlength="40" required value="{{ email }}"> </input>
+		        {% endif %}
+	
+		        {% if accounttype == "Client" and authtype != "NULL" %} 
+		            <p>Assign Group</p>
+                            <select name="groupId1">
+                                <option value="-1" selected>No group</option>
+                                {% for groupNumber in groupNumbers %}
+			            <option value="{{ groupNumber }}">{{ groupNumber }}</option>
+			        {% endfor %}
+                            </select>
+                    	
+                            <p>Expiry (YYYY-MM-DD:HHMM)</p>
+                            <input type="text" name="expiry1" placeholder="Enter Expiry Date" maxlength="40"> </input>
+                            <br  />
+                            <br  />
+		        {% endif %}
+        
+                        <div class= "bodydiv" div id = "submitDiv">
+                            <input type="submit" name="userform1" value="Send"></input>
+                        </div>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>

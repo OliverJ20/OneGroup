@@ -45,36 +45,9 @@
                         <input type="text" name="name1" placeholder="Enter Name" maxlength="40" > </input>
 		    {% endif %}
 
-<<<<<<< HEAD
-                    <p id = "testyo">Account Type</p>
-                    <select name="accountType1" onchange="testDisplay()">
-                        <option value="Client">Client</option>
-                        <option value="Admin">Admin</option>
-                    </select>
-
-                    <p>Authentication Type</p>
-                    <select name="authType1" id="t">
-                        <option value="Passphrase">Username & Password</option>
-                        <option value="Radius">Email</option>
-                        <option value="Phone">Null</option>
-                    </select>
-		    <br>
-		    <p>Assign Group</p>
-                    <select name="groupType1">
-                        <option value="-1">No group</option>
-                       	{% for groupNumber in groupNumbers %}
-			<option value="{{ groupNumber }}">{{ groupNumber }}</option>
-			{% endfor %}
-                    </select>
-=======
 	            {% if auth == "Passphrase" or auth == "Email" or account == "Admin" %}    
                         <p>Email</p>
                         <input type="text" name="email1" placeholder="Enter Email" onkeyup="checkForm()" maxlength="40"> </input>
-		    {% endif %}
-
-	   	    {% if auth == "Passphrase" or account == "Admin" %} 
-                        {# <p>Password</p> #} <!-- CHECK WHETHER PASSWORD SHOULD BE AVAILABLE ON HERE !-->
-                        {# <input type="text" name="pass1" placeholder="Enter Password" maxlength="40"> </input> #}
 		    {% endif %}
 	
 		    {% if account == "Client" and auth != "NULL" %} 
@@ -85,9 +58,8 @@
 			        <option value="{{ groupNumber }}">{{ groupNumber }}</option>
 			    {% endfor %}
                         </select>
->>>>>>> 7f3d955be90e1decdcdd05ee5aae19d2f91ceaf8
-                    
-                        <p>Expiry</p>
+                    	
+                        <p>Expiry (YYYY-MM-DD:HHMM)</p>
                         <input type="text" name="expiry1" placeholder="Enter Expiry Date" maxlength="40" > </input>
                         <br  />
                         <br  />
