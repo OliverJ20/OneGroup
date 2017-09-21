@@ -247,18 +247,6 @@ def delete_key():
         hl.deleteUser(ID)
         return redirect('/users')
 
-@app.route('/delete_group/', methods=['POST'])
-@admin_required
-def delete_group():
-    """
-        Endpoint to handle the deletion of a group
-        
-        POST: Redirect to the user management page
-    """
-    ID = request.form['name']
-    if request.method == 'POST':
-        hl.deleteGroup(ID)
-        return redirect('/users')
 
 @app.route('/logs/', methods=['GET', 'POST'])
 @admin_required
@@ -324,15 +312,17 @@ def show_user_keys(username):
  
         GET: Displays the client page html. Displays download button and generates hash if keys haven't been downloaded for this user
     """
-    downloaded = hl.checkDistributeFlag(username)
-    #Prevent Replay Attacks by downloading keys
-    hash = None
-    if not downloaded:
-        #generate hash
-        hash = randompassword()
-    return render_template('user_keys.html', username=username, distributed = downloaded, hash = hash)
-    ##method to pull keys from database using username
-
+    if hl.getUser({"Name": username}) != None
+        downloaded = hl.checkDistributeFlag(username)
+        #Prevent Replay Attacks by downloading keys
+        hash = None
+        if not downloaded:
+            #generate hash
+            hash = randompassword()
+            return render_template('user_keys.html', username=username, distributed = downloaded, hash = hash)
+            ##method to pull keys from database using username
+    else:
+        abort(404)
 
 @app.route('/iptables/<ruleid>', methods=['GET','POST'])
 @admin_required
@@ -795,7 +785,7 @@ def createNewUser(name, account, auth, email, pwd, group, expiry):
     
     #Check if the user creation was succesful
     if hl.createUser(name, account, auth, email = email, passwd = pwd, group = group, expiry = expiry):
-        user = hl.getUser("Email", email)
+        user = hl.getUser("Email", recipientEmail[0])
         hl.zipUserKeys(user['Keys'])
 
         if(auth == "Email"):
@@ -810,7 +800,7 @@ def createNewUser(name, account, auth, email, pwd, group, expiry):
         elif(auth == "Passphrase"):
             subjectTitle = "OneGroup account details"
             recipientEmail = [email]
-            bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(pwd)
+            bodyMessage = "Your login details are\n Email :" + str(email) + "\nPassword :" + str(password)
             emailMessage(subjectTitle, recipientEmail, bodyMessage)
         return True
     else:
@@ -836,6 +826,7 @@ def createNewGroup():
                 print("MADE IT HERE TOO")
                 return True
         elif int(userNo) > 0:
+            #TODO send key files if generated users
             if hl.createGroup(groupname, internal, external, genUsers=True, numUsers=int(userNo)):
                 return True
 
@@ -1028,29 +1019,12 @@ def run_server(development=False):
         cherrypy.tree.graft(app_logged,'/')
 
         #Configure web server
-        config = {
+        cherrypy.config.update({
             'engine.autoreload_on': True,
             'log.screen': True,
             'server.socket_port': int(os.getenv(tag+'server_port',base_config['server_port'])),
             'server.socket_host': os.getenv(tag+'server_host',base_config['server_host'])        
-        }
-
-        #Check if ssl is configured correctly and if so apply it
-        ssl_cert = os.getenv(tag+'server_ssl_cert',base_config['server_ssl_cert']) 
-        ssl_key = os.getenv(tag+'server_ssl_private',base_config['server_ssl_private']) 
-        ssl_chain = os.getenv(tag+'server_ssl_cert_chain',base_config['server_ssl_cert_chain']) 
-        
-        if ssl_cert != "None" and ssl_key != "None":
-            config['server.ssl_module'] = 'builtin'
-            config['server.socket_port'] = 443
-            config['server.ssl_certificate'] = ssl_cert
-            config['server.ssl_private_key'] = ssl_key
-
-            if ssl_chain != "None":
-                config['server.ssl_certificate_chain'] = ssl_chain
-
-        #Apply config
-        cherrypy.config.update(config) 
+        })
 
         #Start WSGI web server
         cherrypy.engine.start()
