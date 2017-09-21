@@ -324,15 +324,18 @@ def show_user_keys(username):
  
         GET: Displays the client page html. Displays download button and generates hash if keys haven't been downloaded for this user
     """
-    downloaded = hl.checkDistributeFlag(username)
-    #Prevent Replay Attacks by downloading keys
-    hash = None
-    if not downloaded:
-        #generate hash
-        hash = randompassword()
-    return render_template('user_keys.html', username=username, distributed = downloaded, hash = hash)
-    ##method to pull keys from database using username
-
+    if hl.getUser({"Name" : username}) != None:
+        downloaded = hl.checkDistributeFlag(username)
+        #Prevent Replay Attacks by downloading keys
+        hash = None
+        if not downloaded:
+            #generate hash
+            hash = randompassword()
+        
+        return render_template('user_keys.html', username=username, distributed = downloaded, hash = hash)
+        ##method to pull keys from database using username
+    else:
+        abort(404)
 
 @app.route('/iptables/<ruleid>', methods=['GET','POST'])
 @admin_required
@@ -832,6 +835,7 @@ def createNewGroup():
         external = request.form['external1']
         userNo = request.form['usersNo1']
         if int(userNo) == 0:
+            #TODO send key file generated users
             if hl.createGroup(groupname, internal, external):
                 print("MADE IT HERE TOO")
                 return True
