@@ -370,7 +370,7 @@ def edit_iptable(ruleid):
         hl.updateIPRules(ruleid, ip_string)
         return redirect(url_for('show_config'))
 
-    return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
+    return render_template('iptables.html', rule = rule['Rule'], policy = rule['Policy'])
 
 
 @app.route('/config/', methods=['GET'])

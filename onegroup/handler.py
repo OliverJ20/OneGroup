@@ -590,27 +590,29 @@ def updateGroup(ID, group):
     db.close()
 
 
-def deleteGroup(group,deleteUsers = False):
+def deleteGroup(ID,deleteUsers = False):
     """
         Deletes a group from the database and users if specified
 
-        group : The group ID of the group to delete
+        ID : The group ID of the group to delete
         deleteUsers : Boolean flag to determine if the users of the group should be deleted as well
     """
     db = Database(filename = filen)
 
+    group = getGroup(ID)
+
     #Delete the IPTables rule
-    removeIPRule(getGroup(group)["Rule"])
+    removeIPRule(group["Rule"])
     
     #Remove route from server config
     deleteRouteInConfig(group["Internal"])
 
     #Delete group entry
-    db.delete("groups",{"ID" : group})
+    db.delete("groups",{"ID" : ID})
     db.close()
 
     #Delete user if deleteUsers == True, else just remove them from the group
-    for user in getUserInGroup(group):
+    for user in getUsersInGroup(ID):
         if deleteUsers:
             deleteUser(user["ID"])        
         else:
