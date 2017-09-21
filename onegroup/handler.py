@@ -116,7 +116,7 @@ def loadIptables():
     #Extract rules and add the correct prefix
     ruleStrings = []
     for rule in rules:
-        if rule["Policy"]:
+        if rule["Policy"] == 1:
             ruleStrings.append("'-P "+rule["Rule"]+"'")
         else: 
             ruleStrings.append("'-A "+rule["Rule"]+"'")
