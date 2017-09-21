@@ -117,7 +117,7 @@
                                     <a href="/groupform/{{members["ID"]}}">
                                         <button>Edit</button>
                                     </a>
-                                    <form action="{{ url_for('delete_key') }}" method=post>
+                                    <form action="{{ url_for('delete_group') }}" method=post>
                                     <input type="text" name="name" value= {{members["ID"]}} id = "hiddenInput" readonly>
                                     <input type="submit" value="Delete" id = "declineButton"></input>
                                     </form>
