@@ -84,6 +84,7 @@ class Database:
             query += " {} = {} AND".format(key, keypairs[key])
 
         query = query[:-4]
+        print(query)
         self._db.execute('delete from {} where {}'.format(table, query))
         self._db.commit()
 

@@ -513,9 +513,17 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
 
     #Setup IPTables rule
     rule = ipDictToString({"Table": "","Chain": "FORWARD","Input": "tun0","Output": "", "Protocol": "","Source" : internalNetwork,"Source_Port": "", "Destination": externalNetwork,"Destination_Port": "","State": "","Action": "ACCEPT"})
-    addIPRule(rule)
-    group["Rule"] = db.retrieve("firewall",{"Rule":rule})["ID"]
-
+    
+    #Check if the rule already exists
+    check = db.retrieve("firewall",{"Rule":rule})  
+    if check != None:
+        group["Rule"] = check["ID"]
+    else:
+        addIPRule(rule)
+        group["Rule"] = db.retrieve("firewall",{"Rule":rule})["ID"]
+    
+    print(group["Rule"])
+    
     #Add group to the database
     db.insert("groups",group)
 
