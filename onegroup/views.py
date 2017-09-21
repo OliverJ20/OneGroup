@@ -835,7 +835,6 @@ def createNewGroup():
         external = request.form['external1']
         userNo = request.form['usersNo1']
         if int(userNo) == 0:
-            #TODO send key file generated users
             if hl.createGroup(groupname, internal, external):
                 print("MADE IT HERE TOO")
                 return True
