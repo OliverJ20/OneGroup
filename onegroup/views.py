@@ -247,6 +247,18 @@ def delete_key():
         hl.deleteUser(ID)
         return redirect('/users')
 
+@app.route('/delete_group/', methods=['POST'])
+@admin_required
+def delete_group():
+    """
+        Endpoint to handle the deletion of a group
+        
+        POST: Redirect to the user management page
+    """
+    ID = request.form['name']
+    if request.method == 'POST':
+        hl.deleteGroup(ID)
+        return redirect('/users')
 
 @app.route('/logs/', methods=['GET', 'POST'])
 @admin_required

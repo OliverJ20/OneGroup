@@ -713,8 +713,8 @@ def addRouteToConfig(network):
             config = f.readlines()
             #Check if onegroup additions section has been added
             if commentStart+"\n" in config:
-                endLine = congfig.index(commentEnd+"\n")
-                config.insert(endLine,"{} {}".format("route",formattedNetwork))
+                endLine = config.index(commentEnd+"\n")
+                config.insert(endLine,"{} {}\n".format("route",formattedNetwork))
             #Else add section
             else:
                 config.append("\n")
