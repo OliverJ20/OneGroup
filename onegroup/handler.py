@@ -1303,14 +1303,14 @@ def updateIPRules(ID, value):
     loadIptables()
 
 
-def removeIPRules(ID):
+def removeIPRule(ID):
     """ 
         Removes and IPTables rule from the database and updates the current rules on the system
 
         ID : ID of the rule
     """
     db = Database(filename=filen)
-    db.delete("firewall", {"ID", ID})
+    db.delete("firewall", {"ID": ID})
     db.close()
 
     #Apply new rules
