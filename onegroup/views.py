@@ -714,8 +714,8 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
     """
     msg = Message(
         subjectTitle,
-        sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
-        )
+        sender = 'capstoneonegroup@gmail.com'
+    )
     for email in recipientEmail:             
         msg.add_recipient(email)
 
@@ -956,8 +956,8 @@ def setConfig(debug):
     app.config['MAIL_SERVER'] = os.getenv(tag+'mail_server',base_config['mail_server'])
     app.config['MAIL_PORT'] = int(os.getenv(tag+'mail_port',base_config['mail_port'])) 
     app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
-    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
+    app.config['MAIL_USERNAME'] = 'capstoneonegroup@gmail.com' 
+    app.config['MAIL_PASSWORD'] = 'MaristCollege!'  
     mail = Mail(app)
 
 def setKeyExpiry():
