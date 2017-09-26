@@ -625,8 +625,11 @@ def filluserform(form):
             session.pop('accountType', None)
             
             
-            if auth == "Passphrase" or auth == "Email":
+            if auth == "Passphrase":
                 pwd = randompassword() #Default Generation or Not
+                email = request.form['email1']
+            elif auth == "Email":
+                pwd = "" 
                 email = request.form['email1']
             else:
                 pwd = ""
@@ -714,7 +717,7 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
     """
     msg = Message(
         subjectTitle,
-        sender = 'capstoneonegroup@gmail.com'
+        sender = os.getenv(tag+'email',base_config['email']) 
     )
     for email in recipientEmail:             
         msg.add_recipient(email)
@@ -722,7 +725,8 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
     msg.body = bodyMessage
 
     if attachmentName is not None and attachmentFilePath is not None:
-        mail.attach(attachmentName, attachmentFilePath, "application/zip")
+        with app.open_resource(attachmentFilePath) as fp:
+            msg.attach(attachmentName, "application/zip", fp)
 
     mail.send(msg)
 
@@ -956,8 +960,8 @@ def setConfig(debug):
     app.config['MAIL_SERVER'] = os.getenv(tag+'mail_server',base_config['mail_server'])
     app.config['MAIL_PORT'] = int(os.getenv(tag+'mail_port',base_config['mail_port'])) 
     app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USERNAME'] = 'capstoneonegroup@gmail.com' 
-    app.config['MAIL_PASSWORD'] = 'MaristCollege!'  
+    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])    
+    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password']) 
     mail = Mail(app)
 
 def setKeyExpiry():
