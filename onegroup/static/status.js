@@ -9,12 +9,12 @@ $(document).ready(function () {
 
 function addInfo()
 {
-    var invalid1 = "Open VPN CLIENT LIST";
-    var invalid2 = "Updated";
+    var invalid1 = new RegExp("Open VPN CLIENT LIST");
+    var invalid2 = new RegExp("Updated");
     var invalid3 = new RegExp("ROUTING TABLE");
-    var invalid4 = "GLOBAL STATS";
-    var invalid5 = "Max bcast";
-    var invalid6 = "END";
+    var invalid4 = new RegExp("GLOBAL STATS");
+    var invalid5 = new RegExp("Max bcast");
+    var invalid6 = new RegExp("END");
 
   $.get("/log/status", function (data)
     {
@@ -26,13 +26,13 @@ function addInfo()
             if(/invalid1/.test(tempvar) || /invalid2/.test(tempvar) || /invalid3/.test(tempvar) || /invalid4/.test(tempvar) || /invalid5/.test(tempvar) || /invalid6/.test(tempvar)){
                  tempvar = LogInfo["logData"].splice(i);
             }
+            tempvar = tempvar.split(',');
             logStringArrays.push(tempvar);
         }
 
         
               var table = $("<table />");
               var routingTable = $("<table />");
-              var globalTable = $("<table />");
 
 
               var row = $(table[0].insertRow(-1));
@@ -83,14 +83,14 @@ function addInfo()
               while(invalid3.test(logStringArrays[counter]) == false){
                 var tableLength = logStringArrays[counter].length;
                 row = $(table[0].insertRow(-1));
-                // for (var j = 0; j < tableLength; j++) {
-                //   var info = $("<td />");
-                //   info.html(logStringArrays[counter][j]);
-                //   row.append(info);
-                // }
-                var info = $("<td />");
-                info.html(logStringArrays[counter]);
-                row.append(info);
+                for (var j = 0; j < tableLength; j++) {
+                  var info = $("<td />");
+                  info.html(logStringArrays[counter][j]);
+                  row.append(info);
+                }
+                // var info = $("<td />");
+                // info.html(logStringArrays[counter]);
+                // row.append(info);
                 counter++;
               }
 
