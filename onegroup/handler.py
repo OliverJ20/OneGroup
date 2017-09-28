@@ -116,7 +116,7 @@ def loadIptables():
     #Extract rules and add the correct prefix
     ruleStrings = []
     for rule in rules:
-        if rule["Policy"]:
+        if rule["Policy"] == 1:
             ruleStrings.append("'-P "+rule["Rule"]+"'")
         else: 
             ruleStrings.append("'-A "+rule["Rule"]+"'")
@@ -303,7 +303,7 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         logging.error("Error validating user %s Password set for authentication type: %s",name,accountType)
         return False
     #Expiry incorrectly set
-    elif expiry == 'test':
+    elif not re.search(r"\d{4}-\d{1,2}-\d{1,2}", expiry):
         logging.error("Error validating user %s Expiry set for authentication type: %s",name,expiry)
         return False
     #Name already exists
@@ -513,9 +513,17 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
 
     #Setup IPTables rule
     rule = ipDictToString({"Table": "","Chain": "FORWARD","Input": "tun0","Output": "", "Protocol": "","Source" : internalNetwork,"Source_Port": "", "Destination": externalNetwork,"Destination_Port": "","State": "","Action": "ACCEPT"})
-    addIPRule(rule)
-    group["Rule"] = db.retrieve("firewall",{"Rule":rule})["ID"]
-
+    
+    #Check if the rule already exists
+    check = db.retrieve("firewall",{"Rule":rule})  
+    if check != None:
+        group["Rule"] = check["ID"]
+    else:
+        addIPRule(rule)
+        group["Rule"] = db.retrieve("firewall",{"Rule":rule})["ID"]
+    
+    print(group["Rule"])
+    
     #Add group to the database
     db.insert("groups",group)
 
@@ -582,27 +590,29 @@ def updateGroup(ID, group):
     db.close()
 
 
-def deleteGroup(group,deleteUsers = False):
+def deleteGroup(ID,deleteUsers = False):
     """
         Deletes a group from the database and users if specified
 
-        group : The group ID of the group to delete
+        ID : The group ID of the group to delete
         deleteUsers : Boolean flag to determine if the users of the group should be deleted as well
     """
     db = Database(filename = filen)
 
+    group = getGroup(ID)
+
     #Delete the IPTables rule
-    removeIPRule(getGroup(group)["Rule"])
+    removeIPRule(group["Rule"])
     
     #Remove route from server config
     deleteRouteInConfig(group["Internal"])
 
     #Delete group entry
-    db.delete("groups",{"ID" : group})
+    db.delete("groups",{"ID" : ID})
     db.close()
 
     #Delete user if deleteUsers == True, else just remove them from the group
-    for user in getUserInGroup(group):
+    for user in getUsersInGroup(ID):
         if deleteUsers:
             deleteUser(user["ID"])        
         else:

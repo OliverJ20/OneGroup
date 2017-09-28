@@ -79,13 +79,12 @@ class Database:
         self._db.commit()
 
     def delete(self, table, keypairs):
-        keys = sorted(keypairs.keys())
-        values = tuple([keypairs[k] for k in keys])
         query = ''
-        for key in keys:
+        for key in keypairs:
             query += " {} = {} AND".format(key, keypairs[key])
 
         query = query[:-4]
+        print(query)
         self._db.execute('delete from {} where {}'.format(table, query))
         self._db.commit()
 

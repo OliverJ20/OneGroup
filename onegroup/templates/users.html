@@ -13,6 +13,7 @@
                     <th>Group</th>
                     <th>Expiry</th>
                     <th>Options</th>
+                    <th>Keys</th>
                 </tr>
                 {% if dataU != None %}
                     {% if dataU[0] is mapping%}  
@@ -33,6 +34,9 @@
                             <input type="submit" value="Delete" id = "declineButton"></input>
                             </form>
                         </td>
+                        <td>
+                            <a href="/admin_key/{{users["Name"]}}" download><button class='downloadButton' id= "testButton">Download</button></a>
+                        </td>
                       </tr>
                     {% endfor %}
                     {% endif %}
@@ -52,6 +56,9 @@
                             <input type="text" name="name" value= {{dataU["ID"]}} id = "hiddenInput" readonly>
                             <input type="submit" value="Delete" id = "declineButton"></input>
                             </form>
+                        </td>
+                        <td>
+                                <a href="/admin_key/{{dataU["Name"]}}" download><button class='downloadButton' id= "testButton">Download</button></a>
                         </td>
                       </tr>
                     {% endif %}

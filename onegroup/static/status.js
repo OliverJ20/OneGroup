@@ -24,11 +24,11 @@ function addInfo()
         {
           var tempvar = LogInfo["logData"][i];
             // if(/invalid1/.test(tempvar) || /invalid2/.test(tempvar) || /invalid3/.test(tempvar) || /invalid4/.test(tempvar) || /invalid5/.test(tempvar) || /invalid6/.test(tempvar)){
-            //     LogInfo["logData"].splice(i);
+            //      LogInfo["logData"].splice(i,1);
             // }
             // else{
                 logStringArrays.push(tempvar);
-            // }
+            //}
         }
 
               var table = $("<table />");
@@ -42,11 +42,11 @@ function addInfo()
               //Add the data rows.
               for (var i = 1; i < logStringArrays.length; i++) {
                   row = $(table[0].insertRow(-1));
-                  // for (var j = 0; j < infoLength; j++) {
-                  //     var info = $("<td />");
+                  for (var j = 0; j < infoLength; j++) {
+                       var info = $("<td />");
                       info.html(logStringArrays[i]);
                       row.append(info);
-                  // }
+                  }
               }
 
               var statusTable = $("#statusTable");
@@ -56,23 +56,23 @@ function addInfo()
     })
 }
 
-function tableFilter() {
-  var input, filter, table, tr, td, i;
-  input = document.getElementById("dateStart");
-  input2 = document.getElementById("dateEnd");
-  filter = input.value.toUpperCase();
-  filter2 = input2.value.toUpperCase();
-  table = document.getElementById("logTable");
-  tr = table.getElementsByTagName("tr");
-  for (i = 0; i < tr.length; i++) {
-    td = tr[i].getElementsByTagName("td")[0];
-    co = tr[i].getElementsByTagName("td")[1];
-    if (td) {
-      if ((td.innerHTML.toUpperCase().indexOf(filter) > -1) && (co.innerHTML.toUpperCase().indexOf(filter2) > -1)) {
-        tr[i].style.display = "";
-      }else {
-        tr[i].style.display = "none";
-      }
-    }
-  }
-}
+// function tableFilter() {
+//   var input, filter, table, tr, td, i;
+//   input = document.getElementById("dateStart");
+//   input2 = document.getElementById("dateEnd");
+//   filter = input.value.toUpperCase();
+//   filter2 = input2.value.toUpperCase();
+//   table = document.getElementById("logTable");
+//   tr = table.getElementsByTagName("tr");
+//   for (i = 0; i < tr.length; i++) {
+//     td = tr[i].getElementsByTagName("td")[0];
+//     co = tr[i].getElementsByTagName("td")[1];
+//     if (td) {
+//       if ((td.innerHTML.toUpperCase().indexOf(filter) > -1) && (co.innerHTML.toUpperCase().indexOf(filter2) > -1)) {
+//         tr[i].style.display = "";
+//       }else {
+//         tr[i].style.display = "none";
+//       }
+//     }
+//   }
+// }
