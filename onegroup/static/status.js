@@ -98,14 +98,14 @@ $.get("/log/general", function (data)
       {
         var tempvar = LogInfo["logData"][i];
         if(/2017/.test(tempvar)){
-        tempvar = tempvar.split("2017");
-        tempvar[0] = tempvar[0] + n;
-        logStringArrays.push(tempvar);
+          tempvar = tempvar.split("2017");
+          tempvar[0] = tempvar[0] + n;
+          logStringArrays.push(tempvar);
       }
       else{
         temparray= ["No Date", tempvar];
         logStringArrays.push(temparray);
-      }
+        }
       }
             var table = $("<table />");
             var infoLength = logStringArrays[0].length;
