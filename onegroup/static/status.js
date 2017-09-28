@@ -23,14 +23,13 @@ function addInfo()
       for (var i = 0; i<LogInfo["logData"].length; i++)
         {
           var tempvar = LogInfo["logData"][i];
-            // if(/invalid1/.test(tempvar) || /invalid2/.test(tempvar) || /invalid3/.test(tempvar) || /invalid4/.test(tempvar) || /invalid5/.test(tempvar) || /invalid6/.test(tempvar)){
-            //      LogInfo["logData"].splice(i,1);
-            // }
-            // else{
-                logStringArrays.push(tempvar);
-            //}
+            if(/invalid1/.test(tempvar) || /invalid2/.test(tempvar) || /invalid3/.test(tempvar) || /invalid4/.test(tempvar) || /invalid5/.test(tempvar) || /invalid6/.test(tempvar)){
+                 tempvar = LogInfo["logData"].splice(i,1);
+            }
+            logStringArrays.push(tempvar);
         }
 
+        
               var table = $("<table />");
               var infoLength = logStringArrays[0].length;
 
