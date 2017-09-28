@@ -80,11 +80,11 @@ function addInfo()
 
               var counter = 1;
 
-              while(!invalid3.test(logStringArrays[counter])){
+              while(invalid3.test(logStringArrays[counter]) == false){
                 var tableLength = logStringArrays[counter].length;
+                row = $(table[0].insertRow(-1));
                 for (var j = 0; j < tableLength; j++) {
                   var info = $("<td />");
-                  row = $(table[0].insertRow(-1));
                   info.html(logStringArrays[counter][j]);
                   row.append(info);
                 }
