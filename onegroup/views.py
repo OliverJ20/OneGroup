@@ -163,7 +163,7 @@ def home():
     """
     
     users = hl.getUsers()
-    return render_template('index.html', dataU = users)
+    return render_template('index.html')
 
 
 @app.route('/password/', methods=['GET', 'POST'])
@@ -625,11 +625,8 @@ def filluserform(form):
             session.pop('accountType', None)
             
             
-            if auth == "Passphrase":
+            if auth == "Passphrase" or auth == "Email":
                 pwd = randompassword() #Default Generation or Not
-                email = request.form['email1']
-            elif auth == "Email":
-                pwd = "" 
                 email = request.form['email1']
             else:
                 pwd = ""
@@ -717,16 +714,15 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
     """
     msg = Message(
         subjectTitle,
-        sender = os.getenv(tag+'email',base_config['email']) 
-    )
+        sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
+        )
     for email in recipientEmail:             
         msg.add_recipient(email)
 
     msg.body = bodyMessage
 
     if attachmentName is not None and attachmentFilePath is not None:
-        with app.open_resource(attachmentFilePath) as fp:
-            msg.attach(attachmentName, "application/zip", fp)
+        mail.attach(attachmentName, attachmentFilePath, "application/zip")
 
     mail.send(msg)
 
@@ -960,8 +956,8 @@ def setConfig(debug):
     app.config['MAIL_SERVER'] = os.getenv(tag+'mail_server',base_config['mail_server'])
     app.config['MAIL_PORT'] = int(os.getenv(tag+'mail_port',base_config['mail_port'])) 
     app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])    
-    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password']) 
+    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
+    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
 
 def setKeyExpiry():
