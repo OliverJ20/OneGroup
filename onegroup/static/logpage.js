@@ -20,7 +20,7 @@ function addInfo()
         {
           var tempvar = LogInfo["logData"][i];
           if('/' + n + '/'.test(tempvar)){
-          tempvar = tempvar.split("2017");
+          tempvar = tempvar.split(n);
           tempvar[0] = tempvar[0] + n;
           logStringArrays.push(tempvar);
         }
