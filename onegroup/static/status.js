@@ -107,9 +107,9 @@ $.get("/log/general", function (data)
 
             var row = $(table[0].insertRow(-1));
             var header = $("<th />");
-            header.html("Date");
+            header.html("TEST");
             var header2 = $("<th />");
-            header2.html("Activity");
+            header2.html("ICAL");
             row.append(header);
             row.append(header2);
 
