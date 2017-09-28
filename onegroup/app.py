@@ -1,5 +1,6 @@
 import logging
 import os
+import fileinput
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -74,12 +75,22 @@ def loadConfig():
         confFile = config_path_backup
 
     #Read in config
+    node_locations = False
+    nodes = []
+    
     try:
         with fileinput.input(files=confFile) as f:
             for line in f:
                 #Ignore new lines and comments
                 if line == "" or line =="\n" or line[0] == "#":
                     continue
+                #Read in line as an address for a node
+                if node_locations:
+                    #Check end
+                    if line.strip("\n") == "{":
+                        node_locations = False
+                    else:
+                        nodes.append({"Address" : line.strip("\n")})
                 else:
                     #split by '=' and store in tuple
                     key, val = line.split("=")
@@ -93,10 +104,7 @@ def loadConfig():
                     #Check for node_locations and handle
                     if key == "node_locations":
                         #loop till the end of the node_location section
-                        nodes = []
-                        while (line != '}'):
-                            line = f.next()
-                            nodes.append({"Address" : line})
+                        node_locations = True
                          
                     #check if the key is a valid key
                     elif key not in base_config.keys(): 
@@ -111,7 +119,7 @@ def loadConfig():
             os.environ[tag+key] = config[key]
 
     except Exception as e:
-        logging.error("Error reading config at line %s",e)
+        logging.error("Error reading config: %s",e)
 
     
     #Add nodes to database if multinode support enabled and master node
@@ -140,8 +148,7 @@ def run_server(development=False):
         Initialises and runs the web server
         
         development : flag to run the Flask development server instead of the full Cherrypy server
-    """
-    
+    """    
     #load config 
     loadConfig()
     

@@ -697,7 +697,7 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
 
     if attachmentName is not None and attachmentFilePath is not None:
         with app.open_resource(attachmentFilePath) as fp:
-            msg.attach(attachmentName, "application/zip", fp)
+            msg.attach(attachmentName, "text/plain", fp.read())
 
     mail.send(msg)
 
@@ -727,14 +727,13 @@ def createNewUser(name, account, auth, email, pwd, group, expiry):
     #Check if the user creation was succesful
     if hl.createUser(name, account, auth, email = email, passwd = pwd, group = group, expiry = expiry):
         user = hl.getUser("Email", email)
-        hl.zipUserKeys(user['Keys'])
 
         if(auth == "Email"):
             subjectTitle = "OneGroup account keys"
             recipientEmail =[email]
             bodyMessage = "here are your keys"
-            attachmentName = "user keys"
-            filename = keys_dir + user['Keys'] + '.zip'
+            attachmentName = user['Keys'] + '.ovpn'
+            filename = "{}/{}".format(keys_dir,attachmentName)
             attachmentFilePath = filename
             emailMessage(subjectTitle, recipientEmail, bodyMessage,attachmentName, attachmentFilePath)
 
@@ -869,15 +868,16 @@ def getKeys(name = None):
         Returns : zip file of user's keys if found. Else returns example zip file
     """
     if name == None:
-        name =session.get('name')
+        name = session.get('name')
 
     keys = hl.getUser("Name",name)["Keys"]
     hl.keyDistributeFlag(name)
     #If on a production server, use actual path
     if os.path.isdir(keys_dir):
-        filename = keys_dir + keys + '.zip' 
-        if not os.path.exists(filename):
-            hl.zipUserKeys(keys) 
+        filename = keys_dir + keys + '.ovpn' 
+
+        #if not os.path.exists(filename):
+        #    hl.zipUserKeys(keys) 
 
         return send_file(filename)
     #Else use relative dev path
@@ -889,17 +889,18 @@ def getKeys(name = None):
 @admin_required
 def adminGetUserKey(name):
     """
-        Returns a zip file of a specified user's key/cert pair for the Admin to download
+        Returns a config file of a specified user's key/cert pair for the Admin to download
 
         
-        Returns : zip file of user's keys if found. Else returns example zip file
+        Returns : config file of user's keys if found. Else returns example zip file
     """
     keys = hl.getUser("Name",name)["Keys"]
     #If on a production server, use actual path
     if os.path.isdir(keys_dir):
-        filename = keys_dir + keys + '.zip' 
-        if not os.path.exists(filename):
-            hl.zipUserKeys(keys) 
+        filename = keys_dir + keys + '.ovpn' 
+        #if not os.path.exists(filename):
+        #    hl.zipUserKeys(keys) 
+        
         return send_file(filename)
     #Else use relative dev path
     else:
@@ -977,7 +978,7 @@ def run_server(development=False):
 
             if ssl_chain != "None":
                 config['server.ssl_certificate_chain'] = ssl_chain
-
+        
         #Apply config
         cherrypy.config.update(config) 
 

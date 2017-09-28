@@ -6,7 +6,6 @@ import subprocess
 import shlex
 import os
 import logging
-import fileinput
 import re
 
 #Database and constants
@@ -244,22 +243,6 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
     
     #Form data is correct
     return True
-
-
-def zipUserKeys(user):
-    """
-        creates a zip file with the client's key/cert pair
-
-        user : the filename of the client
-    """
-    #create the users key/cert pair
-    args = [
-        "dist",
-        user,
-    ]
-    callScript('userman',args)
-    #subprocess.call(shlex.split('user_dist.sh {}'.format(user)))
-
 
 def checkExpiredKeys():
     """
