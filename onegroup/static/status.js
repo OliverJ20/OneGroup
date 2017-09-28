@@ -3,8 +3,7 @@
 //  */
 
 $(document).ready(function () {
-    addInfo();
-
+    addInfo();    
 });
 
 function addInfo()
@@ -69,32 +68,31 @@ function addInfo()
 
               var updated = logStringArrays[1];
 
-              var counter = 2;
+              var counter = 3;
+              
+                            while(invalid3.test(logStringArrays[counter]) == false){
+                              var tableLength = logStringArrays[counter].length;
+                              row = $(table[0].insertRow(-1));
+                              for (var j = 0; j < tableLength; j++) {
+                                var info = $("<td />");
+                                info.html(logStringArrays[counter][j]);
+                                row.append(info);
+                              }
+                              counter++;
+                            }
 
-              while(invalid3.test(logStringArrays[counter]) == false){
-                var tableLength = logStringArrays[counter].length;
-                row = $(table[0].insertRow(-1));
-                for (var j = 0; j < tableLength; j++) {
-                  var info = $("<td />");
-                  info.html(logStringArrays[counter][j]);
-                  row.append(info);
-                }
-                counter++;
+                            document.getElementById("currentUsers").innerHTML = counter = 3;
+
+                          while(invalid4.test(logStringArrays[counter+2]) == false){
+                            var routerLength = logStringArrays[counter+2].length;
+                            routingrow = $(routingTable[0].insertRow(-1));
+                            for (var k = 0; k < routerLength; k++) {
+                              var routinginfo = $("<td />");
+                              routinginfo.html(logStringArrays[counter+1][k]);
+                              routingrow.append(routinginfo);
+                            }
+                            counter++;
               }
-
-            //document.getElementById("currentUsers").innerHTML = counter - 3;
-
-            while(invalid4.test(logStringArrays[counter+1]) == false){
-              var routerLength = logStringArrays[counter+1].length;
-              routingrow = $(routingTable[0].insertRow(-1));
-              for (var k = 0; k < routerLength; k++) {
-                var routinginfo = $("<td />");
-                routinginfo.html(logStringArrays[counter+2][k]);
-                routingrow.append(routinginfo);
-              }
-              counter++;
-            }
-
               var statusTable = $("#statusTable");
               statusTable.html("");
               statusTable.append(table);
