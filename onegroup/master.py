@@ -34,7 +34,6 @@ def login_required(f):
     def login_decorator(*args, **kwargs):
         if not session.get('logged_in'):
             abort(401)
-            ##return redirect(url_for('login'))
         else:
             return f(*args, **kwargs)
     return login_decorator
@@ -134,7 +133,7 @@ def home():
     """
     
     users = hl.getUsers()
-    return render_template('index.html', dataU = users)
+    return render_template('index.html')
 
 
 @app.route('/password/', methods=['GET', 'POST'])
@@ -307,7 +306,7 @@ def show_user_keys(username):
 
 @app.route('/iptables/<ruleid>', methods=['GET','POST'])
 @admin_required
-def edit_iptable(ruleid):
+def iptable_form(ruleid):
     """
         Form to edit an iptables rule
 
@@ -315,33 +314,48 @@ def edit_iptable(ruleid):
 
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
-    """
+    """ 
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
-        if rule["Policy"] == 1:
-            ip_dict = {
-                "Chain" : request.form["Chain"],
-                "Action" : request.form["Action"]
-            }
-        else:
-            ip_dict = {
-                "Source" : request.form["source"],
-                "Source_Port" : request.form["sport"],
-                "Destination" : request.form["destination"],
-                "Destination_Port" : request.form["dport"],
-                "Table" : request.form["Table"],
-                "Chain" : request.form["Chain"],
-                "Input" : request.form["input"],
-                "Output" : request.form["output"],
-                "Protocol" : request.form["Protocol"],
-                "State" : request.form["State"],
-                "Action" : request.form["Action"]
-            }
-        ip_string = hl.ipDictToString(ip_dict)
-        hl.updateIPRules(ruleid, ip_string)
-        return redirect(url_for('show_config'))
+        if ruleid != -2:
+            if rule["Policy"] == 1:
+                ip_dict = {
+                    "Chain" : request.form["Chain"],
+                    "Action" : request.form["Action"]
+                }
+            else:
+                ip_dict = {
+                    "Source" : request.form["source"],
+                    "Source_Port" : request.form["sport"],
+                    "Destination" : request.form["destination"],
+                    "Destination_Port" : request.form["dport"],
+                    "Table" : request.form["Table"],
+                    "Chain" : request.form["Chain"],
+                    "Input" : request.form["input"],
+                    "Output" : request.form["output"],
+                    "Protocol" : request.form["Protocol"],
+                    "State" : request.form["State"],
+                    "Action" : request.form["Action"]
+                }
+            ip_string = hl.ipDictToString(ip_dict)
+            if ruleid == -1:           
+                hl.addRule(ip_string)
+            else :
+                hl.updateIPRules(ruleid, ip_string)
 
-    return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
+            return redirect(url_for('show_config'))
+
+        elif ruleid == -2:
+            #set policy
+            policy = request.form["ruleType1"]
+            return render_template('iptables_create.html', postback = 1, policy = policy)
+        else:
+            abort(404)
+
+    if ruleid == -1:
+        return render_template('iptables_create.html', postback = -1)
+
+    return render_template('iptables_edit.html', rule = rule['Rule'], policy = rule['Policy'])
 
 
 @app.route('/config/', methods=['GET'])
@@ -711,7 +725,7 @@ def page_not_found(e):
         Returns : login template and flashes error message
     """
     flash("Error: Try Something Different This Time")
-    return render_template('login.html'), 404
+    return redirect(url_for('login'))
 
 
 #Function to create user and generate keys into a ZIP folder
@@ -906,6 +920,7 @@ def adminGetUserKey(name):
     else:
         return send_file('static\\Test_client1.zip')
 
+
 def setConfig(debug):
     """
         Loads the configuration from the config file 
@@ -923,6 +938,7 @@ def setConfig(debug):
         app.config['SECRET_KEY'] = secret 
     else:
         app.config['SECRET_KEY'] = os.getenv(tag+'secret',base_config['secret']) 
+
 
     #Flask-mail config
     app.config['MAIL_SERVER'] = os.getenv(tag+'mail_server',base_config['mail_server'])
@@ -978,7 +994,7 @@ def run_server(development=False):
 
             if ssl_chain != "None":
                 config['server.ssl_certificate_chain'] = ssl_chain
-        
+
         #Apply config
         cherrypy.config.update(config) 
 

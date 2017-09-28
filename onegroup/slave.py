@@ -4,10 +4,12 @@ import string
 import re
 import os
 import logging
+import cherrypy 
 
 from functools import wraps
 from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
+from paste.translogger import TransLogger
 
 try:
     from onegroup.defaults import *
@@ -32,7 +34,6 @@ def login_required(f):
     def login_decorator(*args, **kwargs):
         if not session.get('logged_in'):
             abort(401)
-            ##return redirect(url_for('login'))
         else:
             return f(*args, **kwargs)
     return login_decorator
@@ -357,7 +358,6 @@ def iptable_form(ruleid):
     return render_template('iptables_edit.html', rule = rule['Rule'], policy = rule['Policy'])
 
 
-
 @app.route('/config/', methods=['GET'])
 @admin_required
 def show_config():
@@ -610,8 +610,11 @@ def filluserform(form):
             session.pop('accountType', None)
             
             
-            if auth == "Passphrase" or auth == "Email":
+            if auth == "Passphrase":
                 pwd = randompassword() #Default Generation or Not
+                email = request.form['email1']
+            elif auth == "Email":
+                pwd = "" 
                 email = request.form['email1']
             else:
                 pwd = ""
@@ -699,15 +702,16 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
     """
     msg = Message(
         subjectTitle,
-        sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
-        )
+        sender = os.getenv(tag+'email',base_config['email']) 
+    )
     for email in recipientEmail:             
         msg.add_recipient(email)
 
     msg.body = bodyMessage
 
     if attachmentName is not None and attachmentFilePath is not None:
-        mail.attach(attachmentName, attachmentFilePath, "application/zip")
+        with app.open_resource(attachmentFilePath) as fp:
+            msg.attach(attachmentName, "text/plain", fp.read())
 
     mail.send(msg)
 
@@ -721,7 +725,7 @@ def page_not_found(e):
         Returns : login template and flashes error message
     """
     flash("Error: Try Something Different This Time")
-    return render_template('login.html'), 404
+    return redirect(url_for('login'))
 
 
 #Function to create user and generate keys into a ZIP folder
@@ -737,14 +741,13 @@ def createNewUser(name, account, auth, email, pwd, group, expiry):
     #Check if the user creation was succesful
     if hl.createUser(name, account, auth, email = email, passwd = pwd, group = group, expiry = expiry):
         user = hl.getUser("Email", email)
-        hl.zipUserKeys(user['Keys'])
 
         if(auth == "Email"):
             subjectTitle = "OneGroup account keys"
             recipientEmail =[email]
             bodyMessage = "here are your keys"
-            attachmentName = "user keys"
-            filename = keys_dir + user['Keys'] + '.zip'
+            attachmentName = user['Keys'] + '.ovpn'
+            filename = "{}/{}".format(keys_dir,attachmentName)
             attachmentFilePath = filename
             emailMessage(subjectTitle, recipientEmail, bodyMessage,attachmentName, attachmentFilePath)
 
@@ -879,15 +882,16 @@ def getKeys(name = None):
         Returns : zip file of user's keys if found. Else returns example zip file
     """
     if name == None:
-        name =session.get('name')
+        name = session.get('name')
 
     keys = hl.getUser("Name",name)["Keys"]
     hl.keyDistributeFlag(name)
     #If on a production server, use actual path
     if os.path.isdir(keys_dir):
-        filename = keys_dir + keys + '.zip' 
-        if not os.path.exists(filename):
-            hl.zipUserKeys(keys) 
+        filename = keys_dir + keys + '.ovpn' 
+
+        #if not os.path.exists(filename):
+        #    hl.zipUserKeys(keys) 
 
         return send_file(filename)
     #Else use relative dev path
@@ -899,17 +903,18 @@ def getKeys(name = None):
 @admin_required
 def adminGetUserKey(name):
     """
-        Returns a zip file of a specified user's key/cert pair for the Admin to download
+        Returns a config file of a specified user's key/cert pair for the Admin to download
 
         
-        Returns : zip file of user's keys if found. Else returns example zip file
+        Returns : config file of user's keys if found. Else returns example zip file
     """
     keys = hl.getUser("Name",name)["Keys"]
     #If on a production server, use actual path
     if os.path.isdir(keys_dir):
-        filename = keys_dir + keys + '.zip' 
-        if not os.path.exists(filename):
-            hl.zipUserKeys(keys) 
+        filename = keys_dir + keys + '.ovpn' 
+        #if not os.path.exists(filename):
+        #    hl.zipUserKeys(keys) 
+        
         return send_file(filename)
     #Else use relative dev path
     else:
@@ -934,12 +939,13 @@ def setConfig(debug):
     else:
         app.config['SECRET_KEY'] = os.getenv(tag+'secret',base_config['secret']) 
 
+
     #Flask-mail config
     app.config['MAIL_SERVER'] = os.getenv(tag+'mail_server',base_config['mail_server'])
     app.config['MAIL_PORT'] = int(os.getenv(tag+'mail_port',base_config['mail_port'])) 
     app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
-    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
+    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])    
+    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password']) 
     mail = Mail(app)
 
 
@@ -999,4 +1005,3 @@ def run_server(development=False):
 
 if __name__ == '__main__':
     run_server(True)
-

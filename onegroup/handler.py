@@ -228,7 +228,7 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         logging.error("Error validating user %s Password set for authentication type: %s",name,accountType)
         return False
     #Expiry incorrectly set
-    elif not re.search(r"\d{4}-\d{1,2}-\d{1,2}", expiry):
+    elif expiry != '' and not re.search(r"\d{4}-\d{1,2}-\d{1,2}", expiry):
         logging.error("Error validating user %s Expiry set for authentication type: %s",name,expiry)
         return False
     #Name already exists
