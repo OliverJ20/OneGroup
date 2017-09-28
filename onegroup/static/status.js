@@ -11,7 +11,7 @@ function addInfo()
 {
     var invalid1 = "Open VPN CLIENT LIST";
     var invalid2 = "Updated";
-    var invalid3 = "ROUTING TABLE";
+    var invalid3 = new RegExp("ROUTING TABLE");
     var invalid4 = "GLOBAL STATS";
     var invalid5 = "Max bcast";
     var invalid6 = "END";
@@ -68,7 +68,7 @@ function addInfo()
               routingrow.append(lastrefHeader);
 
               //Add the data rows for Status.
-              for (var i = 1; i < logStringArrays.length; i++) {
+              for (var i = 2; i < logStringArrays.length; i++) {
                   var info = $("<td />");
                   row = $(table[0].insertRow(-1));
                   info.html(logStringArrays[i]);
@@ -78,7 +78,7 @@ function addInfo()
                   // }
               }
 
-              var counter = 1;
+              var counter = 2;
 
               while(invalid3.test(logStringArrays[counter]) == false){
                 var tableLength = logStringArrays[counter].length;
@@ -91,7 +91,7 @@ function addInfo()
                 counter++;
               }
 
-              for (var i = 1; i < logStringArrays.length; i++) {
+              for (var i = 2; i < logStringArrays.length; i++) {
                 var routinginfo = $("<td />");
                 routingrow = $(routingTable[0].insertRow(-1));
                 routinginfo.html(logStringArrays[i]);
