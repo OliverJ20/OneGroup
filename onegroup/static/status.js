@@ -82,10 +82,10 @@ function addInfo()
                 counter++;
               }
 
-              document.getElementById("currentUsers").innerHTML = counter -3;
+            //document.getElementById("currentUsers").innerHTML = counter - 3;
 
-            while(invalid4.test(logStringArrays[counter+2]) == false){
-              var routerLength = logStringArrays[counter+2].length;
+            while(invalid4.test(logStringArrays[counter+1]) == false){
+              var routerLength = logStringArrays[counter+1].length;
               routingrow = $(routingTable[0].insertRow(-1));
               for (var k = 0; k < routerLength; k++) {
                 var routinginfo = $("<td />");
