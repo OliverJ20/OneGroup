@@ -31,7 +31,7 @@
                 <input type = "text" id = "dport"  name = "dport" value = '{{rule["Destination_Port"]}}'>
                 <br  />
                 <select value = "TABLE" id = "Table" name = "Table" >
-                    <option value = "NULL">TABLE</option>
+                    <option value = "NULL" {% if not rule['Table'] %} selected {% endif %}> -- No Table -- </option>
                     <option value ="nat" {% if rule['Table'] == "nat" %} selected {% endif %}>nat</option>
                     <option value ="filter" {% if rule['Table'] == "filter" %} selected {% endif %}>filter</option>
                     <option value ="mangle" {% if rule['Table'] == "mangle" %} selected {% endif %}>mangle</option>
@@ -46,14 +46,14 @@
                 <input type = "text" id = "output" name = "output" value = "{{rule['Output']}}">
                 <br  />
                 <select value = "PROT" id = "Protocol" name = "Protocol" >
-                    <option value = "NULL">PROT</option>
+                    <option value = "NULL" {% if not rule['Protocol'] %} selected {% endif %}> -- No Protocol -- </option>
                     <option value ="tcp" {% if rule['Protocol'] == "tcp"  %} selected {% endif %}>tcp</option>
                     <option value ="icmp" {% if rule['Protocol'] == "icmp"  %} selected {% endif %}>icmp</option>
                     <option value ="udp" {% if rule['Protocol'] == "udp"  %} selected {% endif %}>udp</option>
                 </select>
                 <br  />
                 <select value = "STATE" id = "State" name = "State" >
-                    <option value = "NULL">STATE</option>
+                    <option value ="NULL"> -- No State -- </option>
                     <option value ="NEW" {% if rule['State'] == "NEW" %} selected {% endif %}>NEW</option>
                     <option value ="ESTABLISHED" {% if rule['State'] == "ESTABLISHED" %} selected {% endif %}>ESTABLISHED</option>
                     <option value ="RELATED" {% if rule['State'] == "RELATED" %} selected {% endif %}>RELATED</option>
