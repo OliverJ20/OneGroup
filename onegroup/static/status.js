@@ -67,6 +67,8 @@ function addInfo()
               routingrow.append(realaddressHeader);
               routingrow.append(lastrefHeader);
 
+              var updated = logStringArrays[1];
+
               var counter = 2;
 
               while(invalid3.test(logStringArrays[counter]) == false){
