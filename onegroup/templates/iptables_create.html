@@ -3,22 +3,22 @@
 {% block body %}
     <body>	
         {% if postback < 0 %} 
-	    <form action="{{ url_for('iptables', ruleid = -2) }}" vname="ruleType" id="detailsLeft" method=post>
-	        <p>Account Type</p>
+	        <form action="{{ url_for('iptable_form', ruleid = -2) }}" vname="ruleType" id="detailsLeft" method=post>
+	            <p>Account Type</p>
                     <select name="ruleType1">
-	                <option disabled selected value> -- Select -- </option>
+	                    <option disabled selected value> -- Select -- </option>
                         <option value="0">Standard Rule</option>
                         <option value="1">Policy Rule</option>
                     </select>                
 
-	        <div class= "bodydiv" div id = "submitDiv">
+	            <div class= "bodydiv" div id = "submitDiv">
                     <input type="submit" name="ruleform1" value="OK"></input>
                 </div>
             </form>
         {% else %}	
-            <form action="" vname="ipform" method=post>
-                <select value = "CHAIN" id = "Chain" name = "Chain" >
-                    <option disabled selected value> -- Select -- </option>
+            <form action="{{ url_for('iptable_form', ruleid = -1) }}" vname="ipform" method=post>
+                <select value = "CHAIN" id = "Chain" name = "Chain" required>
+                    <option disabled selected> -- Select -- </option>
                     <option value ="INPUT">INPUT</option>
                     <option value ="OUTPUT">OUTPUT</option>
                     <option value ="FORWARD">FORWARD</option>
@@ -28,12 +28,12 @@
 
     	        <br  />
 
-                {% if policy == 0 %}
+                {% if policy == "0" %}
                     <label for ="source">Source</label>
                     <br  />
                     <input type = "text" id = "source"  name = "source">
                     <br  />
-                    <label for = "port">port</label>
+                    <label for = "sport">port</label>
                     <br  />
                     <input type = "text" id = "sport"  name = "sport">
                     <br  />
@@ -41,12 +41,12 @@
                     <br  />
                     <input type = "text" id = "destination" name = "destination">
                     <br  />
-                    <label for = "port">port</label>
+                    <label for = "dport">port</label>
                     <br  />
                     <input type = "text" id = "dport"  name = "dport">
                     <br  />
                     <select value = "TABLE" id = "Table" name = "Table" >
-                        <option value = "NULL" selected> -- No Table -- </option>
+                        <option value = "" selected> -- No Table -- </option>
                         <option value ="nat">nat</option>
                         <option value ="filter">filter</option>
                         <option value ="mangle">mangle</option>
@@ -54,29 +54,29 @@
                     <br  />
                     <label for ="input">Input Interface</label>
                     <br  />
-                    <input type = "text" id = "input" name = "input" value = "{{rule['Input']}}">
+                    <input type = "text" id = "input" name = "input">
                     <br  />
-                    <label for ="destination">Output Interface</label>
+                    <label for ="output">Output Interface</label>
                     <br  />
                     <input type = "text" id = "output" name = "output">
                     <br  />
                     <select value = "PROT" id = "Protocol" name = "Protocol" >
-                        <option value = "NULL" selected>PROT</option>
+                        <option value = "" selected>PROT</option>
                         <option value ="tcp">tcp</option>
                         <option value ="icmp">icmp</option>
                         <option value ="udp">udp</option>
                     </select>
                     <br  />
                     <select value = "STATE" id = "State" name = "State" >
-                        <option value ="NULL" selected>STATE</option>
+                        <option value ="" selected>STATE</option>
                         <option value ="NEW">NEW</option>
                         <option value ="ESTABLISHED">ESTABLISHED</option>
                         <option value ="RELATED">RELATED</option>
                      </select>
                 {% endif %}
 
-                <select value = "ACTION" id = "Action" name = "Action" >
-                    <option disabled selected value> -- Select -- </option>
+                <select value = "ACTION" id = "Action" name = "Action" required>
+                    <option disabled selected> -- Select -- </option>
                     <option value ="DROP">DROP</option>
                     <option value ="ACCEPT">ACCEPT</option>
                     <option value ="REJECT">REJECT</option>

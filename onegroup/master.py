@@ -317,45 +317,60 @@ def iptable_form(ruleid):
     """ 
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
-        if ruleid != -2:
-            if rule["Policy"] == 1:
-                ip_dict = {
-                    "Chain" : request.form["Chain"],
-                    "Action" : request.form["Action"]
-                }
-            else:
-                ip_dict = {
-                    "Source" : request.form["source"],
-                    "Source_Port" : request.form["sport"],
-                    "Destination" : request.form["destination"],
-                    "Destination_Port" : request.form["dport"],
-                    "Table" : request.form["Table"],
-                    "Chain" : request.form["Chain"],
-                    "Input" : request.form["input"],
-                    "Output" : request.form["output"],
-                    "Protocol" : request.form["Protocol"],
-                    "State" : request.form["State"],
-                    "Action" : request.form["Action"]
-                }
-            ip_string = hl.ipDictToString(ip_dict)
-            if ruleid == -1:           
-                hl.addRule(ip_string)
+        if ruleid == "-2":
+            #set policy
+            session["Policy"] = request.form["ruleType1"]
+            return render_template('iptables_create.html', postback = 1, policy = session["Policy"])
+        elif ruleid != "-2":
+            if ruleid == "-1":           
+                ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
+                hl.addIPRule(ip_string)
             else :
+                ip_string = hl.ipDictToString(getIPForm(rule["Policy"]))
                 hl.updateIPRules(ruleid, ip_string)
 
             return redirect(url_for('show_config'))
 
-        elif ruleid == -2:
-            #set policy
-            policy = request.form["ruleType1"]
-            return render_template('iptables_create.html', postback = 1, policy = policy)
         else:
             abort(404)
 
-    if ruleid == -1:
+    if ruleid == "-1":
         return render_template('iptables_create.html', postback = -1)
 
-    return render_template('iptables_edit.html', rule = rule['Rule'], policy = rule['Policy'])
+    return render_template('iptables_edit.html', rid = ruleid, rule = rule['Rule'], policy = rule['Policy'])
+
+
+def getIPForm(policy):
+    """
+        Gets all the form data from an iptables form
+
+        policy : Flag to determine if this is a policy rule or not
+
+        Returns dict of the inputed iptables rule
+    """ 
+    if int(policy) == 1:
+        ip_dict = {
+            "Chain" : request.form["Chain"],
+            "Action" : request.form["Action"]
+        }
+    else:
+        ip_dict = {
+            "Source" : request.form["source"],
+            "Source_Port" : request.form["sport"], 
+            "Destination" : request.form["destination"],       
+            "Destination_Port" : request.form["dport"],
+            "Table" : request.form["Table"],
+            "Chain" : request.form["Chain"],
+            "Input" : request.form["input"],
+            "Output" : request.form["output"],
+            "Protocol" : request.form["Protocol"],
+            "State" : request.form["State"],
+            "Action" : request.form["Action"]
+        }
+    
+    return ip_dict
+
+
 
 
 @app.route('/config/', methods=['GET'])

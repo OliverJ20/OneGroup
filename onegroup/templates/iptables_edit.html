@@ -2,8 +2,9 @@
 
 {% block body %}
     <body>
-        <form action="" vname="ipform" method=post>
-            <select value = "CHAIN" id = "Chain" name = "Chain" >
+        <form action="{{ url_for('iptable_form', ruleid = rid) }}" vname="ipform" method=post>
+            <select value = "CHAIN" id = "Chain" name = "Chain" required>
+                <option disabled> -- Select -- </option>
                 <option value ="INPUT" {% if rule['Chain'] == "INPUT" %} selected {% endif %}>INPUT</option>
                 <option value ="OUTPUT" {% if rule['Chain'] == "OUTPUT" %} selected {% endif %}>OUTPUT</option>
                 <option value ="FORWARD" {% if rule['Chain'] == "FORWARD" %} selected {% endif %}>FORWARD</option>
@@ -31,7 +32,7 @@
                 <input type = "text" id = "dport"  name = "dport" value = '{{rule["Destination_Port"]}}'>
                 <br  />
                 <select value = "TABLE" id = "Table" name = "Table" >
-                    <option value = "NULL" {% if not rule['Table'] %} selected {% endif %}> -- No Table -- </option>
+                    <option value = "" {% if not rule['Table'] %} selected {% endif %}> -- No Table -- </option>
                     <option value ="nat" {% if rule['Table'] == "nat" %} selected {% endif %}>nat</option>
                     <option value ="filter" {% if rule['Table'] == "filter" %} selected {% endif %}>filter</option>
                     <option value ="mangle" {% if rule['Table'] == "mangle" %} selected {% endif %}>mangle</option>
@@ -46,21 +47,22 @@
                 <input type = "text" id = "output" name = "output" value = "{{rule['Output']}}">
                 <br  />
                 <select value = "PROT" id = "Protocol" name = "Protocol" >
-                    <option value = "NULL" {% if not rule['Protocol'] %} selected {% endif %}> -- No Protocol -- </option>
+                    <option value = "" {% if not rule['Protocol'] %} selected {% endif %}> -- No Protocol -- </option>
                     <option value ="tcp" {% if rule['Protocol'] == "tcp"  %} selected {% endif %}>tcp</option>
                     <option value ="icmp" {% if rule['Protocol'] == "icmp"  %} selected {% endif %}>icmp</option>
                     <option value ="udp" {% if rule['Protocol'] == "udp"  %} selected {% endif %}>udp</option>
                 </select>
                 <br  />
                 <select value = "STATE" id = "State" name = "State" >
-                    <option value ="NULL"> -- No State -- </option>
+                    <option value = "" {% if not rule['Protocol'] %} selected {% endif %}> -- No State -- </option>
                     <option value ="NEW" {% if rule['State'] == "NEW" %} selected {% endif %}>NEW</option>
                     <option value ="ESTABLISHED" {% if rule['State'] == "ESTABLISHED" %} selected {% endif %}>ESTABLISHED</option>
                     <option value ="RELATED" {% if rule['State'] == "RELATED" %} selected {% endif %}>RELATED</option>
                 </select>
             {% endif %}
 
-            <select value = "ACTION" id = "Action" name = "Action" >
+            <select value = "ACTION" id = "Action" name = "Action" required>
+                <option disabled> -- Select -- </option>
                 <option value ="DROP" {% if rule['Action'] == "DROP" %} selected {% endif %}>DROP</option>
                 <option value ="ACCEPT" {% if rule['Action'] == "ACCEPT" %} selected {% endif %}>ACCEPT</option>
                 <option value ="REJECT" {% if rule['Action'] == "REJECT" %} selected {% endif %}>REJECT</option>

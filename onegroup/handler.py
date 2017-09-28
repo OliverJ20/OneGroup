@@ -1061,7 +1061,7 @@ def getRule(ruleid):
     db = Database(filename=filen)
     rule = db.retrieve('firewall',{"ID" : ruleid})
     
-    if rule is None:
+    if rule is not None:
         rule["Rule"] = ipStringToDict(rule["Rule"])
 
     db.close()

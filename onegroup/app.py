@@ -3,6 +3,7 @@ import os
 import fileinput
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from passlib.hash import sha256_crypt
 
 #Package imports
 try:
