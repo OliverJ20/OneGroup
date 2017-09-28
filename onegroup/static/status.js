@@ -68,7 +68,7 @@ function addInfo()
 
               var updated = logStringArrays[1];
 
-              var counter = 2;
+              var counter = 3;
               
                             while(invalid3.test(logStringArrays[counter]) == false){
                               var tableLength = logStringArrays[counter].length;
@@ -88,7 +88,7 @@ function addInfo()
                             routingrow = $(routingTable[0].insertRow(-1));
                             for (var k = 0; k < routerLength; k++) {
                               var routinginfo = $("<td />");
-                              routinginfo.html(logStringArrays[counter+1][k]);
+                              routinginfo.html(logStringArrays[counter+2][k]);
                               routingrow.append(routinginfo);
                             }
                             counter++;
