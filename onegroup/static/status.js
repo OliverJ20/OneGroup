@@ -88,20 +88,28 @@ function addInfo()
                   info.html(logStringArrays[counter][j]);
                   row.append(info);
                 }
-                // var info = $("<td />");
-                // info.html(logStringArrays[counter]);
-                // row.append(info);
                 counter++;
               }
 
-              for (var i = 2; i < logStringArrays.length; i++) {
+            //   for (var i = 2; i < logStringArrays.length; i++) {
+            //     var routinginfo = $("<td />");
+            //     routingrow = $(routingTable[0].insertRow(-1));
+            //     routinginfo.html(logStringArrays[i]);
+            //     routingrow.append(routinginfo);
+            //     // for (var j = 0; j < infoLength; j++) {
+            //     //     var info = $("<td />");
+            //     // }
+            // }
+
+            while(invalid4.test(logStringArrays[counter+1]) == false){
+              var routerLength = logStringArrays[counter+1].length;
+              routingrow = $(routingTable[0].insertRow(-1));
+              for (var k = 0; k < routerLength; k++) {
                 var routinginfo = $("<td />");
-                routingrow = $(routingTable[0].insertRow(-1));
-                routinginfo.html(logStringArrays[i]);
+                routinginfo.html(logStringArrays[counter+1][k]);
                 routingrow.append(routinginfo);
-                // for (var j = 0; j < infoLength; j++) {
-                //     var info = $("<td />");
-                // }
+              }
+              counter++;
             }
 
               var statusTable = $("#statusTable");
