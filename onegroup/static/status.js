@@ -2,10 +2,10 @@
 //  * Created by Eliot on 8/6/2017.
 //  */
 
-// $(document).ready(function () {
-//     addInfo();
+$(document).ready(function () {
+    addInfo();
 
-// });
+});
 
 // function addInfo()
 // {
@@ -80,11 +80,6 @@
 /**
  * Created by Olive & Eliot on 8/6/2017.
  */
-
-$(document).ready(function () {
-  addInfo();
-
-});
 
 function addInfo()
 {
