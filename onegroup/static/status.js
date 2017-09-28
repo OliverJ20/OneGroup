@@ -33,7 +33,7 @@ function addInfo()
               var table = $("<table />");
               var routingTable = $("<table />");
               var globalTable = $("<table />");
-              var infoLength = logStringArrays[0].length;
+
 
               var row = $(table[0].insertRow(-1));
               var nameHeader = $("<th />");
@@ -76,6 +76,19 @@ function addInfo()
                   // for (var j = 0; j < infoLength; j++) {
                   //     var info = $("<td />");
                   // }
+              }
+
+              var counter = 1;
+
+              while(!invalid3.test(logStringArrays[counter])){
+                var tableLength = logStringArrays[counter].length;
+                for (var j = 0; j < tableLength; j++) {
+                  var info = $("<td />");
+                  row = $(table[0].insertRow(-1));
+                  info.html(logStringArrays[counter][j]);
+                  row.append(info);
+                }
+                counter++;
               }
 
               for (var i = 1; i < logStringArrays.length; i++) {
