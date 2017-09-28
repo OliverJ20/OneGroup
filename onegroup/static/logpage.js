@@ -4,7 +4,8 @@
 
 $(document).ready(function () {
     addInfo();
-
+    var today = new Date();
+    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
 });
 
 function addInfo()
@@ -18,7 +19,7 @@ function addInfo()
       for (var i = 0; i<LogInfo["logData"].length; i++)
         {
           var tempvar = LogInfo["logData"][i];
-          if(/2017/.test(tempvar)){
+          if('/' + n + '/'.test(tempvar)){
           tempvar = tempvar.split("2017");
           tempvar[0] = tempvar[0] + n;
           logStringArrays.push(tempvar);
