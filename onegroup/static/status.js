@@ -40,6 +40,7 @@ function addInfo()
 
               //Add the data rows.
               for (var i = 1; i < logStringArrays.length; i++) {
+                  var info = $("<td />");
                   row = $(table[0].insertRow(-1));
                   info.html(logStringArrays[i]);
                   row.append(info);
