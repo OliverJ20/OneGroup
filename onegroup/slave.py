@@ -1,5 +1,4 @@
 #Imports
-import cherrypy 
 import random
 import string
 import re
@@ -7,10 +6,8 @@ import os
 import logging
 
 from functools import wraps
-from paste.translogger import TransLogger
 from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
-from apscheduler.schedulers.background import BackgroundScheduler
 
 try:
     from onegroup.defaults import *
@@ -22,34 +19,6 @@ except:
 
 app = Flask(__name__)
 mail = Mail(app)
-sched = BackgroundScheduler()
-
-#app.config.from_object(__name__)
-
-# Load default config and override config from an environment variable
-#app.config.update(dict(
-#    SECRET_KEY='development_key',
-#))
-
-#app.config.update(
-#    DEBUG = True,
-#    MAIL_SERVER='smtp.gmail.com',
-#	MAIL_PORT=465,
-#	MAIL_USE_SSL=True,
-#	MAIL_USERNAME = 'capstoneonegroup@gmail.com',
-#	MAIL_PASSWORD = 'MaristCollege!'
-#)
-#mail = Mail(app)
-
-#Message mail structure
-# msg = Message (
-#     "can be some text",  <--- subject title
-#     sender = "capstoneonegroup@gmail.com",
-#     recipients= ['some email here'])
-#     msg.body = "some text here" <--- the body of the email here
-#     mail.send(msg)
-# )
-
 
 def login_required(f):
     """
@@ -942,9 +911,6 @@ def setConfig(debug):
 
         debug : flag to turn on the flask debugging flag
     """
-    #load config 
-    hl.loadConfig()
-
     #Set debug flag
     if debug:
         app.config['DEBUG'] = True
@@ -964,35 +930,16 @@ def setConfig(debug):
     app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password']) 
     mail = Mail(app)
 
-def setKeyExpiry():
-    """
-        Adds job to the scheduler and starts the scheduler
-    """
-    #Add key expiry job to run every hour
-    sched.add_job(hl.checkExpiredKeys,'cron',minute=0,id='key_expire_job')
-    
-    #Start scheduler
-    sched.start()
 
-
-#
-#Cherrypy server base
-#
 def run_server(development=False):
     """
         Initialises and runs the web server
         
         development : flag to run the Flask development server instead of the full Cherrypy server
     """
-    #Initalise database
-    hl.init_database()
-    
     #Set the configuration
     setConfig(development)
-
-    #Setup key expiry 
-    setKeyExpiry()
- 
+     
     #Run development server if in development mode
     if development:
         app.run(use_reloader=False)
@@ -1040,3 +987,4 @@ def run_server(development=False):
 
 if __name__ == '__main__':
     run_server(True)
+

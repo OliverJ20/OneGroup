@@ -34,6 +34,8 @@ base_config = {
     "password" : "password",
     "mail_server" : "smtp.gmail.com",
     "mail_port" : 465,
+    "multinode" : "False",
+    "node" : "master"
 }
 
 #IPTABLES RULES
