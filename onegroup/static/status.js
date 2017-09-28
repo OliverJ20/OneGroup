@@ -67,16 +67,16 @@ function addInfo()
               routingrow.append(realaddressHeader);
               routingrow.append(lastrefHeader);
 
-              //Add the data rows for Status.
-              for (var i = 2; i < logStringArrays.length; i++) {
-                  var info = $("<td />");
-                  row = $(table[0].insertRow(-1));
-                  info.html(logStringArrays[i]);
-                  row.append(info);
-                  // for (var j = 0; j < infoLength; j++) {
-                  //     var info = $("<td />");
-                  // }
-              }
+              // //Add the data rows for Status.
+              // for (var i = 2; i < logStringArrays.length; i++) {
+              //     var info = $("<td />");
+              //     row = $(table[0].insertRow(-1));
+              //     info.html(logStringArrays[i]);
+              //     row.append(info);
+              //     // for (var j = 0; j < infoLength; j++) {
+              //     //     var info = $("<td />");
+              //     // }
+              // }
 
               var counter = 2;
 
