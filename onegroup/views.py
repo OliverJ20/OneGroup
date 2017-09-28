@@ -336,7 +336,7 @@ def show_user_keys(username):
 
 @app.route('/iptables/<ruleid>', methods=['GET','POST'])
 @admin_required
-def edit_iptable(ruleid):
+def iptable_form(ruleid):
     """
         Form to edit an iptables rule
 
@@ -344,33 +344,49 @@ def edit_iptable(ruleid):
 
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
-    """
+    """ 
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
-        if rule["Policy"] == 1:
-            ip_dict = {
-                "Chain" : request.form["Chain"],
-                "Action" : request.form["Action"]
-            }
-        else:
-            ip_dict = {
-                "Source" : request.form["source"],
-                "Source_Port" : request.form["sport"],
-                "Destination" : request.form["destination"],
-                "Destination_Port" : request.form["dport"],
-                "Table" : request.form["Table"],
-                "Chain" : request.form["Chain"],
-                "Input" : request.form["input"],
-                "Output" : request.form["output"],
-                "Protocol" : request.form["Protocol"],
-                "State" : request.form["State"],
-                "Action" : request.form["Action"]
-            }
-        ip_string = hl.ipDictToString(ip_dict)
-        hl.updateIPRules(ruleid, ip_string)
-        return redirect(url_for('show_config'))
+        if ruleid != -2:
+            if rule["Policy"] == 1:
+                ip_dict = {
+                    "Chain" : request.form["Chain"],
+                    "Action" : request.form["Action"]
+                }
+            else:
+                ip_dict = {
+                    "Source" : request.form["source"],
+                    "Source_Port" : request.form["sport"],
+                    "Destination" : request.form["destination"],
+                    "Destination_Port" : request.form["dport"],
+                    "Table" : request.form["Table"],
+                    "Chain" : request.form["Chain"],
+                    "Input" : request.form["input"],
+                    "Output" : request.form["output"],
+                    "Protocol" : request.form["Protocol"],
+                    "State" : request.form["State"],
+                    "Action" : request.form["Action"]
+                }
+            ip_string = hl.ipDictToString(ip_dict)
+            if ruleid == -1:           
+                hl.addRule(ip_string)
+            else :
+                hl.updateIPRules(ruleid, ip_string)
 
-    return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
+            return redirect(url_for('show_config'))
+
+        elif ruleid == -2:
+            #set policy
+            policy = request.form["ruleType1"]
+            return render_template('iptables_create.html', postback = 1, policy = policy)
+        else:
+            abort(404)
+
+    if ruleid == -1:
+        return render_template('iptables_create.html', postback = -1)
+
+    return render_template('iptables_edit.html', rule = rule['Rule'], policy = rule['Policy'])
+
 
 
 @app.route('/config/', methods=['GET'])

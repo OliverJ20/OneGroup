@@ -1147,11 +1147,14 @@ def getRule(ruleid):
     """
         Gets the specified iptables rule from the database
 
-        Returns: the given rule
+        Returns: the given rule or None if the rule doesn't exist
     """
     db = Database(filename=filen)
     rule = db.retrieve('firewall',{"ID" : ruleid})
-    rule["Rule"] = ipStringToDict(rule["Rule"])
+    
+    if rule is None:
+        rule["Rule"] = ipStringToDict(rule["Rule"])
+
     db.close()
     return rule
 
