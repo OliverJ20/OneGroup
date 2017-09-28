@@ -132,7 +132,7 @@ def home():
     """
     
     users = hl.getUsers()
-    return render_template('index.html', dataU = users)
+    return render_template('index.html')
 
 
 @app.route('/password/', methods=['GET', 'POST'])
@@ -305,7 +305,7 @@ def show_user_keys(username):
 
 @app.route('/iptables/<ruleid>', methods=['GET','POST'])
 @admin_required
-def edit_iptable(ruleid):
+def iptable_form(ruleid):
     """
         Form to edit an iptables rule
 
@@ -313,33 +313,49 @@ def edit_iptable(ruleid):
 
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
-    """
+    """ 
     rule = hl.getRule(ruleid)
     if request.method == 'POST':
-        if rule["Policy"] == 1:
-            ip_dict = {
-                "Chain" : request.form["Chain"],
-                "Action" : request.form["Action"]
-            }
-        else:
-            ip_dict = {
-                "Source" : request.form["source"],
-                "Source_Port" : request.form["sport"],
-                "Destination" : request.form["destination"],
-                "Destination_Port" : request.form["dport"],
-                "Table" : request.form["Table"],
-                "Chain" : request.form["Chain"],
-                "Input" : request.form["input"],
-                "Output" : request.form["output"],
-                "Protocol" : request.form["Protocol"],
-                "State" : request.form["State"],
-                "Action" : request.form["Action"]
-            }
-        ip_string = hl.ipDictToString(ip_dict)
-        hl.updateIPRules(ruleid, ip_string)
-        return redirect(url_for('show_config'))
+        if ruleid != -2:
+            if rule["Policy"] == 1:
+                ip_dict = {
+                    "Chain" : request.form["Chain"],
+                    "Action" : request.form["Action"]
+                }
+            else:
+                ip_dict = {
+                    "Source" : request.form["source"],
+                    "Source_Port" : request.form["sport"],
+                    "Destination" : request.form["destination"],
+                    "Destination_Port" : request.form["dport"],
+                    "Table" : request.form["Table"],
+                    "Chain" : request.form["Chain"],
+                    "Input" : request.form["input"],
+                    "Output" : request.form["output"],
+                    "Protocol" : request.form["Protocol"],
+                    "State" : request.form["State"],
+                    "Action" : request.form["Action"]
+                }
+            ip_string = hl.ipDictToString(ip_dict)
+            if ruleid == -1:           
+                hl.addRule(ip_string)
+            else :
+                hl.updateIPRules(ruleid, ip_string)
 
-    return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
+            return redirect(url_for('show_config'))
+
+        elif ruleid == -2:
+            #set policy
+            policy = request.form["ruleType1"]
+            return render_template('iptables_create.html', postback = 1, policy = policy)
+        else:
+            abort(404)
+
+    if ruleid == -1:
+        return render_template('iptables_create.html', postback = -1)
+
+    return render_template('iptables_edit.html', rule = rule['Rule'], policy = rule['Policy'])
+
 
 
 @app.route('/config/', methods=['GET'])
@@ -594,11 +610,8 @@ def filluserform(form):
             session.pop('accountType', None)
             
             
-            if auth == "Passphrase":
+            if auth == "Passphrase" or auth == "Email":
                 pwd = randompassword() #Default Generation or Not
-                email = request.form['email1']
-            elif auth == "Email":
-                pwd = "" 
                 email = request.form['email1']
             else:
                 pwd = ""
@@ -686,16 +699,15 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
     """
     msg = Message(
         subjectTitle,
-        sender = os.getenv(tag+'email',base_config['email']) 
-    )
+        sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
+        )
     for email in recipientEmail:             
         msg.add_recipient(email)
 
     msg.body = bodyMessage
 
     if attachmentName is not None and attachmentFilePath is not None:
-        with app.open_resource(attachmentFilePath) as fp:
-            msg.attach(attachmentName, "application/zip", fp)
+        mail.attach(attachmentName, attachmentFilePath, "application/zip")
 
     mail.send(msg)
 
@@ -926,8 +938,8 @@ def setConfig(debug):
     app.config['MAIL_SERVER'] = os.getenv(tag+'mail_server',base_config['mail_server'])
     app.config['MAIL_PORT'] = int(os.getenv(tag+'mail_port',base_config['mail_port'])) 
     app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])    
-    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password']) 
+    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
+    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
     mail = Mail(app)
 
 
