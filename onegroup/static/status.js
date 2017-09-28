@@ -94,7 +94,7 @@ function addInfo()
 
               var statusRouteTable = $("#statusRouteTable");
               statusRouteTable.html("");
-              statusRouteTable.append(table);
+              statusRouteTable.append(routingTable);
 
     })
 }
