@@ -83,11 +83,14 @@ function addInfo()
               while(invalid3.test(logStringArrays[counter]) == false){
                 var tableLength = logStringArrays[counter].length;
                 row = $(table[0].insertRow(-1));
-                for (var j = 0; j < tableLength; j++) {
-                  var info = $("<td />");
-                  info.html(logStringArrays[counter][j]);
-                  row.append(info);
-                }
+                // for (var j = 0; j < tableLength; j++) {
+                //   var info = $("<td />");
+                //   info.html(logStringArrays[counter][j]);
+                //   row.append(info);
+                // }
+                var info = $("<td />");
+                info.html(logStringArrays[counter]);
+                row.append(info);
                 counter++;
               }
 
