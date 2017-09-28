@@ -31,14 +31,43 @@ function addInfo()
 
         
               var table = $("<table />");
+              var routingTable = $("<table />");
+              var globalTable = $("<table />");
               var infoLength = logStringArrays[0].length;
 
               var row = $(table[0].insertRow(-1));
-              var header = $("<th />");
-              header.html("Test");
-              row.append(header);
+              var nameHeader = $("<th />");
+              nameHeader.html("Name");
+              var addressHeader = $("<th />");
+              addressHeader.html("Address");
+              var recHeader = $("<th />");
+              recHeader.html("Bytes Received");
+              var sentHeader = $("<th />");
+              sentHeader.html("Bytes Sent");
+              var connectedHeader = $("<th />");
+              connectedHeader.html("Connected Since");
+              row.append(nameHeader);
+              row.append(addressHeader);
+              row.append(recHeader);
+              row.append(sentHeader);
+              row.append(connectedHeader);
 
-              //Add the data rows.
+
+              var routingrow = $(routingTable[0].insertRow(-1));
+              var nameHeader = $("<th />");
+              nameHeader.html("Name");
+              var virtualaddressHeader = $("<th />");
+              virtualaddressHeader.html("Virtual Address");
+              var realaddressHeader = $("<th />");
+              realaddressHeader.html("Real Address");
+              var lastrefHeader = $("<th />");
+              lastrefHeader.html("Last Ref");
+              routingrow.append(nameHeader);
+              routingrow.append(virtualaddressHeader);
+              routingrow.append(realaddressHeader);
+              routingrow.append(lastrefHeader);
+
+              //Add the data rows for Status.
               for (var i = 1; i < logStringArrays.length; i++) {
                   var info = $("<td />");
                   row = $(table[0].insertRow(-1));
@@ -49,9 +78,23 @@ function addInfo()
                   // }
               }
 
+              for (var i = 1; i < logStringArrays.length; i++) {
+                var routinginfo = $("<td />");
+                routingrow = $(routingTable[0].insertRow(-1));
+                routinginfo.html(logStringArrays[i]);
+                routingrow.append(routinginfo);
+                // for (var j = 0; j < infoLength; j++) {
+                //     var info = $("<td />");
+                // }
+            }
+
               var statusTable = $("#statusTable");
               statusTable.html("");
               statusTable.append(table);
+
+              var statusRouteTable = $("#statusRouteTable");
+              statusRouteTable.html("");
+              statusRouteTable.append(table);
 
     })
 }
