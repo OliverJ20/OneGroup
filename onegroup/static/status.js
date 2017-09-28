@@ -88,7 +88,7 @@ function addInfo()
                             routingrow = $(routingTable[0].insertRow(-1));
                             for (var k = 0; k < routerLength; k++) {
                               var routinginfo = $("<td />");
-                              routinginfo.html(logStringArrays[counter+2][k]);
+                              routinginfo.html(logStringArrays[counter+1][k]);
                               routingrow.append(routinginfo);
                             }
                             counter++;
