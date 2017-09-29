@@ -88,10 +88,11 @@ def loadConfig():
                 #Read in line as an address for a node
                 if node_locations:
                     #Check end
-                    if line.strip("\n") == "{":
+                    if line.strip("\n") == "}":
                         node_locations = False
                     else:
-                        nodes.append({"Address" : line.strip("\n")})
+                        name, address = line.strip("\n").split()
+                        nodes.append({"Name" : name, "Address" : address})
                 else:
                     #split by '=' and store in tuple
                     key, val = line.split("=")
@@ -122,17 +123,19 @@ def loadConfig():
     except Exception as e:
         logging.error("Error reading config: %s",e)
 
-    
+    #Remove all existing nodes 
+    db = Database(filename = filen)
+    db.delete("nodes")
+
     #Add nodes to database if multinode support enabled and master node
     if os.getenv(tag+'multinode',base_config['multinode']) == "True" and os.getenv(tag+'node',base_config['node']) == "master":
-        db = Database(filename = filen)
         for node in nodes:    
             db.insert("nodes",node)
             
-        db.close()
+    db.close()
    
     #Loadin iptables  
-    loadIptables()
+    #loadIptables()
 
 def setKeyExpiry():
     """

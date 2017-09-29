@@ -1302,7 +1302,21 @@ def logDownload(startDate,endDate):
     return newLogFile
 
 
+def getNodes():
+    """
+        Gets all the nodes loaded into the database on startup.
+        It is assumed that the system is in multinode mode, but if no nodes
+        are found, an None is returned
 
+        Returns: A list of node dictonaries or none if no nodes 
+    """
+    db = Database(filename=filen)
+    nodes = db.retrieve('nodes')
+    db.close()
 
+    #Force a list if there is only 1 node
+    if isinstance(nodes,dict):   
+        nodes = [nodes]
 
+    return nodes
 

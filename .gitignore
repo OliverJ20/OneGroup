@@ -103,8 +103,9 @@ ENV/
 #db files
 **.db
 
-#ignore development config file
+#ignore development files
 onegroup/onegroup.conf
+onegroup/test.py
 
 #.idea
 **.idea/
