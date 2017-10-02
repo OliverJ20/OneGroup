@@ -7,6 +7,7 @@ import shlex
 import os
 import logging
 import re
+import requests
 
 #Database and constants
 try:
@@ -438,6 +439,7 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
 
     #If specified, create users for the group
     if kwargs.get("genUsers",False):
+        
         grp = db.retrieve("groups",group)["ID"]
         
         for i in range(kwargs.get("numUsers")):
@@ -564,7 +566,6 @@ def addUserToGroup(user, group):
     #Update the group's entry to show the used octets
     updateGroup(group,grp)
 
-
 def getUserClientConfig(user):
     """
         Reads the users client config and returns their internal and external IP addresses
@@ -607,7 +608,7 @@ def deleteUserFromGroup(userID):
     user["Grp"] = -1
     updateUser(userID, user) 
     
-    #Remove the user's client config filei
+    #Remove the user's client config file
     args = [
         os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user["Keys"]),
     ]
@@ -1301,6 +1302,9 @@ def logDownload(startDate,endDate):
     #return the new filepath
     return newLogFile
 
+#
+# Multinode commands
+#
 
 def getNodes():
     """
@@ -1319,4 +1323,61 @@ def getNodes():
         nodes = [nodes]
 
     return nodes
+
+def nodeGet(url):
+    """
+        Performs a get request to a node and returns JSON object
+
+        url : The url to peform a get request on
+
+        Returns dict of json response, else None
+    """
+    r = requests.get(url) 
+    
+    if r.status_code == 200:
+        return r.json()
+    else:
+        return None
+
+
+def nodeGetFile(url, path):
+    """
+        Performs a get request to download a file from a node
+
+        url : The url to peform a get request on
+        path : Full path of where to store the downloaded file 
+
+        Returns True if succesful, else False
+    """
+    r = requests.get(url, stream = True) 
+    
+    if r.status_code == 200:
+        #Attempt to write the downloaded file to disk. Should be cleaned up later
+        try:
+            with open(path, 'wb') as f:
+                for chunk in r:
+                    f.write(chunk)
+            return True
+        except:
+            return False
+    else:
+        return False
+
+def nodePost(url, data):
+    """
+        Performs a post request to a node and returns JSON object
+
+        url : The url to peform a get request on
+        data : Dictionary of data to post as json
+
+        Returns dict of json response, else None
+    """
+    r = requests.post(url,json=data)
+    
+    if r.status_code == 200:
+        return r.json()
+    else:
+        return None
+
+
 
