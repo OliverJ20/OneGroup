@@ -9,20 +9,21 @@ $(document).ready(function () {
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
     var days = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    input = days[today.getDay()] + '' + months[today.getMonth()]+ today.getDate();
-    filter = input.value.toUpperCase();
-    table = document.getElementById("logTable");
-    tr = table.getElementsByTagName("tr");
-    for (i = 0; i < tr.length; i++) {
-      td = tr[i].getElementsByTagName("td")[0];
-      if (td) {
-        if ((td.innerHTML.toUpperCase().indexOf(filter) > -1)) {
-          tr[i].style.display = "";
-        }else {
-          tr[i].style.display = "none";
-        }
-      }
-    }
+    input = days[today.getDay()] + ' ' + months[today.getMonth()]+ ' ' + today.getDate();
+    document.getElementById('dateStart').placeholder = input;
+    // filter = input.value.toUpperCase();
+    // table = document.getElementById("logTable");
+    // tr = table.getElementsByTagName("tr");
+    // for (i = 0; i < tr.length; i++) {
+    //   td = tr[i].getElementsByTagName("td")[0];
+    //   if (td) {
+    //     if ((td.innerHTML.toUpperCase().indexOf(filter) > -1)) {
+    //       tr[i].style.display = "";
+    //     }else {
+    //       tr[i].style.display = "none";
+    //     }
+    //   }
+    // }
 });
 
 function convertDate(){
