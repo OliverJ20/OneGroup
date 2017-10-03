@@ -4,9 +4,30 @@
 
 $(document).ready(function () {
     addInfo();
+    print("YOYOYOYO");
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+    var days = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
+    input = days[today.getDate()] + ''+ today.getDate();
+    filter = input.value.toUpperCase();
+    filter2 = input2.value.toUpperCase();
+    table = document.getElementById("logTable");
+    tr = table.getElementsByTagName("tr");
+    for (i = 0; i < tr.length; i++) {
+      td = tr[i].getElementsByTagName("td")[0];
+      if (td) {
+        if ((td.innerHTML.toUpperCase().indexOf(filter) > -1)) {
+          tr[i].style.display = "";
+        }else {
+          tr[i].style.display = "none";
+        }
+      }
+    }
 });
+
+function convertDate(){
+  
+}
 
 function addInfo()
 {
@@ -58,6 +79,7 @@ function addInfo()
 }
 
 function tableFilter() {
+  addInfo();
   var input, filter, table, tr, td, i;
   input = document.getElementById("dateStart");
   input2 = document.getElementById("dateEnd");
