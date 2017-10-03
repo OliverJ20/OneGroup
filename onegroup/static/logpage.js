@@ -9,7 +9,7 @@ $(document).ready(function () {
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
     var days = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    input = days[today.getDay()] + ' ' + months[today.getMonth()]+ ' ' + today.getDate();
+    input = days[today.getDay()] + ' ' + months[today.getMonth()];
     document.getElementById('dateStart').placeholder = input;
     filter = input.value.toUpperCase();
     table = document.getElementById("logTable");
@@ -17,7 +17,7 @@ $(document).ready(function () {
     for (i = 0; i < tr.length; i++) {
       td = tr[i].getElementsByTagName("td")[0];
       if (td) {
-        if ((td.innerHTML.toUpperCase().indexOf(filter) > -1)) {
+        if ((td.innerHTML.toUpperCase().indexOf(input) > -1)) {
           tr[i].style.display = "";
         }else {
           tr[i].style.display = "none";
