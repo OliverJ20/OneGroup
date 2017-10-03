@@ -41,7 +41,7 @@ function addInfo()
       for (var i = 0; i<LogInfo["logData"].length; i++)
         {
           var tempvar = LogInfo["logData"][i];
-          if(/n/.test(tempvar)){
+          if(/2017/.test(tempvar)){
           tempvar = tempvar.split(n);
           tempvar[0] = tempvar[0] + n;
           logStringArrays.push(tempvar);
