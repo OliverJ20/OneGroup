@@ -3,7 +3,7 @@
  */
 
 $(document).ready(function () {
-    print("YOYOYOYO");
+    console.log ("hello there young one");
     addInfo();
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
@@ -33,6 +33,7 @@ function addInfo()
 {
   $.get("/log/general", function (data)
     {
+      console.log ("Begin");
       var LogInfo = data;
       var logStringArrays = new Array;
       var d = new Date();
@@ -40,7 +41,7 @@ function addInfo()
       for (var i = 0; i<LogInfo["logData"].length; i++)
         {
           var tempvar = LogInfo["logData"][i];
-          if('/' + n + '/'.test(tempvar)){
+          if(/n/.test(tempvar)){
           tempvar = tempvar.split(n);
           tempvar[0] = tempvar[0] + n;
           logStringArrays.push(tempvar);
