@@ -27,8 +27,8 @@ def loadIptables():
     """Retrieves the iptables rules from the database (if any) and applys those rules"""
     rules = getIptablesRules()
 
-    #If there are no/not enough rules, use the defaults
-    if rules == None or len(rules) < len(iptables):
+    #If there are no rules, use the defaults
+    if rules == None:
         rules = iptables
         
         #Add the defaults to the database
@@ -1196,14 +1196,15 @@ def ipStringToDict(ipString):
     return ipDict
 
 
-def addIPRule(rule):
+def addIPRule(rule, policy):
     """ 
         Adds a new IPTables rule to the database
 
         rule : The string representation of the rule
+        policy : integer to set if the rule is a policy or a standard rule
     """
     db = Database(filename=filen)
-    db.insert("firewall", {"Rule": rule})
+    db.insert("firewall", {"Rule": rule, "Policy" : policy})
     db.close()
 
     #Apply new rule

@@ -40,23 +40,10 @@ def init_database():
     #Connect to the database
     db = Database(filename = filen)
 
+    #If no users in the database, add the default admin user
     if db.retrieve("users") == None:
-        #Insert test users
-        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
-        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
-        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
-        
-        #Test group users
-        db.insert("users", {"Name" : "Group01_1", "Email" : "one@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_1", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
-        db.insert("users", {"Name" : "Group01_2", "Email" : "two@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_2", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
-        db.insert("users", {"Name" : "Group01_3", "Email" : "three@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_3", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
-        db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
-
-    if db.retrieve("groups") == None:
-        db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
-        db.insert("groups",{"Name" : "Group02", "Internal" : "10.9.1.0/24", "External" : "192.128.3.0/24", "Used_Octets" : "1,2,4,5"})
-
-    
+        db.insert("users", {"Name" : "admin", "Email" : "admin@onegroup.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 1, "Grp" : -1, "Expiry": ""})
+         
     #Close database
     db.close()
 
@@ -135,7 +122,7 @@ def loadConfig():
     db.close()
    
     #Loadin iptables  
-    #loadIptables()
+    loadIptables()
 
 def setKeyExpiry():
     """

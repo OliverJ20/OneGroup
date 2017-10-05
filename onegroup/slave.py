@@ -107,7 +107,7 @@ def deleteUserKey():
 
 @app.route('/addgroup/', methods=['POST'])
 @login_required
-def addToGroup():
+def addGroup():
     """
         Adds a group to the system
 
