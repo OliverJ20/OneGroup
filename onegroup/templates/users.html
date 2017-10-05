@@ -31,11 +31,11 @@
                             <td>{{users["Expiry"]}}</td>
                             <td>
                                 <a href="/form/{{users["ID"]}}">
-                                    <button>Edit</button>
+                                    <button class = "button-table">Edit</button>
                                 </a>
                                 <form action="{{ url_for('delete_key') }}" method=post></input>
                                     <input type="text" name="name" value= {{users["ID"]}} id = "hiddenInput" readonly></input>
-                                    <input type="submit" value="Delete" id = "declineButton"></input>
+                                    <input type="submit" value="Delete" class = "declineButton"></input>
                                 </form>
                             </td>
                             <td>
@@ -54,15 +54,15 @@
                         <td>{{dataU["Expiry"]}}</td>
                         <td>
                             <a href="/form/{{dataU["ID"]}}">
-                                <button>Edit</button>
+                                <button class = "button-table">Edit</button>
                             </a>
                             <form action="{{ url_for('delete_key') }}" method=post></input>
                                 <input type="text" name="name" value= {{dataU["ID"]}} id = "hiddenInput" readonly></input>
-                                <input type="submit" value="Delete" id = "declineButton"></input>
+                                <input type="submit" value="Delete" class = "declineButton"></input>
                             </form>
                         </td>
                         <td>
-                            <a href="/admin_key/{{dataU["Name"]}}" download><button class='downloadButton' id= "testButton">Download</button></a>
+                            <a href="/admin_key/{{dataU["Name"]}}" download> <button class = "button-table" id= "testButton">Download</button></a>
                         </td>
                       </tr>
                     {% endif %}
@@ -90,7 +90,7 @@
                                             <input type="text" name="user" value= {{notifications["User"]}} id = "hiddenInput" readonly></input>
                                             <input type="text" name="request" value= {{notifications["Request"]}}  id = "hiddenInput" readonly></input>
                                             <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
-                                            <input type="submit" name="reqOption" value="Decline" id = "declineButton"></input>
+                                            <input type="submit" name="reqOption" value="Decline" class = "declineButton"></input>
                                         </form>
                                     </td>
                                 </tr>
@@ -105,7 +105,7 @@
                                         <input type="text" name="user" value= {{dataR["User"]}} id = "hiddenInput" readonly></input>
                                         <input type="text" name="request" value= {{dataR["Request"]}}  id = "hiddenInput" readonly></input>
                                         <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
-                                        <input type="submit" name="reqOption" value="Decline" id = "declineButton"></input>
+                                        <input type="submit" name="reqOption" value="Decline" class = "declineButton"></input>
                                     </form>
                                 </td>
                             </tr>
@@ -130,11 +130,11 @@
                                 <td>{{members['External']}}</td>
                                 <td>
                                     <a href="/groupform/{{members["ID"]}}">
-                                        <button>Edit</button>
+                                        <button class = "button-table">Edit</button>
                                     </a>
                                     <form action="{{ url_for('delete_group') }}" method=post>
                                         <input type="text" name="name" value= {{members["ID"]}} id = "hiddenInput" readonly>
-                                        <input type="submit" value="Delete" id = "declineButton"></input>
+                                        <input type="submit" value="Delete" class = "declineButton"></input>
                                     </form>
                                 </td>
                             </tr>
@@ -147,11 +147,11 @@
                             <td>{{dataG['External']}}</td>
                             <td>
                                 <a href="/groupform/{{dataG["ID"]}}">
-                                    <button>Edit</button>
+                                    <button class = "button-table">Edit</button>
                                 </a>
                                 <form action="{{ url_for('delete_group') }}" method=post>
                                     <input type="text" name="name" value= {{dataG["ID"]}} id = "hiddenInput" readonly>
-                                    <input type="submit" value="Delete" id = "declineButton"></input>
+                                    <input type="submit" value="Delete" class = "declineButton"></input>
                                 </form>
                             </td>
                         </tr>
