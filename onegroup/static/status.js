@@ -180,7 +180,6 @@ function addInfo()
 }
 
 function tableFilter() {
-    addInfo();
     var input, filter, table, tr, td, i;
     input = document.getElementById("dateStart");
     input2 = document.getElementById("dateEnd");
