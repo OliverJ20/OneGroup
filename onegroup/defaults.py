@@ -40,9 +40,11 @@ base_config = {
 
 #IPTABLES RULES
 iptables = [
+    {"Rule" : "PREROUTING ACCEPT", "Policy" : 1},
     {"Rule" : "INPUT ACCEPT", "Policy" : 1},
     {"Rule" : "FORWARD ACCEPT", "Policy" : 1},
     {"Rule" : "OUTPUT ACCEPT", "Policy" : 1},
+    {"Rule" : "POSTROUTING ACCEPT", "Policy" : 1},
 ]
 
 #USABLE 4TH OCTETS FOR GROUP SUBNETS

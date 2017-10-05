@@ -324,7 +324,7 @@ def iptable_form(ruleid):
         elif ruleid != "-2":
             if ruleid == "-1":           
                 ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
-                hl.addIPRule(ip_string, session["Policy"])
+                hl.addIPRule(ip_string)
             else :
                 ip_string = hl.ipDictToString(getIPForm(rule["Policy"]))
                 hl.updateIPRules(ruleid, ip_string)
