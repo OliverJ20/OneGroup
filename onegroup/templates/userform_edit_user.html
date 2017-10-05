@@ -21,7 +21,7 @@
 		    </form>
 		{% endif %}
                 
-                {% if postback > 0 %}
+                {% if postback > 0 or accounttype == "Admin" %}
 		    <form action="{{ url_for('filluserform' , form='EU')}}" vname="userEditForm" id="detailsLeft" method=post> 
 		        <p>Name</p>
                         <input type="text" name="name2" maxlength="40" required value="{{ username }}"> </input>
@@ -33,13 +33,21 @@
 	
 		        {% if accounttype == "Client" and authtype != "NULL" %} 
 		            <p>Assign Group</p>
-                            <select name="groupId1">
+                            <select name="groupId2">
                                 <option value="-1" selected>No group</option>
-                                {% for groupNumber in groupNumbers %}
-			            <option value="{{ groupNumber }}">{{ groupNumber }}</option>
+                                {% for group in groups %}
+			            <option value="{{ group['ID'] }}">{{ group['Name'] }}</option>
 			        {% endfor %}
                             </select>
                     	
+                            <p>Assign Node</p>
+                            <select name="node2">
+                                 <option value="-1" selected>No assigned node</option>
+                                 {% for node in nodes %}
+                                     <option value="{{ node }}">{{ node }}</option>
+                                 {% endfor %}                    	
+                            </select>
+                        
                             <p>Expiry (YYYY-MM-DD:HHMM)</p>
                             <input type="text" name="expiry1" placeholder="Enter Expiry Date" maxlength="40"> </input>
                             <br  />
