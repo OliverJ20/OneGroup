@@ -11,7 +11,8 @@ $(document).ready(function () {
   var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   input = document.getElementById("dateStart");
   input.value = days[today.getDay()] + ' ' + months[today.getMonth()];
-  document.getElementById('dateStart').placeholder = input;
+  document.getElementById('dateStart').value = input.value;
+  document.getElementById('dateStart').placeholder = input.value;
   filter = input.value.toUpperCase();
   table = document.getElementById("logTable");
   tr = table.getElementsByTagName("tr");
