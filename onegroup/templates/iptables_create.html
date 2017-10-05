@@ -4,7 +4,7 @@
     <body>	
         {% if postback < 0 %} 
 	        <form action="{{ url_for('iptable_form', ruleid = -2) }}" vname="ruleType" id="detailsLeft" method=post>
-	            <p>Account Type</p>
+	            <p>Rule Type</p>
                     <select name="ruleType1">
 	                    <option disabled selected value> -- Select -- </option>
                         <option value="0">Standard Rule</option>
