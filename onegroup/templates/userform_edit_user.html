@@ -9,7 +9,7 @@
 		{% if accounttype == "Client" %}
                     <form action="{{ url_for('filluserform', form='ET') }}" vname="userAuthentication" id="detailsLeft" method=post>
 			<p>Authentication Type</p>
-                        <select name="authType1">
+                        <select name="authType2">
                             <option {% if authtype == "Passphrase" %} selected {% endif %} value="Passphrase">Username & Password</option>
                             <option {% if authtype == "Email" %} selected {% endif %} value="Email">Email</option>
                             <option {% if authtype == "None" %} selected {% endif %} value="None">None</option>

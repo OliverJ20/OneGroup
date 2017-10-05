@@ -372,7 +372,7 @@ def getIPForm(policy):
     return ip_dict
 
 
-@app.route('/iptabledelete/<rid>')
+@app.route('/iptabledelete')
 def iptables_delete(rid):
     """
         Deletes a given iptable rule from the database
@@ -381,8 +381,8 @@ def iptables_delete(rid):
 
         GET : deletes the given iptable rule
     """
-    hl.removeIPRule(rid)
-    return redirect(url_for('confirm', confirmed = "IP Table Rule Deleted!"))
+    removeIPRule(rid)
+    return redirect(url_for('confirm'), confirmed = "IP Table Rule Deleted!")
     
 
 @app.route('/config/', methods=['GET'])
@@ -628,6 +628,11 @@ def filluserform(form):
                 return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "None", groups = groups)
             else:
                 abort(404)
+
+        elif form == "ET":
+            
+            return render_template("userform_edit_user.html", postback = 1, accounttype = session['user']["Account_Type"], authtype = request.form['authType2'])
+                
         elif form == "DE":
             #MAKE SURE ALL VALUE THAT ARE NOT PART OF REQUEST.FORM DO NOT THROW 400 BAD REQUEST ERROR
             name = request.form['name1']
@@ -664,7 +669,7 @@ def filluserform(form):
                 flash("User already exists")
                     
         elif hl.getUser("ID", form) != None:
-            user = {"Name" : request.form['name2'], "Email" : request.form['email2'], "Account_Type" : request.form['accountType2'], "Expiry" : request.form['expiry2'], "Grp" : request.form['groupID2'], "Node" : request.form['node2']} 
+            user = {"Name" : request.form['name2'], "Email" : request.form['email2'], "Expiry" : request.form['expiry2'], "Grp" : request.form['groupID2'], "Node" : request.form['node2']} 
             if hl.updateUser(form, user):
                 return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
             else:
@@ -676,6 +681,7 @@ def filluserform(form):
         return render_template("userform_create_user.html", postback = -1, account = "NULL", auth = "NULL", groups = groups)
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
+            session['user'] = user
             return render_template("userform_edit_user.html", postback = -1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], groups = groups)
     else: #Must be fake input
         abort(404)            
