@@ -1087,8 +1087,8 @@ def ipDictToString(ip_dict):
     action =""
     
     if len(ip_dict) == 2:
-        ipRules = " -A " + ip_dict['Chain']
-        ipRules = ipRules + " -j " + ip_dict['Action']
+        ipRules = " {} {}".format(ip_dict['Chain'], ip_dict['Action'])
+        #ipRules = ipRules + " -j " + ip_dict['Action']
     else:
         ipRules = ip_dict['Chain']
         
@@ -1196,15 +1196,14 @@ def ipStringToDict(ipString):
     return ipDict
 
 
-def addIPRule(rule, policy):
+def addIPRule(rule):
     """ 
-        Adds a new IPTables rule to the database
+        Adds a new IPTables rule to the database. Always a non policy rule
 
         rule : The string representation of the rule
-        policy : integer to set if the rule is a policy or a standard rule
     """
     db = Database(filename=filen)
-    db.insert("firewall", {"Rule": rule, "Policy" : policy})
+    db.insert("firewall", {"Rule": rule, "Policy" : 0})
     db.close()
 
     #Apply new rule

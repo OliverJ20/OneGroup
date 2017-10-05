@@ -324,7 +324,7 @@ def iptable_form(ruleid):
         elif ruleid != "-2":
             if ruleid == "-1":           
                 ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
-                hl.addIPRule(ip_string, session["Policy"])
+                hl.addIPRule(ip_string)
             else :
                 ip_string = hl.ipDictToString(getIPForm(rule["Policy"]))
                 hl.updateIPRules(ruleid, ip_string)
@@ -372,7 +372,18 @@ def getIPForm(policy):
     return ip_dict
 
 
+@app.route('/iptabledelete')
+def iptables_delete(rid):
+    """
+        Deletes a given iptable rule from the database
 
+        rid : the id of the rule to edit
+
+        GET : deletes the given iptable rule
+    """
+    removeIPRule(rid)
+    return redirect(url_for('confirm'), confirmed = "IP Table Rule Deleted!")
+    
 
 @app.route('/config/', methods=['GET'])
 @admin_required
