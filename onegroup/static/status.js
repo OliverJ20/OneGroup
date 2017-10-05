@@ -7,21 +7,24 @@ $(document).ready(function () {
   statusInfo(); 
   var today = new Date();
   var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-  var days = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
-  // input = days[today.getDate()] + ''+ today.getDate();
-  // filter = input.value.toUpperCase();
-  // table = document.getElementById("logTable");
-  // tr = table.getElementsByTagName("tr");
-  // for (i = 0; i < tr.length; i++) {
-  //   td = tr[i].getElementsByTagName("td")[0];
-  //   if (td) {
-  //     if ((td.innerHTML.toUpperCase().indexOf(filter) > -1)) {
-  //       tr[i].style.display = "";
-  //     }else {
-  //       tr[i].style.display = "none";
-  //     }
-  //   }
-  // }
+  var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  input = document.getElementById("dateStart");
+  input.value = days[today.getDay()] + ' ' + months[today.getMonth()];
+  document.getElementById('dateStart').placeholder = input;
+  filter = input.value.toUpperCase();
+  table = document.getElementById("logTable");
+  tr = table.getElementsByTagName("tr");
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      if ((td.innerHTML.toUpperCase().indexOf(input) > -1)) {
+        tr[i].style.display = "";
+      }else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
 });
 
 function statusInfo()
@@ -177,25 +180,25 @@ function addInfo()
 }
 
 function tableFilter() {
-addInfo();
-var input, filter, table, tr, td, i;
-input = document.getElementById("dateStart");
-input2 = document.getElementById("dateEnd");
-filter = input.value.toUpperCase();
-filter2 = input2.value.toUpperCase();
-table = document.getElementById("logTable");
-tr = table.getElementsByTagName("tr");
-for (i = 0; i < tr.length; i++) {
-td = tr[i].getElementsByTagName("td")[0];
-co = tr[i].getElementsByTagName("td")[1];
-if (td) {
-  if ((td.innerHTML.toUpperCase().indexOf(filter) > -1) && (co.innerHTML.toUpperCase().indexOf(filter2) > -1)) {
-    tr[i].style.display = "";
-  }else {
-    tr[i].style.display = "none";
+    addInfo();
+    var input, filter, table, tr, td, i;
+    input = document.getElementById("dateStart");
+    input2 = document.getElementById("dateEnd");
+    filter = input.value.toUpperCase();
+    filter2 = input2.value.toUpperCase();
+    table = document.getElementById("logTable");
+    tr = table.getElementsByTagName("tr");
+    for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    co = tr[i].getElementsByTagName("td")[1];
+    if (td) {
+      if ((td.innerHTML.toUpperCase().indexOf(filter) > -1) && (co.innerHTML.toUpperCase().indexOf(filter2) > -1)) {
+        tr[i].style.display = "";
+      }else {
+        tr[i].style.display = "none";
+      }
+    }
   }
-}
-}
 }
 
 // MISC SCRIPT FUNCTIONS
