@@ -372,7 +372,7 @@ def getIPForm(policy):
     return ip_dict
 
 
-@app.route('/iptabledelete')
+@app.route('/iptabledelete/<rid>')
 def iptables_delete(rid):
     """
         Deletes a given iptable rule from the database
@@ -381,8 +381,8 @@ def iptables_delete(rid):
 
         GET : deletes the given iptable rule
     """
-    removeIPRule(rid)
-    return redirect(url_for('confirm'), confirmed = "IP Table Rule Deleted!")
+    hl.removeIPRule(rid)
+    return redirect(url_for('confirm', confirmed = "IP Table Rule Deleted!"))
     
 
 @app.route('/config/', methods=['GET'])
