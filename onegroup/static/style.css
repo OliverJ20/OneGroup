@@ -103,6 +103,11 @@ footer    {
     margin-bottom: -8px;
 }
 
+footer a{
+    color: #ffffff;
+    text-decoration:none;
+}
+
 #headContainer    {
     margin-left: -8px;
     margin-top: -8px;

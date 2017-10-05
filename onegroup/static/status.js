@@ -101,12 +101,12 @@ $.get("/log/status", function (data)
 
                           document.getElementById("currentUsers").innerHTML = counter- 3;
 
-                        while(invalid4.test(logStringArrays[counter+1]) == false){
-                          var routerLength = logStringArrays[counter+1].length;
+                        while(invalid4.test(logStringArrays[counter+2]) == false){
+                          var routerLength = logStringArrays[counter+2].length;
                           routingrow = $(routingTable[0].insertRow(-1));
                           for (var k = 0; k < routerLength; k++) {
                             var routinginfo = $("<td />");
-                            routinginfo.html(logStringArrays[counter+1][k]);
+                            routinginfo.html(logStringArrays[counter+2][k]);
                             routingrow.append(routinginfo);
                           }
                           counter++;
