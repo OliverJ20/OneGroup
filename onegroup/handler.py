@@ -730,8 +730,9 @@ def checkRouteExists(network,formattedNetwork):
     filename = os.getenv(tag+'openvpn_server_config',base_config['openvpn_server_config']) 
     with open(filename) as f:
         for num, line in enumerate(f,1):
-            if any([x for x in compare if x == line]):
+            if any([x for x in compare if x == line.strip("\n")]):
                 return num
+            
 
     #If reached here, the route is not in the file
     return -1
