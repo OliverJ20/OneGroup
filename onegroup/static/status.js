@@ -101,12 +101,12 @@ $.get("/log/status", function (data)
 
                           document.getElementById("currentUsers").innerHTML = counter- 3;
 
-                        while(invalid4.test(logStringArrays[counter+1]) == false){
-                          var routerLength = logStringArrays[counter+1].length;
+                        while(invalid4.test(logStringArrays[counter+2]) == false){
+                          var routerLength = logStringArrays[counter+2].length;
                           routingrow = $(routingTable[0].insertRow(-1));
                           for (var k = 0; k < routerLength; k++) {
                             var routinginfo = $("<td />");
-                            routinginfo.html(logStringArrays[counter+1][k]);
+                            routinginfo.html(logStringArrays[counter+2][k]);
                             routingrow.append(routinginfo);
                           }
                           counter++;
@@ -128,50 +128,52 @@ $.get("/log/status", function (data)
 
 function addInfo()
 {
-$.get("/log/general", function (data)
-{
-  var LogInfo = data;
-  var logStringArrays = new Array;
-  var d = new Date();
-  var n = d.getFullYear();
-  for (var i = 0; i<LogInfo["logData"].length; i++)
+  $.get("/log/general", function (data)
     {
-      var tempvar = LogInfo["logData"][i];
-      if('/' + n + '/'.test(tempvar)){
-      tempvar = tempvar.split(n);
-      tempvar[0] = tempvar[0] + n;
-      logStringArrays.push(tempvar);
-    }
-    else{
-      temparray= ["No Date", tempvar];
-      logStringArrays.push(temparray);
-    }
-    }
-          var table = $("<table />");
-          var infoLength = logStringArrays[0].length;
+      console.log ("Begin");
+      var LogInfo = data;
+      var logStringArrays = new Array;
+      var d = new Date();
+      var n = d.getFullYear();
+      for (var i = 0; i<LogInfo["logData"].length; i++)
+        {
+          var tempvar = LogInfo["logData"][i];
+          if(/2017/.test(tempvar)){
+          tempvar = tempvar.split(n);
+          tempvar[0] = tempvar[0] + n;
+          logStringArrays.push(tempvar);
+        }
+        else{
+          temparray= ["No Date", tempvar];
+          logStringArrays.push(temparray);
+        }
+        }
+              var table = $("<table />");
+              var infoLength = logStringArrays[0].length;
 
-          var row = $(table[0].insertRow(-1));
-          var header = $("<th />");
-          header.html("Date");
-          var header2 = $("<th />");
-          header2.html("Activity");
-          row.append(header);
-          row.append(header2);
+              var row = $(table[0].insertRow(-1));
+              var header = $("<th />");
+              header.html("Date");
+              var header2 = $("<th />");
+              header2.html("Activity");
+              row.append(header);
+              row.append(header2);
 
-          for (var i = 1; i < logStringArrays.length; i++) {
-              row = $(table[0].insertRow(-1));
-              for (var j = 0; j < infoLength; j++) {
-                  var info = $("<td />");
-                  info.html(logStringArrays[i][j]);
-                  row.append(info);
+              //Add the data rows.
+              for (var i = 1; i < logStringArrays.length; i++) {
+                  row = $(table[0].insertRow(-1));
+                  for (var j = 0; j < infoLength; j++) {
+                      var info = $("<td />");
+                      info.html(logStringArrays[i][j]);
+                      row.append(info);
+                  }
               }
-          }
 
-          var logTable = $("#logTable");
-          logTable.html("");
-          logTable.append(table);
+              var logTable = $("#logTable");
+              logTable.html("");
+              logTable.append(table);
 
-})
+    })
 }
 
 function tableFilter() {
