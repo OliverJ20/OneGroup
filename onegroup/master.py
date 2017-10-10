@@ -414,8 +414,12 @@ def login():
             flash(error)
         else:
             session['logged_in'] = True
-            if hl.confirmUser(email) and hl.confirmClient(email):
-                user = hl.getUser("Email",email)
+            
+            user = hl.getUser("Email",email)
+            if not user:
+                user = hl.getUser("Name",email)
+
+            if hl.confirmClient(user["Email"]):
                 session['type'] = 'Client'
                 session['name'] = user['Name']
                 return redirect("/clients/" + user['Name'])

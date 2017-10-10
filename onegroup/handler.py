@@ -317,22 +317,28 @@ def createUserFilename(name):
     return userFilen
 
 
-def confirmLogin(email, password):
+def confirmLogin(user, password):
     """
         Confirms if the entered login credentials are correct
     
-        email: user's email address
+        user: user's username or email address
         password: user's associated password
         
-        Returns : True if both email is found in the database and associated password matches. 
+        Returns : True if both email/username is found in the database and associated password matches. 
                   False if either condition fails
     """
-    if confirmUser(email):
-        user = getUser("Email",email)
+    passHash = None
 
-        if sha256_crypt.verify(password, user['Password']):
-            return True
-        
+    if confirmUser(user):
+        entry = getUser("Email",user)
+        #Check if the entered user was a username instead of an email    
+        if entry:
+            passHash = entry['Password']
+        else:
+            passHash = getUser("Name",user)['Password']
+    
+    if passHash and sha256_crypt.verify(password,passHash):
+        return True
     else:
         return False
 
@@ -353,17 +359,17 @@ def confirmClient(email):
         return False
 
 
-def confirmUser(email):
+def confirmUser(user):
     """
         Confirms if the user exists in the database
     
-        email : user's email address
-        
+        user : the email or username to check       
+ 
         Returns : True if exists, else False
     """
-    user = getUser("Email",email)
-
-    if user is not None:
+    if getUser("Email",user):
+        return True
+    elif getUser("Name",user):
         return True
     else:
         return False
