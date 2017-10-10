@@ -315,7 +315,7 @@ def iptable_form(ruleid):
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
     """ 
-    rule = hl.getRule(ruleid)
+    rule = hl.getRule("ID", ruleid)
     if request.method == 'POST':
         if ruleid == "-2":
             #set policy
@@ -673,7 +673,7 @@ def filluserform(form):
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
             #Should Group No. be updated -> Do the keys need to be redownloaded?
-            return render_template("userform_edit_user.html", username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
+            return render_template("userform_edit_user.html", postback = -1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
     else: #Must be fake input
         abort(404)            
 
