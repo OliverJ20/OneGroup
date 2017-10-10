@@ -30,7 +30,7 @@
                             <td>{{users["Grp"]}}</td>
                             <td>{{users["Expiry"]}}</td>
                             <td>
-                                <a href="/form/{{users["ID"]}}">
+                                <a href="/userform/{{users["ID"]}}">
                                     <button class = "button-table">Edit</button>
                                 </a>
                                 <form action="{{ url_for('delete_key') }}" method=post></input>
@@ -53,7 +53,7 @@
                         <td>{{dataU["Grp"]}}</td>
                         <td>{{dataU["Expiry"]}}</td>
                         <td>
-                            <a href="/form/{{dataU["ID"]}}">
+                            <a href="/userform/{{dataU["ID"]}}">
                                 <button class = "button-table">Edit</button>
                             </a>
                             <form action="{{ url_for('delete_key') }}" method=post></input>

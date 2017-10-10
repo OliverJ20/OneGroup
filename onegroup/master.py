@@ -372,7 +372,7 @@ def getIPForm(policy):
     return ip_dict
 
 
-@app.route('/iptabledelete/<rid>')
+@app.route('/iptabledelete')
 def iptables_delete(rid):
     """
         Deletes a given iptable rule from the database
@@ -381,8 +381,8 @@ def iptables_delete(rid):
 
         GET : deletes the given iptable rule
     """
-    hl.removeIPRule(rid)
-    return redirect(url_for('confirm', confirmed = "IP Table Rule Deleted!"))
+    removeIPRule(rid)
+    return redirect(url_for('confirm'), confirmed = "IP Table Rule Deleted!")
     
 
 @app.route('/config/', methods=['GET'])
@@ -601,15 +601,17 @@ def filluserform(form):
 ##        //IF ADMIN account = Admin
 ##                //SHOW NAME, EMAIL, PASS
 
+    groups = hl.getAllGroups()
+
     if request.method == 'POST':
         if form == "AC":
             #Store Account Type in session variable 
             if request.form['accountType1'] == "Client":
                 session['accountType'] = "Client"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "NULL")
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "NULL", groups = groups)
             elif request.form['accountType1'] == "Admin":
                 session['accountType'] = "Admin"
-                return render_template("userform_create_user.html", postback = 1, account = "Admin", auth = "Passphrase")
+                return render_template("userform_create_user.html", postback = 1, account = "Admin", auth = "Passphrase", groups = groups)
             else:
                 abort(404)
              
@@ -617,15 +619,20 @@ def filluserform(form):
             #Store Auth Type in session variable
             if request.form['authType1'] == "Passphrase":
                 session['authType'] = "Passphrase"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Passphrase")
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Passphrase", groups = groups)
             elif request.form['authType1'] == "Email":
                 session['authType'] = "Email"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Email")
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Email", groups = groups)
             elif request.form['authType1'] == "None":
                 session['authType'] = "None"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "None")
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "None", groups = groups)
             else:
                 abort(404)
+
+        elif form == "ET":
+            
+            return render_template("userform_edit_user.html", postback = 1, accounttype = session['user']["Account_Type"], authtype = request.form['authType2'])
+                
         elif form == "DE":
             #MAKE SURE ALL VALUE THAT ARE NOT PART OF REQUEST.FORM DO NOT THROW 400 BAD REQUEST ERROR
             name = request.form['name1']
@@ -650,30 +657,32 @@ def filluserform(form):
             if account == "Client":
                 group = request.form['groupId1']
                 expiry = request.form['expiry1']
+                node = request.form['node1']
             else:
                 group = -1
                 expiry = ""
+                node = -1
                 
-            if createNewUser(name, account, auth, email, pwd, group, expiry):
-                return redirect(url_for('confirm', confirmed = 'New User Addition Confirmed!'))
+            if createNewUser(name, account, auth, email, pwd, group, expiry, node):
+                return redirect(url_for('confirm', confirmed = 'New User Created!'))
             else:
                 flash("User already exists")
                     
         elif hl.getUser("ID", form) != None:
-            if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2']), str(request.form['expiry2'])):
+            user = {"Name" : request.form['name2'], "Email" : request.form['email2'], "Expiry" : request.form['expiry2'], "Grp" : request.form['groupID2'], "Node" : request.form['node2']} 
+            if hl.updateUser(form, user):
                 return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
             else:
                 flash("Cannot Update User Information")
         else: #Must be fake input
             abort(404)
 
-
     if form == "CU":
-        return render_template("userform_create_user.html", postback = -1, account = "NULL", auth = "NULL")
+        return render_template("userform_create_user.html", postback = -1, account = "NULL", auth = "NULL", groups = groups)
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
-            #Should Group No. be updated -> Do the keys need to be redownloaded?
-            return render_template("userform_edit_user.html", postback = -1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
+            session['user'] = user
+            return render_template("userform_edit_user.html", postback = -1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], groups = groups)
     else: #Must be fake input
         abort(404)            
 
@@ -697,7 +706,7 @@ def fillgroupform(form):
     if request.method == 'POST':
         if form == "CG":
             if createNewGroup():
-                return redirect(url_for('confirm', confirmed = 'New Group Addition Confirmed!'))
+                return redirect(url_for('confirm', confirmed = 'New Group Created!'))
             else:
                 abort(404)
         elif hl.getGroup(form) != None:
@@ -756,7 +765,7 @@ def page_not_found(e):
 
 
 #Function to create user and generate keys into a ZIP folder
-def createNewUser(name, account, auth, email, pwd, group, expiry):
+def createNewUser(name, account, auth, email, pwd, group, expiry, node):
     """
         Handles input of the new user form. 
 
@@ -766,7 +775,7 @@ def createNewUser(name, account, auth, email, pwd, group, expiry):
     """
     
     #Check if the user creation was succesful
-    if hl.createUser(name, account, auth, email = email, passwd = pwd, group = group, expiry = expiry):
+    if hl.createUser(name, account, auth, email = email, passwd = pwd, group = group, expiry = expiry, node = node):
         user = hl.getUser("Email", email)
 
         if(auth == "Email"):
