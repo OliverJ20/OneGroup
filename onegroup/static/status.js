@@ -14,7 +14,6 @@ $(document).ready(function () {
   input = document.getElementById("dateStart");
   input.value = days[today.getDay()] + ' ' + months[today.getMonth()];
   document.getElementById('dateStart').placeholder = input.value;
-  /* TO BE DECIDED IF THIS IS STILL REQUIRED
   document.getElementById('dateStart').value = input.value;
   filter = input.value.toUpperCase();
   table = document.getElementById("logTable");
@@ -28,7 +27,7 @@ $(document).ready(function () {
         tr[i].style.display = "none";
       }
     }
-  }*/
+  }
 });
 
 function statusInfo()
