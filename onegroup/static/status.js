@@ -5,15 +5,16 @@
 $(document).ready(function () {
   addInfo();   
   statusInfo(); 
-  addIndexInfo();
   var today = new Date();
   var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
   var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   input = document.getElementById("dateStart");
   input.value = days[today.getDay()] + ' ' + months[today.getMonth()];
-  document.getElementById('dateStart').value = input.value;
   document.getElementById('dateStart').placeholder = input.value;
+  setInterval(addIndexInfo(), 1000);
+  /* TO BE DECIDED IF THIS IS STILL REQUIRED
+  document.getElementById('dateStart').value = input.value;
   filter = input.value.toUpperCase();
   table = document.getElementById("logTable");
   tr = table.getElementsByTagName("tr");
@@ -26,7 +27,7 @@ $(document).ready(function () {
         tr[i].style.display = "none";
       }
     }
-  }
+  }*/
 });
 
 function statusInfo()
@@ -139,8 +140,9 @@ function addInfo()
       var logStringArrays = new Array;
       var d = new Date();
       var n = d.getFullYear();
+      var limit = LogInfo["logData"].length;
       
-      for (var i = 0; i<LogInfo["logData"].length; i++)
+      for (var i = limit; i> 0; i--)
         {
           var tempvar = LogInfo["logData"][i];
           if(/2017/.test(tempvar)){
@@ -191,7 +193,7 @@ function addIndexInfo()
       var n = d.getFullYear();
       var limit = LogInfo["logData"].length
       
-      for (var i = limit; i> limit - 10; i--)
+      for (var i = limit; i> limit - 11; i--)
         {
           var tempvar = LogInfo["logData"][i];
           if(/2017/.test(tempvar)){
