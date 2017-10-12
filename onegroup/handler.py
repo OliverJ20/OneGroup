@@ -387,7 +387,12 @@ def getAllGroups():
     db = Database(filename = filen)
     groups = db.retrieve("groups")
     db.close()
-    return groups
+    
+    #Force a list if there is only 1 node
+    if isinstance(groups,dict):   
+        groups = [groups]
+    
+    return groups if groups else []
 
 
 def getGroup(group):
@@ -1455,7 +1460,7 @@ def getAllNodes():
     if isinstance(nodes,dict):   
         nodes = [nodes]
 
-    return nodes
+    return nodes if nodes else []
 
 def nodeGet(url):
     """
