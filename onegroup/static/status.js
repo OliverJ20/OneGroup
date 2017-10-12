@@ -2,6 +2,8 @@
 //  * SERVER STATUS - Created by Eliot on 8/6/2017.
 //  */
 
+var logVar = setInterval(addIndexInfo, 1000);
+
 $(document).ready(function () {
   addInfo();   
   statusInfo(); 
@@ -12,7 +14,6 @@ $(document).ready(function () {
   input = document.getElementById("dateStart");
   input.value = days[today.getDay()] + ' ' + months[today.getMonth()];
   document.getElementById('dateStart').placeholder = input.value;
-  setInterval(addIndexInfo(), 1000);
   /* TO BE DECIDED IF THIS IS STILL REQUIRED
   document.getElementById('dateStart').value = input.value;
   filter = input.value.toUpperCase();
