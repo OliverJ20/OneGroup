@@ -7,6 +7,9 @@
             <a href="{{ url_for('filluserform',form='CU') }}"><button> Add Client</button></a>
             <a href="{{ url_for('fillgroupform',form='CG') }}"><button> Add Group</button></a>
             <a href="{{ url_for('iptable_form',ruleid='-1') }}"><button> Add Rules</button></a>
+            
+            <embed type = "image/svg+xml" src ={{graph_data|safe}} style='max-width:1000px'/>
+
             <h2>Network Activity</h2>
             <div id="statusTable" align="center" style="margin-top: 1%; overflow-y: scroll;">
                     <form>
@@ -30,3 +33,4 @@
         </div>
     </body>
 {% endblock %}
+
