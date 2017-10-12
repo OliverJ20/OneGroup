@@ -189,8 +189,9 @@ function addIndexInfo()
       var logStringArrays = new Array;
       var d = new Date();
       var n = d.getFullYear();
+      var limit = LogInfo["logData"].length
       
-      for (var i = 0; i< 10; i++)
+      for (var i = limit; i> limit - 10; i--)
         {
           var tempvar = LogInfo["logData"][i];
           if(/2017/.test(tempvar)){
