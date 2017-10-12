@@ -5,6 +5,7 @@
 $(document).ready(function () {
   addInfo();   
   statusInfo(); 
+  addIndexInfo();
   var today = new Date();
   var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
   var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -139,6 +140,7 @@ function addInfo()
       var logStringArrays = new Array;
       var d = new Date();
       var n = d.getFullYear();
+      
       for (var i = 0; i<LogInfo["logData"].length; i++)
         {
           var tempvar = LogInfo["logData"][i];
@@ -176,6 +178,57 @@ function addInfo()
               var logTable = $("#logTable");
               logTable.html("");
               logTable.append(table);
+
+    })
+}
+
+function addIndexInfo()
+{
+  $.get("/log/general", function (data)
+    {
+      console.log ("Begin");
+      var LogInfo = data;
+      var logStringArrays = new Array;
+      var d = new Date();
+      var n = d.getFullYear();
+      
+      for (var i = 0; i< 10; i++)
+        {
+          var tempvar = LogInfo["logData"][i];
+          if(/2017/.test(tempvar)){
+          tempvar = tempvar.split(n);
+          tempvar[0] = tempvar[0] + n;
+          logStringArrays.push(tempvar);
+        }
+        else{
+          temparray= ["No Date", tempvar];
+          logStringArrays.push(temparray);
+        }
+        }
+              var table = $("<table />");
+              var infoLength = logStringArrays[0].length;
+
+              var row = $(table[0].insertRow(-1));
+              var header = $("<th />");
+              header.html("Date");
+              var header2 = $("<th />");
+              header2.html("Activity");
+              row.append(header);
+              row.append(header2);
+
+              //Add the data rows.
+              for (var i = 1; i < logStringArrays.length; i++) {
+                  row = $(table[0].insertRow(-1));
+                  for (var j = 0; j < infoLength; j++) {
+                      var info = $("<td />");
+                      info.html(logStringArrays[i][j]);
+                      row.append(info);
+                  }
+              }
+
+              var logTable = $("#logTableSmall");
+              logTableSmall.html("");
+              logTableSmall.append(table);
 
     })
 }
