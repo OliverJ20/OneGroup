@@ -324,10 +324,24 @@ def iptable_form(ruleid):
         elif ruleid != "-2":
             if ruleid == "-1":           
                 ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
-                hl.addIPRule(ip_string)
+                
+                #If on a remove node, send rule to node
+                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
+                    url = getNode("ID",int(request.form["node"]))["Address"] 
+                    nodePost(url+"/addrule/",{"rule" : ip_string}) 
+
+                else:    
+                    hl.addIPRule(ip_string)
             else :
                 ip_string = hl.ipDictToString(getIPForm(rule["Policy"]))
-                hl.updateIPRules(ruleid, ip_string)
+                
+                #If on a remove node, send rule to node
+                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
+                    url = getNode("ID",int(request.form["node"]))["Address"] 
+                    nodePost(url+"/modifyrule/",{"ID" : ruleid, "rule" : ip_string}) 
+
+                else:
+                    hl.updateIPRules(ruleid, ip_string)
 
             return redirect(url_for('show_config'))
 
