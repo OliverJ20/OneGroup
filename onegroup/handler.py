@@ -96,7 +96,7 @@ def deleteUser(ID):
     user = getUser("ID",ID)
  
     #delete the users key/cert pair
-    if node != -1 and getNode("ID",node)["Address"] != "self":
+    if user["Node"] != -1 and getNode("ID",user["Node"])["Address"] != "self":
         url = getNode("ID",node)["Address"]  
         nodePost(url+"/deletekey/",{"user" : user["Keys"]}) 
 
@@ -138,8 +138,10 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
         try:
             grpNode = db.retrieve("Groups",{"ID" : group})["Node"]
             if node != -1 and node != grpNode:
+                logging.error("Error creating user %s user node and group node don't match",name)
                 return False
-        except:
+        except Exception as e:
+            logging.error("Error creating user %s %s",name,e)
             return False
 
     #Create user dictonary for database
