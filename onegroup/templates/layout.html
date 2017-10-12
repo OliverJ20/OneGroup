@@ -37,16 +37,20 @@
         <nav>
             <ul>
                 <li>
-                    <a href="/index">Home</a>
+                    <a href="/index"> <img src="{{ url_for('static', filename = 'home.png') }}"
+                        width="25" height="25"/> Home</a>
                 </li>
                 <li class="alternate">
-                    <a href="/logs">Logs</a>
+                    <a href="/logs"> <img src="{{ url_for('static', filename = 'logs.png') }}"
+                        width="25" height="25"/>Logs</a>
                 </li>
                 <li>
-                    <a href="/config">Configuration</a>
+                    <a href="/config"> <img src="{{ url_for('static', filename = 'gear.png') }}"
+                        width="25" height="25"/>Configuration</a>
                 </li>
                 <li class="alternate">
-                    <a href="/users">Users</a>
+                    <a href="/users"> <img src="{{ url_for('static', filename = 'users.png') }}"
+                        width="20" height="25"/>Users</a>
                 </li>
             </ul>
         </nav>

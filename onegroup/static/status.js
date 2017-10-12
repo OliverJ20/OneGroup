@@ -2,6 +2,8 @@
 //  * SERVER STATUS - Created by Eliot on 8/6/2017.
 //  */
 
+var logVar = setInterval(addIndexInfo, 1000);
+
 $(document).ready(function () {
   addInfo();   
   statusInfo(); 
@@ -11,8 +13,9 @@ $(document).ready(function () {
   var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   input = document.getElementById("dateStart");
   input.value = days[today.getDay()] + ' ' + months[today.getMonth()];
-  document.getElementById('dateStart').value = input.value;
   document.getElementById('dateStart').placeholder = input.value;
+  /* TO BE DECIDED IF THIS IS STILL REQUIRED
+  document.getElementById('dateStart').value = input.value;
   filter = input.value.toUpperCase();
   table = document.getElementById("logTable");
   tr = table.getElementsByTagName("tr");
@@ -25,7 +28,7 @@ $(document).ready(function () {
         tr[i].style.display = "none";
       }
     }
-  }
+  }*/
 });
 
 function statusInfo()
@@ -134,12 +137,13 @@ function addInfo()
 {
   $.get("/log/general", function (data)
     {
-      console.log ("Begin");
       var LogInfo = data;
       var logStringArrays = new Array;
       var d = new Date();
       var n = d.getFullYear();
-      for (var i = 0; i<LogInfo["logData"].length; i++)
+      var limit = LogInfo["logData"].length;
+      
+      for (var i = limit; i> 0; i--)
         {
           var tempvar = LogInfo["logData"][i];
           if(/2017/.test(tempvar)){
@@ -176,6 +180,57 @@ function addInfo()
               var logTable = $("#logTable");
               logTable.html("");
               logTable.append(table);
+
+    })
+}
+
+function addIndexInfo()
+{
+  $.get("/log/general", function (data)
+    {
+      var LogInfo = data;
+      var logStringArrays = new Array;
+      var d = new Date();
+      var n = d.getFullYear();
+      var limit = LogInfo["logData"].length
+      
+      for (var i = limit; i> limit - 11; i--)
+        {
+          var tempvar = LogInfo["logData"][i];
+          if(/2017/.test(tempvar)){
+          tempvar = tempvar.split(n);
+          tempvar[0] = tempvar[0] + n;
+          logStringArrays.push(tempvar);
+        }
+        else{
+          temparray= ["No Date", tempvar];
+          logStringArrays.push(temparray);
+        }
+        }
+              var table = $("<table />");
+              var infoLength = logStringArrays[0].length;
+
+              var row = $(table[0].insertRow(-1));
+              var header = $("<th />");
+              header.html("Date");
+              var header2 = $("<th />");
+              header2.html("Activity");
+              row.append(header);
+              row.append(header2);
+
+              //Add the data rows.
+              for (var i = 1; i < logStringArrays.length; i++) {
+                  row = $(table[0].insertRow(-1));
+                  for (var j = 0; j < infoLength; j++) {
+                      var info = $("<td />");
+                      info.html(logStringArrays[i][j]);
+                      row.append(info);
+                  }
+              }
+
+              var logTableSmall = $("#logTableSmall");
+              logTableSmall.html("");
+              logTableSmall.append(table);
 
     })
 }

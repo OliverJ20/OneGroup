@@ -314,7 +314,7 @@ def iptable_form(ruleid):
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
     """ 
-    rule = hl.getRule(ruleid)
+    rule = hl.getRule("ID", ruleid)
     if request.method == 'POST':
         if ruleid == "-2":
             #set policy
@@ -413,8 +413,12 @@ def login():
             flash(error)
         else:
             session['logged_in'] = True
-            if hl.confirmUser(email) and hl.confirmClient(email):
-                user = hl.getUser("Email",email)
+            
+            user = hl.getUser("Email",email)
+            if not user:
+                user = hl.getUser("Name",email)
+
+            if hl.confirmClient(user["Email"]):
                 session['type'] = 'Client'
                 session['name'] = user['Name']
                 return redirect("/clients/" + user['Name'])
