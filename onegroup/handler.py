@@ -291,6 +291,30 @@ def checkExpiredKeys():
                     ]
                 callScript('userman',args)
 
+def remakeUserkey(user):
+    """
+        Recreates a user's key/cert pair
+
+        user : the name of the user
+
+        Return True if succesful else False
+    """
+    #Get the location of the user's keys
+    keys = getUser("Name",user)["Keys"]
+
+    #Delete user's key
+    args = [
+        "del",
+        keys,
+    ]
+    callScript('userman',args)
+    
+    #Create new keys
+    args[0] = "add"
+    callScript('userman',args)
+
+    return True
+
 
 def createUserFilename(name):
     """
@@ -976,7 +1000,7 @@ def changePassword(name, userinput):
 
 def retrieveRequests():
     """
-        Fetchs all active admin requests from the database
+        Fetches all active admin requests from the database
 
         Returns : List of all admin requests
     """
@@ -986,18 +1010,40 @@ def retrieveRequests():
     return requests
 
 
-def acceptRequest(reqName):
+def retrieveRequest(requestID):
     """
-        Performs the accepted request
-    
-        reqName : The request to perform
+        Grabs a single request entry from the database
 
-        Returns : True if the request was succesfully performed. Else False
+        requestID : the ID of the request in the database
+        
+        Returns : the database entry of the request
     """
+    db = Database(filename = filen)
+    request = db.retrieve("notifications", {"ID" : requestID})
+    db.close()
+
+    return request
+
+
+def acceptRequest(request):
+    """
+        Performs the tasks associated with accepting a request
+    
+        request : the entry of the request in the database
+
+        Returns : True if the request was successfully accepted. Else False
+    """
+    db = Databases(filename = filen)
+    
+    if request["Request"] == 1:
+        if remakeUserKeys(user):
+            db.update("users", {"Key_Distributed": 0}, ("Name", user))      
+            db.delete("notifications",{"ID" : request["ID"]})
+
+    db.close()
     return True
 
-
-def declineRequest(reqName):#, reqReq):
+def declineRequest(request):
     """
         Deletes a request from the database without additional action
     
@@ -1006,8 +1052,7 @@ def declineRequest(reqName):#, reqReq):
         Returns : True if the request was succesfully deleted. Else False
     """
     db = Database(filename = filen)
-    db.delete("notifications",{"Users":reqName})
-    #db.delete("notifications", "Request", reqReq)
+    db.delete("notifications",{"ID" : request["ID"]})
     db.close()
     return True
 

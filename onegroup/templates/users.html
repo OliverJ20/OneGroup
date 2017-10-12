@@ -33,8 +33,7 @@
                                 <a href="/userform/{{users["ID"]}}">
                                     <button class = "button-table">Edit</button>
                                 </a>
-                                <form action="{{ url_for('delete_key') }}" method=post></input>
-                                    <input type="text" name="name" value= {{users["ID"]}} id = "hiddenInput" readonly></input>
+                                <form action="{{ url_for('delete_key', {{ users["ID"] }} ) }}" method=post></input>
                                     <input type="submit" value="Delete" class = "declineButton"></input>
                                 </form>
                             </td>
@@ -56,8 +55,7 @@
                             <a href="/userform/{{dataU["ID"]}}">
                                 <button class = "button-table">Edit</button>
                             </a>
-                            <form action="{{ url_for('delete_key') }}" method=post></input>
-                                <input type="text" name="name" value= {{dataU["ID"]}} id = "hiddenInput" readonly></input>
+                            <form action="{{ url_for('delete_key', {{ dataU["ID"] }} ) }}" method=post></input>
                                 <input type="submit" value="Delete" class = "declineButton"></input>
                             </form>
                         </td>
@@ -86,9 +84,7 @@
                                     <td>{{notifications["User"]}}</td>
                                     <td>{{notifications["Request"]}}</td>
                                     <td>
-                                        <form action="{{ url_for('approve_req') }}" vname="approveForm" method=post>
-                                            <input type="text" name="user" value= {{notifications["User"]}} id = "hiddenInput" readonly></input>
-                                            <input type="text" name="request" value= {{notifications["Request"]}}  id = "hiddenInput" readonly></input>
+                                        <form action="{{ url_for('approve_req', {{ notifications["ID"] }} ) }}" vname="approveForm" method=post>
                                             <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
                                             <input type="submit" name="reqOption" value="Decline" class = "declineButton"></input>
                                         </form>
@@ -101,9 +97,7 @@
                                 <td>{{dataR["User"]}}</td>
                                 <td>{{dataR["Request"]}}</td>
                                 <td>
-                                    <form action="{{ url_for('approve_req') }}" vname="approveForm" method=post>
-                                        <input type="text" name="user" value= {{dataR["User"]}} id = "hiddenInput" readonly></input>
-                                        <input type="text" name="request" value= {{dataR["Request"]}}  id = "hiddenInput" readonly></input>
+                                    <form action="{{ url_for('approve_req', {{ dataR["ID"] }} ) }}" vname="approveForm" method=post>
                                         <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
                                         <input type="submit" name="reqOption" value="Decline" class = "declineButton"></input>
                                     </form>
@@ -132,8 +126,7 @@
                                     <a href="/groupform/{{members["ID"]}}">
                                         <button class = "button-table">Edit</button>
                                     </a>
-                                    <form action="{{ url_for('delete_group') }}" method=post>
-                                        <input type="text" name="name" value= {{members["ID"]}} id = "hiddenInput" readonly>
+                                    <form action="{{ url_for('delete_group', {{ members["ID"] }}) }}" method=post>
                                         <input type="submit" value="Delete" class = "declineButton"></input>
                                     </form>
                                 </td>
@@ -149,8 +142,7 @@
                                 <a href="/groupform/{{dataG["ID"]}}">
                                     <button class = "button-table">Edit</button>
                                 </a>
-                                <form action="{{ url_for('delete_group') }}" method=post>
-                                    <input type="text" name="name" value= {{dataG["ID"]}} id = "hiddenInput" readonly>
+                                <form action="{{ url_for('delete_group', {{ dataG["ID"] }} ) }}" method=post>
                                     <input type="submit" value="Delete" class = "declineButton"></input>
                                 </form>
                             </td>
