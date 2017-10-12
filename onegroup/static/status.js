@@ -3,10 +3,10 @@
 //  */
 
 var logVar = setInterval(addIndexInfo, 1000);
+var statVar = setInterval( statusInfo, 1000);
 
 $(document).ready(function () {
-  addInfo();   
-  statusInfo(); 
+  addInfo();    
   var today = new Date();
   var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
   var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
