@@ -4,14 +4,12 @@ import string
 import re
 import os
 import logging
-import cherrypy
-import pygal
+import cherrypy 
 
 from functools import wraps
 from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
 from paste.translogger import TransLogger
-from pygal.style import Style
 
 try:
     from onegroup.defaults import *
@@ -133,22 +131,9 @@ def home():
             Displays confirmation message if creation is successful
             Flashes notification if user exists
     """
-    custom_style = Style(
-      background='transparent',
-      opacity='.7',
-      opacity_hover='.9',
-      transition='400ms ease-in',
-      colors=('#006e72', '#00979d'))
-
-
-    line_chart = pygal.Bar(fill=True, style=custom_style, width=800, height=400,spacing=50)
-    line_chart.title = 'VPN Usage'
-    line_chart.x_labels = ["Big Girl", "Dog Walker", "+1", "Don't Know", "Ernest"] 
-    line_chart.y_labels = [0,20,40,60,80,100]
-    line_chart.add('Bytes Sent',      [85.8, 84.6, 84.7, 74.5,   66])
-    line_chart.add('Bytes Recieved',  [14.2, 15.4, 15.3,  8.9,    9])
-    graph_data = line_chart.render_data_uri()
-    return render_template('index.html', graph_data=graph_data)
+    
+    users = hl.getUsers()
+    return render_template('index.html')
 
 
 @app.route('/password/', methods=['GET', 'POST'])
@@ -275,17 +260,18 @@ def userkey(hash):
         return redirect(url_for('logout'))
 
 
-@app.route('/create_request/')
-def create_request():
+@app.route('/create_request/<request>/<name>')
+def create_request(request, name):
     """
         Endpoint to create a new admin notification
  
         GET: Creates a notification and emails the admins detailing the request
     """
-    name = session['name']
-    requestId = hl.createRequest(name, 1)
+    requestId = hl.createRequest(name, request)
     adminEmails = hl.getAdminEmails()
     #Send email to all admin accounts
+
+    #Should be allocated message depending on type of request
     msg = """
         Request from {}:
         
@@ -341,24 +327,10 @@ def iptable_form(ruleid):
         elif ruleid != "-2":
             if ruleid == "-1":           
                 ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
-                
-                #If on a remove node, send rule to node
-                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
-                    url = getNode("ID",int(request.form["node"]))["Address"] 
-                    nodePost(url+"/addrule/",{"rule" : ip_string}) 
-
-                else:    
-                    hl.addIPRule(ip_string)
+                hl.addIPRule(ip_string)
             else :
                 ip_string = hl.ipDictToString(getIPForm(rule["Policy"]))
-                
-                #If on a remove node, send rule to node
-                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
-                    url = getNode("ID",int(request.form["node"]))["Address"] 
-                    nodePost(url+"/modifyrule/",{"ID" : ruleid, "rule" : ip_string}) 
-
-                else:
-                    hl.updateIPRules(ruleid, ip_string)
+                hl.updateIPRules(ruleid, ip_string)
 
             return redirect(url_for('show_config'))
 

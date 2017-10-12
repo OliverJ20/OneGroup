@@ -17,7 +17,7 @@
                </div>
             {% else %}
                 <a href = "{{ url_for('logout') }}">Log Out</a>
-                <a href = "{{ url_for('create_request', username, 1) }}"><button>Lost Certificate? Request New Keys</button></a>
+                <a href = "{{ url_for('create_request', request = 1, name = username) }}"><button>Lost Certificate? Request New Keys</button></a>
             {% endif %}
             <a href = "/password"> <h3> Reset Password </h3></a>
         </div>
