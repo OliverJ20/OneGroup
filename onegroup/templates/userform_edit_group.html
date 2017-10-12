@@ -19,7 +19,7 @@
                     <select name="node2">
                         <option value="-1" selected>No assigned node</option>
                         {% for node in nodes %}
-                            <option value="{{ node }}">{{ node }}</option>
+                            <option value="{{ node["ID"] }}">{{ node["ID"] }}</option>
                         {% endfor %}                    	
                     </select>
 

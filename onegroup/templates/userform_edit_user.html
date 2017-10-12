@@ -34,7 +34,7 @@
 		        {% if accounttype == "Client" %} 
 		            <p>Assign Group</p>
                             <select name="groupId2">
-                                <option value="-1" selected>No group</option>
+                                <option value="-1" {% if groupAssigned == -1 %} selected {% endif %}>No group</option>
                                 {% for group in groups %}
 			            <option value="{{ group['ID'] }}">{{ group['Name'] }}</option>
 			        {% endfor %}
@@ -42,9 +42,9 @@
                     	
                             <p>Assign Node</p>
                             <select name="node2">
-                                 <option value="-1" selected>No assigned node</option>
+                                 <option value="-1" {% if nodeAssigned == -1 %} selected {% endif %}>No assigned node</option>
                                  {% for node in nodes %}
-                                     <option value="{{ node }}">{{ node }}</option>
+                                     <option value="{{ node["ID"] }} {% if node["ID"] == nodeAssigned %} selected {% endif %}">{{ node["Name"] }}</option>
                                  {% endfor %}                    	
                             </select>
                         

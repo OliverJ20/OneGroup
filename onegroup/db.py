@@ -16,7 +16,7 @@ class Database:
 
     def init(self):
         #Tables
-        self._db.execute('create table IF NOT EXISTS users (ID INTEGER PRIMARY KEY NOT NULL, Name text, Email text, Password text, Auth_Type text, Account_Type text, Keys text, Key_Distributed INTEGER, Grp INTEGER, Node INTEGER, Expiry text)')
+        self._db.execute('create table IF NOT EXISTS users (ID INTEGER PRIMARY KEY NOT NULL, Name text, Email text, Password text, Auth_Type text, Account_Type text, Keys text, Key_Distributed INTEGER, Grp INTEGER, Expiry text)')
         self._db.execute('create table IF NOT EXISTS groups (ID INTEGER PRIMARY KEY NOT NULL, Name text, Internal text, External text, Used_Octets text, Rule INTEGER, Node INTEGER)')
         self._db.execute('create table IF NOT EXISTS codes (Code text PRIMARY KEY NOT NULL, Name text, Purpose text, Used INTEGER)')
         self._db.execute('create table IF NOT EXISTS notifications (ID INTEGER PRIMARY KEY NOT NULL, User text, Request text)')

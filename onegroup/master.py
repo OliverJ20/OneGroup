@@ -275,15 +275,14 @@ def userkey(hash):
         return redirect(url_for('logout'))
 
 
-@app.route('/create_request/')
-def create_request():
+@app.route('/create_request/<request>/<name>')
+def create_request(request, name):
     """
         Endpoint to create a new admin notification
  
         GET: Creates a notification and emails the admins detailing the request
     """
-    name = session['name']
-    requestId = hl.createRequest(name, 1)
+    requestId = hl.createRequest(name, request)
     adminEmails = hl.getAdminEmails()
     #Send email to all admin accounts
     msg = """
@@ -329,12 +328,15 @@ def iptable_form(ruleid):
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
     """ 
-    rule = hl.getRule("ID", ruleid)
+    rule = hl.getRule(ruleid)
+
+    nodes = hl.getNodes()
+    
     if request.method == 'POST':
         if ruleid == "-2":
             #set policy
             session["Policy"] = request.form["ruleType1"]
-            return render_template('iptables_create.html', postback = 1, policy = session["Policy"])
+            return render_template('iptables_create.html', postback = 1, policy = session["Policy"], nodes = nodes)
         elif ruleid != "-2":
             if ruleid == "-1":           
                 ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
@@ -363,10 +365,10 @@ def iptable_form(ruleid):
             abort(404)
 
     if ruleid == "-1":
-        return render_template('iptables_create.html', postback = -1)
+        return render_template('iptables_create.html', postback = -1, nodes = nodes)
 
     print(rule)
-    return render_template('iptables_edit.html', rid = ruleid, rule = rule['Rule'], policy = rule['Policy'])
+    return render_template('iptables_edit.html', rid = ruleid, rule = rule['Rule'], policy = rule['Policy'], nodes = nodes)
 
 
 def getIPForm(policy):
@@ -442,12 +444,8 @@ def login():
             flash(error)
         else:
             session['logged_in'] = True
-            
-            user = hl.getUser("Email",email)
-            if not user:
-                user = hl.getUser("Name",email)
-
-            if hl.confirmClient(user["Email"]):
+            if hl.confirmUser(email) and hl.confirmClient(email):
+                user = hl.getUser("Email",email)
                 session['type'] = 'Client'
                 session['name'] = user['Name']
                 return redirect("/clients/" + user['Name'])
@@ -634,18 +632,17 @@ def filluserform(form):
 ##                //SHOW NAME, EMAIL, PASS
 
     groups = hl.getAllGroups()
-    if groups == None:
-        groups = []
+    nodes = hl.getNodes()
 
     if request.method == 'POST':
         if form == "AC":
             #Store Account Type in session variable 
             if request.form['accountType1'] == "Client":
                 session['accountType'] = "Client"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "NULL", groups = groups)
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "NULL", groups = groups, nodes = nodes)
             elif request.form['accountType1'] == "Admin":
                 session['accountType'] = "Admin"
-                return render_template("userform_create_user.html", postback = 1, account = "Admin", auth = "Passphrase", groups = groups)
+                return render_template("userform_create_user.html", postback = 1, account = "Admin", auth = "Passphrase", groups = groups, nodes = nodes)
             else:
                 abort(404)
              
@@ -653,19 +650,19 @@ def filluserform(form):
             #Store Auth Type in session variable
             if request.form['authType1'] == "Passphrase":
                 session['authType'] = "Passphrase"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Passphrase", groups = groups)
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Passphrase", groups = groups, nodes = nodes)
             elif request.form['authType1'] == "Email":
                 session['authType'] = "Email"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Email", groups = groups)
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Email", groups = groups, nodes = nodes)
             elif request.form['authType1'] == "None":
                 session['authType'] = "None"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "None", groups = groups)
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "None", groups = groups, nodes = nodes)
             else:
                 abort(404)
 
         elif form == "ET":
             
-            return render_template("userform_edit_user.html", postback = 1, accounttype = session['user']["Account_Type"], authtype = request.form['authType2'])
+            return render_template("userform_edit_user.html", postback = 1, accounttype = session['user']["Account_Type"], authtype = request.form['authType2'], groups = groups, nodes = nodes)
                 
         elif form == "DE":
             #MAKE SURE ALL VALUE THAT ARE NOT PART OF REQUEST.FORM DO NOT THROW 400 BAD REQUEST ERROR
@@ -712,11 +709,11 @@ def filluserform(form):
             abort(404)
 
     if form == "CU":
-        return render_template("userform_create_user.html", postback = -1, account = "NULL", auth = "NULL", groups = groups)
+        return render_template("userform_create_user.html", postback = -1, account = "NULL", auth = "NULL", groups = groups, nodes = nodes)
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
             session['user'] = user
-            return render_template("userform_edit_user.html", postback = -1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], groups = groups)
+            return render_template("userform_edit_user.html", postback = -1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], groups = groups, nodes = nodes)
     else: #Must be fake input
         abort(404)            
 
@@ -737,6 +734,9 @@ def fillgroupform(form):
         POST : Attempt to add data from form into database, if successful,
                 redirect to confirm endpoint or abort 404
     """
+
+    nodes = hl.getNodes()
+    
     if request.method == 'POST':
         if form == "CG":
             if createNewGroup():
@@ -752,10 +752,10 @@ def fillgroupform(form):
             abort(404)
     
     if form == "CG":
-        return render_template("userform_create_group.html")
+        return render_template("userform_create_group.html", nodes = nodes)
     elif hl.getGroup(form) != None:
         group = hl.getGroup(form)
-        return render_template("userform_edit_group.html", groupname=group["Name"], internal=group["Internal"], external=group["External"])
+        return render_template("userform_edit_group.html", groupname=group["Name"], internal=group["Internal"], external=group["External"], nodes = nodes)
     else: #Must be fake input
         abort(404)
         
