@@ -31,7 +31,7 @@
                             <input type="text" name="email2" maxlength="40" required value="{{ email }}"> </input>
 		        {% endif %}
 	
-		        {% if accounttype == "Client" and authtype != "NULL" %} 
+		        {% if accounttype == "Client" %} 
 		            <p>Assign Group</p>
                             <select name="groupId2">
                                 <option value="-1" selected>No group</option>

@@ -194,42 +194,40 @@ def retrieve_user_page():
     return render_template('users.html', dataR = requests, dataU = users, dataG = groups) 
 
 
-@app.route('/approve_req/', methods=['POST'])
+@app.route('/approve_req/reqid', methods=['POST'])
 @admin_required
-def approve_req():
+def approve_req(reqid):
     """
         Endpoint to handle the approval/denial of requests made to an admin
+
+        user : the user who created the request
+        request : type of request to be performed
         
         POST: If approve, perform the request. Else delete the request
     """
-    reqName = request.form['user']
-    reqStatus = request.form['request']
+    request = hl.retrieveRequest(reqid)
+    
     if request.method == 'POST':
         if request.form['reqOption'] == 'Approve':
-            print("Approve")
-            print(reqName)
-            print(reqStatus)
-            #hl.acceptRequest(reqName, reqReq)
+            hl.acceptRequest(request)
             return redirect('/users')
         elif request.form['reqOption'] == 'Decline':
-            print("Decline")
-            print(reqName)
-            print(reqStatus)
-            #hl.declineRequest(reqName)#, reqReq)
+            hl.declineRequest(request)
             return redirect('/users')
 
 
-@app.route('/delete_key/', methods=['POST'])
+@app.route('/delete_key/<uid>', methods=['POST'])
 @admin_required
-def delete_key():
+def delete_key(uid):
     """
         Endpoint to handle the deletion of a user
+
+        uid : ID of the user to delete
         
         POST: Redirect to the user management page
     """
-    ID = request.form['name']
     if request.method == 'POST':
-        hl.deleteUser(ID)
+        hl.deleteUser(uid)
         return redirect('/users')
 
 @app.route('/delete_group/', methods=['POST'])
@@ -237,12 +235,13 @@ def delete_key():
 def delete_group():
     """
         Endpoint to handle the deletion of a group
+
+        gid : ID of the group to delete
         
         POST: Redirect to the user management page
     """
-    ID = request.form['name']
     if request.method == 'POST':
-        hl.deleteGroup(ID)
+        hl.deleteGroup(gid)
         return redirect('/users')
 
 @app.route('/logs/', methods=['GET', 'POST'])
@@ -284,7 +283,7 @@ def create_request():
         GET: Creates a notification and emails the admins detailing the request
     """
     name = session['name']
-    requestId = hl.createRequest(name, "Key Reset")
+    requestId = hl.createRequest(name, 1)
     adminEmails = hl.getAdminEmails()
     #Send email to all admin accounts
     msg = """
@@ -339,10 +338,24 @@ def iptable_form(ruleid):
         elif ruleid != "-2":
             if ruleid == "-1":           
                 ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
-                hl.addIPRule(ip_string)
+                
+                #If on a remove node, send rule to node
+                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
+                    url = getNode("ID",int(request.form["node"]))["Address"] 
+                    nodePost(url+"/addrule/",{"rule" : ip_string}) 
+
+                else:    
+                    hl.addIPRule(ip_string)
             else :
                 ip_string = hl.ipDictToString(getIPForm(rule["Policy"]))
-                hl.updateIPRules(ruleid, ip_string)
+                
+                #If on a remove node, send rule to node
+                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
+                    url = getNode("ID",int(request.form["node"]))["Address"] 
+                    nodePost(url+"/modifyrule/",{"ID" : ruleid, "rule" : ip_string}) 
+
+                else:
+                    hl.updateIPRules(ruleid, ip_string)
 
             return redirect(url_for('show_config'))
 
@@ -387,7 +400,7 @@ def getIPForm(policy):
     return ip_dict
 
 
-@app.route('/iptabledelete')
+@app.route('/iptabledelete/<rid>')
 def iptables_delete(rid):
     """
         Deletes a given iptable rule from the database
@@ -396,8 +409,8 @@ def iptables_delete(rid):
 
         GET : deletes the given iptable rule
     """
-    removeIPRule(rid)
-    return redirect(url_for('confirm'), confirmed = "IP Table Rule Deleted!")
+    hl.removeIPRule(rid)
+    return redirect(url_for('confirm', confirmed = "IP Table Rule Deleted!"))
     
 
 @app.route('/config/', methods=['GET'])
@@ -621,6 +634,8 @@ def filluserform(form):
 ##                //SHOW NAME, EMAIL, PASS
 
     groups = hl.getAllGroups()
+    if groups == None:
+        groups = []
 
     if request.method == 'POST':
         if form == "AC":
@@ -674,9 +689,9 @@ def filluserform(form):
                 email = ""
 
             if account == "Client":
-                group = request.form['groupId1']
+                group = int(request.form['groupId1'])
                 expiry = request.form['expiry1']
-                node = request.form['node1']
+                node = int(request.form['node1'])
             else:
                 group = -1
                 expiry = ""
