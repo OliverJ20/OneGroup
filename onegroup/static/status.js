@@ -135,7 +135,6 @@ function addInfo()
 {
   $.get("/log/general", function (data)
     {
-      console.log ("Begin");
       var LogInfo = data;
       var logStringArrays = new Array;
       var d = new Date();
@@ -186,7 +185,6 @@ function addIndexInfo()
 {
   $.get("/log/general", function (data)
     {
-      console.log ("Begin");
       var LogInfo = data;
       var logStringArrays = new Array;
       var d = new Date();
@@ -226,7 +224,7 @@ function addIndexInfo()
                   }
               }
 
-              var logTable = $("#logTableSmall");
+              var logTableSmall = $("#logTableSmall");
               logTableSmall.html("");
               logTableSmall.append(table);
 
