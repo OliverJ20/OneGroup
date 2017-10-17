@@ -50,7 +50,7 @@ function statusInfo(address)
     defAddress = "http://" + address + "/log/general";
   }
   
-$.get("/log/status", function (data)
+$.get(defAddress, function (data)
   {
     var LogInfo = data;
     var logStringArrays = new Array;
@@ -156,7 +156,7 @@ function addInfo(address)
     defAddress = "http://" + address + "/log/general";
   }
   
-  $.get("/log/general", function (data)
+  $.get(defAddress, function (data)
     {
       var LogInfo = data;
       var logStringArrays = new Array;
