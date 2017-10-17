@@ -2,8 +2,8 @@
 //  * SERVER STATUS - Created by Eliot on 8/6/2017.
 //  */
 
-var logVar = setInterval(addIndexInfo(document.getElementById("item1").value), 1000);
-var statVar = setInterval( statusInfo(document.getElementById("item1").value), 1000);
+var logVar = setInterval(addIndexInfo("self"), 1000);
+var statVar = setInterval( statusInfo("self"), 1000);
 
 $(document).ready(function () {
   addInfo();    
@@ -156,7 +156,7 @@ function addInfo(address)
     defAddress = "http://" + address + "/log/general";
   }
   
-  $.get(defAddress, function (data)
+  $.get(defAddress.valueOf, function (data)
     {
       var LogInfo = data;
       var logStringArrays = new Array;
