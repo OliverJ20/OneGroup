@@ -156,7 +156,10 @@ function addInfo(address)
     defAddress = "http://" + address + "/log/general";
   }
   
-  $.get("/log/general", function (data)
+  console.log(defAddress);
+  console.log(defAddress.value);
+
+  $.get(defAddress.value, function (data)
     {
       var LogInfo = data;
       var logStringArrays = new Array;
