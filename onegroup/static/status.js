@@ -2,8 +2,8 @@
 //  * SERVER STATUS - Created by Eliot on 8/6/2017.
 //  */
 
-var logVar = setInterval(addIndexInfo, 1000);
-var statVar = setInterval( statusInfo, 1000);
+var logVar = setInterval(addIndexInfo(document.getElementById("item1").value), 1000);
+var statVar = setInterval( statusInfo(document.getElementById("item1").value), 1000);
 
 $(document).ready(function () {
   addInfo();    
@@ -30,7 +30,7 @@ $(document).ready(function () {
   }
 });
 
-function statusInfo()
+function statusInfo(address)
 {
   var invalid1 = new RegExp("Open VPN CLIENT LIST");
   var invalid2 = new RegExp("Updated");
@@ -39,6 +39,17 @@ function statusInfo()
   var invalid5 = new RegExp("Max bcast");
   var invalid6 = new RegExp("END");
 
+  var defAddress;
+  if (address === undefined) {
+    address = "self";
+  }
+  if (address == "self"){
+    defAddress = "/log/general";
+  }
+  else{
+    defAddress = "http://" + address + "/log/general";
+  }
+  
 $.get("/log/status", function (data)
   {
     var LogInfo = data;
@@ -132,8 +143,19 @@ $.get("/log/status", function (data)
 * LOGPAGE STATUS - Created by Olive & Eliot on 8/6/2017.
 */
 
-function addInfo()
+function addInfo(address)
 {
+  var defAddress;
+  if (address === undefined) {
+    address = "self";
+  }
+  if (address == "self"){
+    defAddress = "/log/general";
+  }
+  else{
+    defAddress = "http://" + address + "/log/general";
+  }
+  
   $.get("/log/general", function (data)
     {
       var LogInfo = data;
@@ -183,9 +205,20 @@ function addInfo()
     })
 }
 
-function addIndexInfo()
+function addIndexInfo(address)
 {
-  $.get("/log/general", function (data)
+  var defAddress;
+  if (address === undefined) {
+    address = "self";
+  }
+  if (address == "self"){
+    defAddress = "/log/general";
+  }
+  else{
+    defAddress = "http://" + address + "/log/general";
+  }
+  
+  $.get(defAddress, function (data)
     {
       var LogInfo = data;
       var logStringArrays = new Array;
@@ -254,6 +287,17 @@ function tableFilter() {
     }
   }
 }
+
+
+// /**
+//  * NODE CHANGE and STATUS - Created by Eliot & Oliver on 17/10/2017.
+//  */
+
+function nodeChange(){
+  document.getElementById('currentNode').innerHTML = "Node: " + document.getElementById("item1").value;
+  
+}
+
 
 // MISC SCRIPT FUNCTIONS
 

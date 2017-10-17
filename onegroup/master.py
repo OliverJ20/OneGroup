@@ -133,6 +133,10 @@ def home():
             Displays confirmation message if creation is successful
             Flashes notification if user exists
     """
+
+    filename = log_dir + "openvpn-status.log"
+    logs = hl.getLog(filename)
+    
     custom_style = Style(
       background='transparent',
       opacity='.7',
@@ -148,7 +152,9 @@ def home():
     line_chart.add('Bytes Sent',      [85.8, 84.6, 84.7, 74.5,   66])
     line_chart.add('Bytes Recieved',  [14.2, 15.4, 15.3,  8.9,    9])
     graph_data = line_chart.render_data_uri()
-    return render_template('index.html', graph_data=graph_data)
+    
+    nodes = hl.getAllNodes();
+    return render_template('index.html', graph_data=graph_data, nodes = nodes)
 
 
 @app.route('/password/', methods=['GET', 'POST'])
@@ -357,7 +363,7 @@ def iptable_form(ruleid):
                     nodePost(url+"/modifyrule/",{"ID" : ruleid, "rule" : ip_string}) 
 
                 else:
-                    hl.updateIPRule(ruleid, ip_string)
+                    hl.updateIPRules(ruleid, ip_string)
 
             return redirect(url_for('show_config'))
 
