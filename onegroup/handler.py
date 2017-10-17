@@ -97,9 +97,13 @@ def deleteUser(ID):
  
     #delete the users key/cert pair
     if user["Node"] != -1 and getNode("ID",user["Node"])["Address"] != "self":
-        url = getNode("ID",node)["Address"]  
-        nodePost(url+"/deletekey/",{"user" : user["Keys"]}) 
-
+        url = getNode("ID",user["Node"])["Address"]  
+        res = nodePost(url+"/deletekey/",{"user" : user["Keys"]}) 
+            
+        if not res or not res["result"]:
+            logging.error("Error deleting user %s: Node returned a empty or false result",name)
+            return False
+        
     else:
         args = [
             "del",
@@ -149,10 +153,14 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
     user = {"Name" : name, "Email" : email, "Password": password, "Auth_Type" : authType, "Account_Type" : accountType, "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : group, "Node" : node,"Expiry": expiry}
  
     #create the users key/cert pair
+    print("Node: {}".format(getNode("ID",node)))
     if node != -1 and getNode("ID",node)["Address"] != "self":
         url = getNode("ID",node)["Address"]
         
-        nodePost(url+"/createkeys/",{"user" : user["Keys"]})
+        res = nodePost(url+"/createkey/",{"user" : user["Keys"]})
+        if not res or not res["result"]:
+            logging.error("Error creating user %s: Node returned a empty or false result",name)
+            return False
 
     else:
         args = [
@@ -169,19 +177,20 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
     db.close()
     return True
           
-def updateUser(ID, newuser):
+def updateUser(ID, newuser, namecheck = True):
     """
         Updates the information of a specified user from the users table
 
         ID : ID field of user as specified in the database
         newuser : Dictionary containing updated data for the user
+        namecheck : Flag to determine if a validation should be performed on the username
 
         Returns True if successful else false
     """
     oldUser = getUser("ID",ID)
 
     #Error checking
-    if not validateNewUser(newuser['Name'], newuser["Account_Type"], newuser["Auth_Type"], newuser["Email"], newuser["Password"], newuser["Expiry"]):   
+    if not validateNewUser(newuser['Name'], newuser["Account_Type"], newuser["Auth_Type"], newuser["Email"], newuser["Password"], newuser["Expiry"], namecheck):   
         return False
     elif "Node" in newuser and oldUser["Node"] != newuser["Node"]:
         return False
@@ -216,7 +225,7 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         authType    : The authorisation type of the user (Passphrase, Email, None) (Admin must use Passphrase) 
         email       : User's email (blank if not set. Cannot be set if authType is None)
         passwd      : User's password (blank if not set. Can only be set if authType is Passphrase. Admin must use a password)
-        existing    : Flag to perf/orm checks for existing username and email
+        existing    : Flag to perform checks for existing username and email
 
         returns: true if valid, else false
     """
@@ -377,7 +386,9 @@ def confirmClient(email):
         
         Returns : True if client, else false
     """
-    user = getUser("Email",email)
+    user = getUser("Email", email)
+    if not user:
+        user = getUser("Name", email)
 
     if user['Account_Type'] == "Client":
         return True
@@ -482,15 +493,24 @@ def createGroup(name, internalNetwork, externalNetwork, node = -1, **kwargs):
     
     #If on a different node, add group on that node
     url = "self"
-    if node == -1 and getNode("ID",node) != None:
+    if node != -1 and getNode("ID",node) != None:
         url = getNode("ID",node)["Address"]
 
     if url != "self":
-         #Add group on remote node
-        nodePost(url+"/addgroup/",{"internal" : group["Internal"]}) 
+        print("adding group to node")
+        #Add group on remote node
+        res = nodePost(url+"/addgroup/",{"internal" : group["Internal"]}) 
+        if not res or not res["result"]:
+            logging.error("Error creating group %s: Node returned a empty or false result",name)
+            return False 
 
         #Add group iptables rule to remote node
-        group["Rule"] = nodePost(url+"/addrule/",{"rule" : rule})["Rule"] 
+        res = nodePost(url+"/addrule/",{"rule" : rule})
+        if not res:
+            logging.error("Error creating group rule for %s: Node returned a empty or false result",name)
+            return False 
+        else:
+            group["Rule"] = res["Rule"] 
 
     else:
         #Add route to the server config if not already added
@@ -504,8 +524,7 @@ def createGroup(name, internalNetwork, externalNetwork, node = -1, **kwargs):
             addIPRule(rule)
             group["Rule"] = db.retrieve("firewall",{"Rule":rule})["ID"]
         
-        print(group["Rule"])
-    
+    print(group)
     #Add group to the database
     db.insert("groups",group)
 
@@ -552,33 +571,53 @@ def updateGroup(ID, group):
             url = getNode("ID", oldGroup["Node"])["Address"]
 
             #Update IPTables rule
-            rule = ipStringToDict(nodePost(url+"/getrule/",{"key" : "ID", "value" : oldGroup["Rule"]}))
+            res = nodePost(url+"/getrule/",{"key" : "ID", "value" : oldGroup["Rule"]})
+            if not res and not res["result"]:
+                logging.error("Error getting group %s rule from remote node: Node returned a empty or false result", oldGroup["Name"])
+                return False 
+            else:
+                rule = res["rule"]["Rule"]
+            
+
             if "Internal" in group:
                 rule["Source"] = group["Internal"]
                 
             if "External" in group:
                 rule["Destination"] = group["External"]
 
-            nodePost(url+"/updaterule/",{"ID" : oldGroup["Rule"], "rule" : ipDictToString(rule)}) 
+            res = nodePost(url+"/updaterule/",{"ID" : oldGroup["Rule"], "rule" : ipDictToString(rule)}) 
+            if not res or not res["result"]:
+                logging.error("Error updating group rule for group  %s: Node returned a empty or false result", oldGroup["Name"])
+                return False 
  
             #Update server route in server config
             if "Internal" in group and group["Internal"] != oldGroup["Internal"]: 
-                nodePost(url+"/modifygroup/",{"oldInternal" : oldGroup["Internal"], "newInternal" : group["Internal"]}) 
+                res = nodePost(url+"/updategroup/",{"oldInternal" : oldGroup["Internal"], "newInternal" : group["Internal"]}) 
+                if not res or not res["result"]:
+                    logging.error("Error updating group %s: Node returned a empty or false result", oldGroup["Name"])
+                    return False 
             
             #Update all the user's client configs
             for user in users:
                 #Get the current client config for the user
-                config = nodeGet(url+"/getconfig/"+user["Keys"])["config"]
-                if config != None:
+                res = nodeGet(url+"/getconfig/"+user["Keys"])
+                if not res or not res["config"]:
+                    logging.error("Error getting config file for user %s: Node returned a empty or false result", user["Name"])
+                    return False 
+                else:
+                    config = res["config"]
                     internal = "{}.{}".format(rule["Source"].split(".0/")[0],config[0].split(".")[-1])
                     external = "{}.{}".format(rule["Source"].split(".0/")[0],config[1].split(".")[-1])
                     
-                nodePost(url+"/addtogroup/",{"user" : user["Keys"], "internal" : internal, "external" : external})
+                res = nodePost(url+"/addtogroup/",{"user" : user["Keys"], "internal" : internal, "external" : external})
+                if not res or not res["result"]:
+                    logging.error("Error adding user group %s: Node returned a empty or false result", oldGroup["Name"])
+                    return False 
 
         #Else edit locally
         else:
             #Update IPTables rule
-            rule = ipStringToDict(getRule("ID", oldGroup["Rule"]))
+            rule = getRule("ID", oldGroup["Rule"])["Rule"]
             if "Internal" in group:
                 rule["Source"] = group["Internal"]
                 
@@ -602,9 +641,14 @@ def updateGroup(ID, group):
                 updateUserClientConfig(user["Keys"],internal,external)
 
     #Removed ID and Rule fields
-    del group["ID"]
-    del group["Rule"]
-    del group["Users"]
+    if "ID" in group:
+        del group["ID"]
+    
+    if "Rule" in group:
+        del group["Rule"]
+    
+    if "Users" in group:
+        del group["Users"]
  
     #Update Group entry
     db.update("groups",group,("ID",ID))
@@ -630,10 +674,16 @@ def deleteGroup(ID,deleteUsers = False):
         url = getNode("ID", group["Node"])["Address"] 
 
         #Delete the IPTables rule
-        nodePost(url+"/deleterule/", {"ID", group["Rule"]})
+        res = nodePost(url+"/deleterule/", {"ID" : group["Rule"]})
+        if not res or not res["result"]:
+            logging.error("Error deleting group rule for group %s: Node returned a empty or false result",ID)
+            return False 
         
         #Remove route from server config
-        nodePost(url+"/deletegroup/", {"internal", group["Internal"]})
+        res = nodePost(url+"/deletegroup/", {"internal" : group["Internal"]})
+        if not res or not res["result"]:
+            logging.error("Error deleting group %s: Node returned a empty or false result",ID)
+            return False 
      
     #Else local
     else:
@@ -653,6 +703,8 @@ def deleteGroup(ID,deleteUsers = False):
             deleteUser(user["ID"])        
         else:
             deleteUserFromGroup(user["ID"])
+
+    return True
 
 
 def addUserToGroup(user, group):
@@ -689,13 +741,17 @@ def addUserToGroup(user, group):
     
     if grp["Node"] != -1 and getNode("ID", grp["Node"])["Address"] != "self":
         url = getNode("ID", grp["Node"])["Address"] 
-        nodePost(url+"/addtogroup/",{"user" : usr["Keys"],"internal" : internal, "external" :external})
+        res = nodePost(url+"/addtogroup/",{"user" : usr["Keys"],"internal" : internal, "external" :external})
+        if not res or not res["result"]:
+            logging.error("Error adding user %s to group %s: Node returned a empty or false result",usr["Name"],grp["Name"])
+            return False 
     else:
         updateUserClientConfig(usr["Keys"],internal,external)
 
 
     #Update the group's entry to show the used octets
     updateGroup(group,grp)
+    return True
 
 def getUserClientConfig(user):
     """
@@ -737,18 +793,23 @@ def deleteUserFromGroup(userID):
     #Change user's Group entry in the database
     user = getUser("ID",userID)
     user["Grp"] = -1
-    updateUser(userID, user) 
+    updateUser(userID, user, False) 
     
     #Remove the user's client config file
     if user["Node"] != -1 and getNode("ID", user["Node"])["Address"] != "self":
         url = getNode("ID", user["Node"])["Address"] 
-        nodePost(url+"/removefromgroup/",{"user" : user["Keys"]})        
+        res= nodePost(url+"/removefromgroup/",{"user" : user["Keys"]})        
+        if not res or not res["result"]:
+            logging.error("Error deleting user %s from group: Node returned a empty or false result",user["Name"])
+            return False 
  
     else:
         args = [
             os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user["Keys"]),
         ]
         callScript('rm',args)
+    
+    return True
 
 
 def addRouteToConfig(network):
@@ -798,6 +859,7 @@ def updateRouteInConfig(oldNetwork,newNetwork):
     #Find the existing route in the file
     #If the route doesn't exist, add it to the config
     line = checkRouteExists(oldNetwork,getFormattedNetwork(oldNetwork)) 
+    print(line)
     if line == -1:
         addRouteToConfig(newNetwork)
     else:
@@ -810,7 +872,7 @@ def updateRouteInConfig(oldNetwork,newNetwork):
                 #Just remove the old network as the new one exists
                 config.remove(config[line])
             else:
-                config[line] = getFormattedNetwork(newNetwork)
+                config[line] = "route {}\n".format(getFormattedNetwork(newNetwork))
             
             #Rewrite config file
             f.seek(0)
@@ -838,13 +900,17 @@ def deleteRouteInConfig(network):
         filename = os.getenv(tag+'openvpn_server_config',base_config['openvpn_server_config']) 
         with open(filename,'r+') as f:
             config = f.readlines()
-            config.remove(config[line])
+            route = config[line]
 
             #Rewrite config file
             f.seek(0)
             for i in config:
-                i.strip()
-                f.write(i)
+                if i != route:
+                    i.strip()
+                    f.write(i)
+            
+            #Remove extra lines
+            f.truncate()
 
         #Restart openvpn to enact changes
         handleOpenvpn("restart")
@@ -867,7 +933,8 @@ def checkRouteExists(network,formattedNetwork):
     with open(filename) as f:
         for num, line in enumerate(f,1):
             if any([x for x in compare if x == line.strip("\n")]):
-                return num
+                #Return -1 to account for lines numbers starting at index 1 and lists starting at index 0
+                return num-1
             
 
     #If reached here, the route is not in the file
@@ -1236,6 +1303,7 @@ def ipDictToString(ip_dict):
         
         Returns : String of dictionary values
     """
+    print(ip_dict)
     table =""
     inputFace =""
     outputFace =""
@@ -1375,7 +1443,7 @@ def addIPRule(rule):
 
 
 
-def updateIPRules(ID, value):
+def updateIPRule(ID, value):
     """ 
         Updates an IPTables rule entry in the database
 
@@ -1485,10 +1553,6 @@ def getNode(key, value):
     nodes = db.retrieve('nodes',{key : value})
     db.close()
 
-    #Force a list if there is only 1 node
-    if isinstance(nodes,dict):   
-        nodes = [nodes]
-
     return nodes
 
 def getAllNodes():
@@ -1517,7 +1581,7 @@ def nodeGet(url):
 
         Returns dict of json response, else None
     """
-    r = requests.get(url) 
+    r = requests.get("http://"+url) 
     
     if r.status_code == 200:
         return r.json()
@@ -1534,7 +1598,7 @@ def nodeGetFile(url, path):
 
         Returns True if succesful, else False
     """
-    r = requests.get(url, stream = True) 
+    r = requests.get("http://"+url, stream = True) 
     
     if r.status_code == 200:
         #Attempt to write the downloaded file to disk. Should be cleaned up later
@@ -1557,7 +1621,7 @@ def nodePost(url, data):
 
         Returns dict of json response, else None
     """
-    r = requests.post(url,json=data)
+    r = requests.post("http://"+url,json=data)
     
     if r.status_code == 200:
         return r.json()

@@ -105,7 +105,7 @@ ENV/
 
 #ignore development files
 onegroup/onegroup.conf
-onegroup/test.py
+onegroup/tests/
 
 #.idea
 **.idea/

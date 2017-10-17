@@ -20,31 +20,13 @@ except:
 
 
 app = Flask(__name__)
-mail = Mail(app)
-
-def login_required(f):
-    """
-        Wraper for endpoints to perform an authentication check
-        
-        f : endpoint function to be wrapped
-
-        returns f if logged in, else aborts with a 401 error
-    """
-    @wraps(f)
-    def login_decorator(*args, **kwargs):
-        if not session.get('logged_in'):
-            abort(401)
-        else:
-            return f(*args, **kwargs)
-    return login_decorator
-    
+mail = Mail(app) 
 
 #
 # User management
 #
 
 @app.route('/getkey/<name>', methods=['GET'])
-@login_required
 def getUserKey(name):
     """
         Allows the master node to download a user key from this node  
@@ -64,7 +46,6 @@ def getUserKey(name):
 
 
 @app.route('/createkey/', methods=['POST'])
-@login_required
 def createUserKey():
     """
         Creates a user key pair on the server 
@@ -83,7 +64,6 @@ def createUserKey():
     return jsonify({"result" : True})
 
 @app.route('/deletekey/', methods=['POST'])
-@login_required
 def deleteUserKey():
     """
         Deletes auser key pair from the server 
@@ -102,7 +82,6 @@ def deleteUserKey():
     return jsonify({"result" : True})
 
 @app.route('/getconfig/<user>', methods=['GET'])
-@login_required
 def getConfig(user):
     """
         Gets a user's openvpn client config 
@@ -111,14 +90,13 @@ def getConfig(user):
         
         GET: Returns the user's client config or None if doesn't exist
     """
-    return jsonify({"config", getUserClientConfig(user)})
+    return jsonify({"config" : hl.getUserClientConfig(user)})
 
 #
 # Group management
 #
 
 @app.route('/addgroup/', methods=['POST'])
-@login_required
 def addGroup():
     """
         Adds a group to the system
@@ -133,7 +111,6 @@ def addGroup():
     return jsonify({"result" : True})
 
 @app.route('/updategroup/', methods=['POST'])
-@login_required
 def updateGroup():
     """
         Updates the route for a group on the server
@@ -149,7 +126,6 @@ def updateGroup():
     return jsonify({"result" : True})
 
 @app.route('/deletegroup/', methods=['POST'])
-@login_required
 def deleteGroup():
     """
         Removes a group from the system
@@ -164,7 +140,6 @@ def deleteGroup():
     return jsonify({"result" : True})
 
 @app.route('/addtogroup/', methods=['POST'])
-@login_required
 def addToGroup():
     """
         Adds a user to a group. Will remove them from thier existing group if any
@@ -177,11 +152,10 @@ def addToGroup():
         POST: Returns True if successful else False
     """
     content = request.get_json()
-    updateUserClientConfig(content["user"],content["internal"],content["external"])
+    hl.updateUserClientConfig(content["user"],content["internal"],content["external"])
     return jsonify({"result" : True})
 
 @app.route('/removefromgroup/', methods=['POST'])
-@login_required
 def removeFromGroup():
     """
         Removes a user from a group
@@ -196,7 +170,7 @@ def removeFromGroup():
     args = [
         os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(content["user"]),
     ]
-    callScript('rm',args)
+    hl.callScript('rm',args)
     return jsonify({"result" : True})
 
 #
@@ -204,7 +178,6 @@ def removeFromGroup():
 #
 
 @app.route('/getrules/', methods=['GET'])
-@login_required
 def getIPRules():
     """
         Fetches a json representation of the Iptables rules on the server
@@ -214,7 +187,6 @@ def getIPRules():
     return jsonify({"result" : True, "rules" : hl.getIptablesRules()})
 
 @app.route('/getrule/', methods=['POST'])
-@login_required
 def getIPRule():
     """
         Fetches a json representation of a specific iptables rule 
@@ -229,7 +201,6 @@ def getIPRule():
     return jsonify({"result" : True, "rule" : hl.getRule(content["key"], content["value"])})
 
 @app.route('/addrule/', methods=['POST'])
-@login_required
 def addRule():
     """
         Adds an iptables rule to the system
@@ -242,10 +213,9 @@ def addRule():
     content = request.get_json()
     hl.addIPRule(content["rule"])
     rule = hl.getRule("Rule",content["rule"])
-    return jsonify({"Rule" : rule})
+    return jsonify({"Rule" : rule["ID"]})
 
-@app.route('/modifyrule/', methods=['POST'])
-@login_required
+@app.route('/updaterule/', methods=['POST'])
 def modifyRule():
     """
         Updates an iptables rule on the system
@@ -257,11 +227,10 @@ def modifyRule():
         POST: Returns True if successful else False
     """
     content = request.get_json()
-    hl.updateIPRules(content["ID"],content["rule"])
+    hl.updateIPRule(content["ID"],content["rule"])
     return jsonify({"result" : True})
 
 @app.route('/deleterule/', methods=['POST'])
-@login_required
 def deleteRule():
     """
         Deletes a iptables rule from the system
@@ -280,7 +249,6 @@ def deleteRule():
 #
 
 @app.route('/log/<log>', methods=['GET'])
-@login_required
 def logJson(log):
     """
         Fetches a json representation of the vpn logs
@@ -301,7 +269,6 @@ def logJson(log):
     return jsonify({"result" : True, "logData" : hl.getLog(filename)})
 
 @app.route("/logdownload/", methods = ['GET'])
-@login_required
 def logDownload():
     """
         Downloads a VPN Log file within certian dates

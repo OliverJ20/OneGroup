@@ -357,7 +357,7 @@ def iptable_form(ruleid):
                     nodePost(url+"/modifyrule/",{"ID" : ruleid, "rule" : ip_string}) 
 
                 else:
-                    hl.updateIPRules(ruleid, ip_string)
+                    hl.updateIPRule(ruleid, ip_string)
 
             return redirect(url_for('show_config'))
 
