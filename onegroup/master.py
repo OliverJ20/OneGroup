@@ -194,7 +194,7 @@ def retrieve_user_page():
     return render_template('users.html', dataR = requests, dataU = users, dataG = groups) 
 
 
-@app.route('/approve_req/reqid', methods=['POST'])
+@app.route('/approve_req/<reqid>', methods=['POST'])
 @admin_required
 def approve_req(reqid):
     """
@@ -230,9 +230,9 @@ def delete_key(uid):
         hl.deleteUser(uid)
         return redirect('/users')
 
-@app.route('/delete_group/', methods=['POST'])
+@app.route('/delete_group/<gid>', methods=['POST'])
 @admin_required
-def delete_group():
+def delete_group(gid):
     """
         Endpoint to handle the deletion of a group
 
@@ -328,9 +328,9 @@ def iptable_form(ruleid):
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
     """ 
-    rule = hl.getRule(ruleid)
+    rule = hl.getRule("ID", ruleid)
 
-    nodes = hl.getNodes()
+    nodes = hl.getAllNodes()
     
     if request.method == 'POST':
         if ruleid == "-2":
@@ -435,6 +435,13 @@ def login():
         POST: If credentials are correct: redirect to the appropriate user page
               Else display error
     """
+    #Check if the user is already logged in
+    if session.get('logged_in'):
+        if session['type'] == 'Admin':
+            return redirect('/index')
+        else:
+            return redirect("/clients/" + session['name'])
+
     error = None
     if request.method == 'POST':
         email = request.form['email']
@@ -523,7 +530,7 @@ def forgotPassword():
                     Onegroup Admin Team
                 """.format(user["Name"],refLink)
 
-                emailMessage("Password Reset", user["Email"], msg)
+                emailMessage("Password Reset", [user["Email"]], msg)
                 return redirect(url_for('confirm', confirmed = 'Password reset email has been sent.'))
             else:
                 flash("User doesn't exists")
@@ -632,7 +639,7 @@ def filluserform(form):
 ##                //SHOW NAME, EMAIL, PASS
 
     groups = hl.getAllGroups()
-    nodes = hl.getNodes()
+    nodes = hl.getAllNodes()
 
     if request.method == 'POST':
         if form == "AC":
@@ -642,6 +649,7 @@ def filluserform(form):
                 return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "NULL", groups = groups, nodes = nodes)
             elif request.form['accountType1'] == "Admin":
                 session['accountType'] = "Admin"
+                session['authType'] = "Passphrase"
                 return render_template("userform_create_user.html", postback = 1, account = "Admin", auth = "Passphrase", groups = groups, nodes = nodes)
             else:
                 abort(404)
@@ -661,8 +669,8 @@ def filluserform(form):
                 abort(404)
 
         elif form == "ET":
-            
-            return render_template("userform_edit_user.html", postback = 1, accounttype = session['user']["Account_Type"], authtype = request.form['authType2'], groups = groups, nodes = nodes)
+            user = session['user']
+            return render_template("userform_edit_user.html", postback = 1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], grp = user["Grp"], groups = groups, node = user["Node"])
                 
         elif form == "DE":
             #MAKE SURE ALL VALUE THAT ARE NOT PART OF REQUEST.FORM DO NOT THROW 400 BAD REQUEST ERROR
@@ -688,20 +696,31 @@ def filluserform(form):
             if account == "Client":
                 group = int(request.form['groupId1'])
                 expiry = request.form['expiry1']
-                node = int(request.form['node1'])
+                if 'node1' in request.form:
+                    node = int(request.form['node1'])
+                else:
+                    node = -1
             else:
                 group = -1
                 expiry = ""
-                node = -1
-                
+                node = -1 
+                        
             if createNewUser(name, account, auth, email, pwd, group, expiry, node):
                 return redirect(url_for('confirm', confirmed = 'New User Created!'))
             else:
                 flash("User already exists")
                     
-        elif hl.getUser("ID", form) != None:
-            user = {"Name" : request.form['name2'], "Email" : request.form['email2'], "Expiry" : request.form['expiry2'], "Grp" : request.form['groupID2'], "Node" : request.form['node2']} 
-            if hl.updateUser(form, user):
+        elif form == "EU":
+            user = {"Name" : request.form['name2'], "Email" : "", "Auth_Type" : session["user"]["Auth_Type"], "Account_Type" : session["user"]["Account_Type"], "Expiry" : request.form['expiry1'], "Grp" : int(request.form['groupId2'])}
+            
+            if 'email2' in request.form:
+                user["Email"] = request.form['email2']             
+            
+            if 'node2' in request.form:
+                user["Node"] = int(request.form['node2'])          
+
+            if hl.updateUser(session["user"]["ID"], user):
+                session.pop("user", None)
                 return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
             else:
                 flash("Cannot Update User Information")
@@ -713,7 +732,8 @@ def filluserform(form):
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
             session['user'] = user
-            return render_template("userform_edit_user.html", postback = -1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], groups = groups, nodes = nodes)
+            return render_template("userform_edit_user.html", postback = -1, authtype=user["Auth_Type"], accounttype=user["Account_Type"])
+            #return render_template("userform_edit_user.html", postback = -1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], grp = user["Grp"], nde = user["Node"], groups = groups, nodes = nodes)
     else: #Must be fake input
         abort(404)            
 
@@ -735,7 +755,7 @@ def fillgroupform(form):
                 redirect to confirm endpoint or abort 404
     """
 
-    nodes = hl.getNodes()
+    nodes = hl.getAllNodes()
     
     if request.method == 'POST':
         if form == "CG":
@@ -744,7 +764,8 @@ def fillgroupform(form):
             else:
                 abort(404)
         elif hl.getGroup(form) != None:
-            if hl.updateGroup(form, str(request.form['groupname2']), str(request.form['internal2']), str(request.form['external2'])):
+            group = {"Name" : str(request.form['groupname2']), "Internal" : str(request.form['internal2']), "External" : str(request.form['external2'])} 
+            if hl.updateGroup(form, group):
                 return redirect(url_for('confirm', confirmed = 'Group Information Successfully Updated'))
             else:
                 flash("Cannot Update Group Information")

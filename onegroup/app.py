@@ -42,7 +42,7 @@ def init_database():
 
     #If no users in the database, add the default admin user
     if db.retrieve("users") == None:
-        db.insert("users", {"Name" : "admin", "Email" : "admin@onegroup.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 1, "Grp" : -1, "Expiry": ""})
+        db.insert("users", {"Name" : "admin", "Email" : "admin@onegroup.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 1, "Grp" : -1, "Node" : -1, "Expiry": ""})
     
     #Close database
     db.close()

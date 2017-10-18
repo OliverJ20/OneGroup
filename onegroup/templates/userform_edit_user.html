@@ -5,54 +5,50 @@
         <div class= "bodydiv">
             <div class= "bodydiv" id= "formDiveft">
                 <h2>Enter User Details</h2>
-		<!-- Only clients can have different authentication types !-->
-		{% if accounttype == "Client" %}
+                <!-- Only clients can have different authentication types !-->
+		        {% if accounttype == "Client" %}
                     <form action="{{ url_for('filluserform', form='ET') }}" vname="userAuthentication" id="detailsLeft" method=post>
-			<p>Authentication Type</p>
+			            <p>Authentication Type</p>
                         <select name="authType2">
                             <option {% if authtype == "Passphrase" %} selected {% endif %} value="Passphrase">Username & Password</option>
                             <option {% if authtype == "Email" %} selected {% endif %} value="Email">Email</option>
                             <option {% if authtype == "None" %} selected {% endif %} value="None">None</option>
                         </select>
 		    
-		        <div class= "bodydiv" div id = "submitDiv">
+		                <div class= "bodydiv" div id = "submitDiv">
                             <input type="submit" name="userform1" value="OK"></input>
                         </div>
-		    </form>
-		{% endif %}
+		            </form>
+		        {% endif %}
                 
                 {% if postback > 0 or accounttype == "Admin" %}
-		    <form action="{{ url_for('filluserform' , form='EU')}}" vname="userEditForm" id="detailsLeft" method=post> 
-		        <p>Name</p>
+		            <form action="{{ url_for('filluserform' , form='EU')}}" vname="userEditForm" id="detailsLeft" method=post> 
+		                <p>Name</p>
                         <input type="text" name="name2" maxlength="40" required value="{{ username }}"> </input>
-
-	                {% if authtype == "Passphrase" or authtype == "Email" or accounttype == "Admin" %}    
+                        {% if authtype == "Passphrase" or authtype == "Email" or accounttype == "Admin" %}    
                             <p>Email</p>
                             <input type="text" name="email2" maxlength="40" required value="{{ email }}"> </input>
-		        {% endif %}
+		                {% endif %}
 	
-		        {% if accounttype == "Client" %} 
-		            <p>Assign Group</p>
+		                {% if accounttype == "Client" %} 
+		                    <p>Assign Group</p>
                             <select name="groupId2">
-                                <option value="-1" {% if groupAssigned == -1 %} selected {% endif %}>No group</option>
+                                <option value="-1" {% if grp == -1 %} selected {% endif %}>No group</option>
                                 {% for group in groups %}
-			            <option value="{{ group['ID'] }}">{{ group['Name'] }}</option>
-			        {% endfor %}
+			                        <option value="{{ group['ID'] }}" {% if grp == group['ID'] %} selected {% endif %}>{{ group['Name'] }}</option>
+			                    {% endfor %}
                             </select>
                     	
-                            <p>Assign Node</p>
-                            <select name="node2">
-                                 <option value="-1" {% if nodeAssigned == -1 %} selected {% endif %}>No assigned node</option>
-                                 {% for node in nodes %}
-                                     <option value="{{ node["ID"] }} {% if node["ID"] == nodeAssigned %} selected {% endif %}">{{ node["Name"] }}</option>
-                                 {% endfor %}                    	
-                            </select>
-                        
+                            {% if node != -1 %}
+                                <br  />
+                                <p>Assigned Node {{ node }}</p>
+                            {% endif %}
+                            
                             <p>Expiry (YYYY-MM-DD:HHMM)</p>
                             <input type="text" name="expiry1" placeholder="Enter Expiry Date" maxlength="40"> </input>
                             <br  />
                             <br  />
-		        {% endif %}
+		                {% endif %}
         
                         <div class= "bodydiv" div id = "submitDiv">
                             <input type="submit" name="userform1" value="Send"></input>

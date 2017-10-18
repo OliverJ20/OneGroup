@@ -177,33 +177,27 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
     db.close()
     return True
           
-def updateUser(ID, newuser, namecheck = True):
+def updateUser(ID, newuser):
     """
         Updates the information of a specified user from the users table
 
         ID : ID field of user as specified in the database
         newuser : Dictionary containing updated data for the user
-        namecheck : Flag to determine if a validation should be performed on the username
 
         Returns True if successful else false
     """
     oldUser = getUser("ID",ID)
 
     #Error checking
-    if not validateNewUser(newuser['Name'], newuser["Account_Type"], newuser["Auth_Type"], newuser["Email"], newuser["Password"], newuser["Expiry"], namecheck):   
+    if not validateNewUser(newuser['Name'], newuser["Account_Type"], newuser["Auth_Type"], newuser["Email"], oldUser["Password"], newuser["Expiry"], oldUser["Name"], oldUser["Email"]):   
         return False
     elif "Node" in newuser and oldUser["Node"] != newuser["Node"]:
+        logging.error("Error updating user %s: Node has been changed", oldUser["Name"])
         return False
-    else:
-        #Check New username isn't used
-        if oldUser["Name"] != newuser['Name'] and getUser("Name", newuser["Name"]) != None:
-            return False
-        #Check new email isn't used
-        elif oldUser["Email"] != newuser["Email"] and getUser("Name", newuser["Email"]) != None:
-            return False
 
     #Remove id from newuser
-    newuser.pop("ID")
+    if "ID" in newuser:
+        newuser.pop("ID")
 
     #Update user data
     db = Database(filename=filen)
@@ -216,7 +210,7 @@ def updateUser(ID, newuser, namecheck = True):
     db.close()
     return True
 
-def validateNewUser(name, accountType, authType, email, passwd, expiry, existing = True):
+def validateNewUser(name, accountType, authType, email, passwd, expiry, oldname = "", oldemail = ""):
     """
         Checks entered form data for invalid data specified below
 
@@ -225,7 +219,8 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         authType    : The authorisation type of the user (Passphrase, Email, None) (Admin must use Passphrase) 
         email       : User's email (blank if not set. Cannot be set if authType is None)
         passwd      : User's password (blank if not set. Can only be set if authType is Passphrase. Admin must use a password)
-        existing    : Flag to perform checks for existing username and email
+        oldname     : The old username of the user if updating
+        oldemail    : The old email of the user if updating 
 
         returns: true if valid, else false
     """
@@ -265,14 +260,13 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         logging.error("Error validating user %s Expiry set for authentication type: %s",name,expiry)
         return False
     #Name already exists
-    if existing:
-        if getUser("Name", name) != None:
-            logging.error("Error validating user %s Name in use",name)
-            return False
-        #Email already in use
-        elif authType != "None" and getUser("Email", email) != None: 
-            logging.error("Error validating user %s Email in use",name)
-            return False
+    if name != oldname and getUser("Name", name) != None:
+        logging.error("Error validating user %s Name in use",name)
+        return False
+    #Email already in use
+    elif authType != "None" and email != oldemail and getUser("Email", email) != None: 
+        logging.error("Error validating user %s Email in use",name)
+        return False
     
     #Form data is correct
     return True
@@ -793,7 +787,7 @@ def deleteUserFromGroup(userID):
     #Change user's Group entry in the database
     user = getUser("ID",userID)
     user["Grp"] = -1
-    updateUser(userID, user, False) 
+    updateUser(userID, user) 
     
     #Remove the user's client config file
     if user["Node"] != -1 and getNode("ID", user["Node"])["Address"] != "self":
