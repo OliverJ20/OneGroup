@@ -3,12 +3,36 @@
             <script type="text/javascript" src="{{ url_for('static', filename='status.js') }}"></script>            
     <body>
         <div class="contentDiv">
-            <h2>Quick Options</h2>
-            <a href="{{ url_for('filluserform',form='CU') }}"><button> Add Client</button></a>
-            <a href="{{ url_for('fillgroupform',form='CG') }}"><button> Add Group</button></a>
-            <a href="{{ url_for('iptable_form',ruleid='-1') }}"><button> Add Rules</button></a>
-            
-            <embed type = "image/svg+xml" src ={{graph_data|safe}} style='max-width:1000px'/>
+            <div id = "indexSplit">
+                <div id = "indexSplitLeft">
+                    <h2>Quick Options</h2>
+                    <a href="{{ url_for('filluserform',form='CU') }}"><button> Add Client</button></a>
+                    <br  />
+                    <a href="{{ url_for('fillgroupform',form='CG') }}"><button> Add Group</button></a>
+                    <br  />
+                    <a href="{{ url_for('iptable_form',ruleid='-1') }}"><button> Add Rules</button></a>
+
+                    <h2 id= "currentNode">Node 0</h2>
+                    <p>Select Node</p>
+                    <select name="nodeSelect" id="node" onchange="nodeChange()">
+                    <option value="self" selected> Self </option>
+                    {% if nodes != None %}
+                        {% if nodes[0] is mapping%}  
+                            {%for node in nodes%}
+                                    <option value="{{node["Address"]}}">{{node["Name"]}}</option>
+                            {% endfor %}
+                        {% endif %}
+                        {% if nodes[0] is not mapping %}   
+                            <option value="{{nodes["Address"]}}">{{nodes["Name"]}}</option>
+                        {% endif %}
+                    {% endif %}
+                    </select> 
+        
+                </div>
+                <div id = "indexSplitRight">
+                        <embed type = "image/svg+xml" src ={{graph_data|safe}} style='max-width:1000px'/>
+                </div>
+            </div>
 
             <h2>Network Activity</h2>
             <div id="statusTable" align="center" style="margin-top: 1%; overflow-y: scroll;">
