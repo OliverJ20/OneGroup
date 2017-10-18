@@ -44,10 +44,10 @@ function statusInfo(address)
     address = "self";
   }
   if (address == "self"){
-    defAddress = "/log/general";
+    defAddress = "/log/status";
   }
   else{
-    defAddress = "http://" + address + "/log/general";
+    defAddress = "http://" + address + "/log/status";
   }
   
 $.get(defAddress, function (data)
@@ -159,7 +159,7 @@ function addInfo(address)
   console.log(defAddress);
   console.log(defAddress.value);
 
-  $.get(defAddress.value, function (data)
+  $.get(defAddress.toString, function (data)
     {
       var LogInfo = data;
       var logStringArrays = new Array;
