@@ -1,6 +1,4 @@
 {% extends "layout.html" %}
-{% block header %}
-{% endblock %}
 {% block body %}
 <div id= "formDiv">        
     <div class="contentDiv">
@@ -54,11 +52,20 @@
 		        <p>Assign Group</p>
                         <select name="groupId1">
                             <option value="-1" selected>No group</option>
-                            {% for groupNumber in groupNumbers %}
-			        <option value="{{ groupNumber }}">{{ groupNumber }}</option>
+                            {% for group in groups %}
+			        <option value="{{ group['ID'] }}">{{ group['Name'] }}</option>
 			    {% endfor %}
                         </select>
-                    	
+
+                        {% if nodes %} 
+                            <p>Assign Node</p>
+                            <select name="node1">
+                                {% for node in nodes %}
+                                    <option value="{{ node["ID"] }}">{{ node["Name"] }}</option>
+                                {% endfor %}                    	
+                            </select>
+                        {% endif %}
+
                         <p>Expiry (YYYY-MM-DD:HHMM)</p>
                         <input type="text" name="expiry1" placeholder="Enter Expiry Date" maxlength="40" > </input>
                         <br  />

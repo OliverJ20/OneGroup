@@ -7,7 +7,7 @@ $(document).ready(function () {
     addInfo();
     var today = new Date();
     var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var days = ["Sun","Mon","Tue","Wed","Thur","Fri","Sat"];
+    var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     input = days[today.getDay()] + ' ' + months[today.getMonth()];
     document.getElementById('dateStart').placeholder = input;

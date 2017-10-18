@@ -4,19 +4,18 @@
     <body>
         <center>
         </br>
-            <img src="{{ url_for('static', filename = 'logoblue.png') }}"
-                 width="150" height="75"/>
-                 <div id="alertDiv">
-                 {% with messages = get_flashed_messages() %}
-                  {% if messages %}
-                    <ul class=flashes>
-                    {% for message in messages %}
-                      <li>{{ message }}</li>
-                    {% endfor %}
-                    </ul>
-                  {% endif %}
-                 {% endwith %}
-                 </div>
+            <img src="{{ url_for('static', filename = 'logoblue.png') }}" width="150" height="75"/>
+            <div id="alertDiv">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <ul class=flashes>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </div>
             <form action="{{ url_for('login') }}" method=post>
                 <div id="loginDiv">
                     <h3> Login Details</h3>

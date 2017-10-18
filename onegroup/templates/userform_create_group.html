@@ -1,6 +1,4 @@
 {% extends "layout.html" %}
-{% block header %}
-{% endblock %}
 {% block body %}
 <div id= "formDiv">        
     <div class="contentDiv">
@@ -15,10 +13,18 @@
                     <input type="text" name="internal1" placeholder="Enter Group Internal Network Address" onkeyup="checkForm()" maxlength="40"> </input>
 
                     <p>Group External Network Address</p>
-                    <input type="text" name="external1" placeholder="Enter Group External Network Address" maxlength="40"> </input> #}
+                    <input type="text" name="external1" placeholder="Enter Group External Network Address" maxlength="40"> </input>
 
                     <p>Number of Automatically Generated Default Users<p>
                     <input type="number" name="usersNo1" value="0"></input>
+
+                    <p>Assign Node</p>
+                    <select name="node1">
+                        <option value="-1" selected>No assigned node</option>
+                        {% for node in nodes %}
+                            <option value="{{ node["ID"] }}">{{ node["ID"] }}</option>
+                        {% endfor %}                    	
+                    </select>
 
                     <br  /><br  />
                     <div class= "bodydiv" div id = "submitDiv">

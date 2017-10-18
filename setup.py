@@ -72,7 +72,9 @@ setup(
         'cherrypy',
         'passlib',
         'paste',
-        'apscheduler'
+        'apscheduler',
+        'requests',
+        'pygal'
     ],
     scripts=[
         'onegroup/scripts/userman',

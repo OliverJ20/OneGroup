@@ -6,8 +6,8 @@ import subprocess
 import shlex
 import os
 import logging
-import fileinput
 import re
+import requests
 
 #Database and constants
 try:
@@ -22,87 +22,13 @@ filen = database
 if os.path.isdir(working_dir):
     filen = working_dir+"/"+database
 
-#
-# Config
-#
-def init_database():
-    """Initialises the test database if not created already"""
-    #Connect to the database
-    db = Database(filename = filen)
-
-    if db.retrieve("users") == None:
-        #Insert test users
-        db.insert("users", {"Name" : "Test client1", "Email" : "client1@test.com", "Password" : sha256_crypt.hash("client1"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client1", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
-        db.insert("users", {"Name" : "Test client2", "Email" : "client2@test.com", "Password" : sha256_crypt.hash("client2"), "Auth_Type" : "Passphrase", "Account_Type" : "Client", "Keys" : "Test_client2", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
-        db.insert("users", {"Name" : "admin", "Email" : "admin@test.com", "Password" : sha256_crypt.hash("admin"), "Auth_Type" : "Passphrase", "Account_Type" : "Admin", "Keys" : "admin", "Key_Distributed" : 0, "Grp" : -1, "Expiry": ""})
-        
-        #Test group users
-        db.insert("users", {"Name" : "Group01_1", "Email" : "one@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_1", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
-        db.insert("users", {"Name" : "Group01_2", "Email" : "two@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_2", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
-        db.insert("users", {"Name" : "Group01_3", "Email" : "three@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_3", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
-        db.insert("users", {"Name" : "Group01_4", "Email" : "four@groupone.com", "Password" : sha256_crypt.hash("111111111111111"), "Auth_Type" : "None", "Account_Type" : "Client", "Keys" : "Group01_4", "Key_Distributed" : 0, "Grp" : 1, "Expiry": ""})
-
-    if db.retrieve("groups") == None:
-        db.insert("groups",{"Name" : "Group01", "Internal" : "10.8.1.0/24", "External" : "192.168.3.0/24", "Used_Octets" : "1,2,4,5"})
-        db.insert("groups",{"Name" : "Group02", "Internal" : "10.9.1.0/24", "External" : "192.128.3.0/24", "Used_Octets" : "1,2,4,5"})
-
-    
-    #Close database
-    db.close()
-
-
-def loadConfig():
-    """Reads a config file and sets environment variables"""
-    #base config dictonary 
-    config = base_config
-    
-    #Find config file
-    confFile = config_file
-    if os.path.exists(config_path_main):
-        confFile = config_path_main
-    elif os.path.exists(config_path_backup): 
-        confFile = config_path_backup
-
-    #Read in config
-    try:
-        with fileinput.input(files=confFile) as f:
-            for line in f:
-                #Ignore new lines and comments
-                if line == "" or line =="\n" or line[0] == "#":
-                    continue
-                else:
-                    #split by '=' and store in tuple
-                    key, val = line.split("=")
-                    
-                    #checks for empty values
-                    if key == "":
-                        logging.error("Error reading config at line %d: No key\n\t%s",f.lineno(),line)
-                    elif val == "":
-                        logging.error("Error reading config at line %d: No Value\n\t%s",f.lineno(),line)
-                    #check if the key is a valid key
-                    elif key not in base_config.keys(): 
-                        logging.error("Error reading config at line %d: Invalid Key\n\t%s",f.lineno(),line)
-                    #else assign value for given key
-                    else:
-                        config[key] = val.strip("\n")
-                    
-                    
-        #Assign Config to environment variables
-        for key in config:
-            os.environ[tag+key] = config[key]
-
-    except Exception as e:
-        logging.error("Error reading config at line %s",e)
-
-    loadIptables()
-
 
 def loadIptables():
     """Retrieves the iptables rules from the database (if any) and applys those rules"""
     rules = getIptablesRules()
 
-    #If there are no/not enough rules, use the defaults
-    if rules == None or len(rules) < len(iptables):
+    #If there are no rules, use the defaults
+    if rules == None:
         rules = iptables
         
         #Add the defaults to the database
@@ -170,11 +96,20 @@ def deleteUser(ID):
     user = getUser("ID",ID)
  
     #delete the users key/cert pair
-    args = [
-        "del",
-        user["Keys"],
-    ]
-    callScript('userman',args)
+    if user["Node"] != -1 and getNode("ID",user["Node"])["Address"] != "self":
+        url = getNode("ID",user["Node"])["Address"]  
+        res = nodePost(url+"/deletekey/",{"user" : user["Keys"]}) 
+            
+        if not res or not res["result"]:
+            logging.error("Error deleting user %s: Node returned a empty or false result",name)
+            return False
+        
+    else:
+        args = [
+            "del",
+            user["Keys"],
+        ]
+        callScript('userman',args)
      
     db.delete("users", {"ID" : ID})
     db.close()
@@ -182,7 +117,7 @@ def deleteUser(ID):
     return True
 
 
-def createUser(name, accountType, authType, email = '', passwd = '', group = -1, expiry= ''):
+def createUser(name, accountType, authType, email = '', passwd = '', group = -1, node = -1, expiry= ''):
 
     """
         Creates a user entry in the database and generates key/cert pair
@@ -193,6 +128,7 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
         email       : User's email (blank if not set. Cannot be set if authType is None)
         passwd      : User's password (blank if not set. Can only be set if authType is Passphrase. Admin must use a password)
         group       : User's group (-1 meaning no group) 
+        node        : Node the user is assigned too (-1 meaning single node) 
 
         returns: true if successful, else false
     """
@@ -202,18 +138,37 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
     #Error checking
     if not validateNewUser(name, accountType, authType, email, passwd, expiry):   
         return False
+    elif group != -1:
+        try:
+            grpNode = db.retrieve("Groups",{"ID" : group})["Node"]
+            if node != -1 and node != grpNode:
+                logging.error("Error creating user %s user node and group node don't match",name)
+                return False
+        except Exception as e:
+            logging.error("Error creating user %s %s",name,e)
+            return False
 
     #Create user dictonary for database
     password = sha256_crypt.hash(passwd) if passwd != '' else passwd 
-    user = {"Name" : name, "Email" : email, "Password": password, "Auth_Type" : authType, "Account_Type" : accountType, "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : group, "Expiry": expiry}
+    user = {"Name" : name, "Email" : email, "Password": password, "Auth_Type" : authType, "Account_Type" : accountType, "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : group, "Node" : node,"Expiry": expiry}
  
     #create the users key/cert pair
-    args = [
-        "add",
-        user["Keys"],
-    ]
-    callScript('userman',args)
-    #subprocess.call(shlex.split('user_gen.sh {}'.format(user["Keys"])))
+    print("Node: {}".format(getNode("ID",node)))
+    if node != -1 and getNode("ID",node)["Address"] != "self":
+        url = getNode("ID",node)["Address"]
+        
+        res = nodePost(url+"/createkey/",{"user" : user["Keys"]})
+        if not res or not res["result"]:
+            logging.error("Error creating user %s: Node returned a empty or false result",name)
+            return False
+
+    else:
+        args = [
+            "add",
+            user["Keys"],
+        ]
+        callScript('userman',args)
+        #subprocess.call(shlex.split('user_gen.sh {}'.format(user["Keys"])))
 
     #Add user to the database
     db.insert("users",user)
@@ -231,21 +186,18 @@ def updateUser(ID, newuser):
 
         Returns True if successful else false
     """
-    #Error checking
-    if not validateNewUser(newuser['Name'], newuser["Account_Type"], newuser["Auth_Type"], newuser["Email"], newuser["Password"], newuser["Expiry"]):   
-        return False
-    else:
-        oldUser = getUser("ID",ID)
+    oldUser = getUser("ID",ID)
 
-        #Check New username isn't used
-        if oldUser["Name"] != newuser['Name'] and getUser("Name", newuser["Name"]) != None:
-            return False
-        #Check new email isn't used
-        elif oldUser["Email"] != newuser["Email"] and getUser("Name", newuser["Email"]) != None:
-            return False
+    #Error checking
+    if not validateNewUser(newuser['Name'], newuser["Account_Type"], newuser["Auth_Type"], newuser["Email"], oldUser["Password"], newuser["Expiry"], oldUser["Name"], oldUser["Email"]):   
+        return False
+    elif "Node" in newuser and oldUser["Node"] != newuser["Node"]:
+        logging.error("Error updating user %s: Node has been changed", oldUser["Name"])
+        return False
 
     #Remove id from newuser
-    newuser.pop("ID")
+    if "ID" in newuser:
+        newuser.pop("ID")
 
     #Update user data
     db = Database(filename=filen)
@@ -258,7 +210,7 @@ def updateUser(ID, newuser):
     db.close()
     return True
 
-def validateNewUser(name, accountType, authType, email, passwd, expiry, existing = True):
+def validateNewUser(name, accountType, authType, email, passwd, expiry, oldname = "", oldemail = ""):
     """
         Checks entered form data for invalid data specified below
 
@@ -267,7 +219,8 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         authType    : The authorisation type of the user (Passphrase, Email, None) (Admin must use Passphrase) 
         email       : User's email (blank if not set. Cannot be set if authType is None)
         passwd      : User's password (blank if not set. Can only be set if authType is Passphrase. Admin must use a password)
-        existing    : Flag to perf/orm checks for existing username and email
+        oldname     : The old username of the user if updating
+        oldemail    : The old email of the user if updating 
 
         returns: true if valid, else false
     """
@@ -303,37 +256,20 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, existing
         logging.error("Error validating user %s Password set for authentication type: %s",name,accountType)
         return False
     #Expiry incorrectly set
-    elif not re.search(r"\d{4}-\d{1,2}-\d{1,2}", expiry):
+    elif expiry != '' and not re.search(r"\d{4}-\d{1,2}-\d{1,2}", expiry):
         logging.error("Error validating user %s Expiry set for authentication type: %s",name,expiry)
         return False
     #Name already exists
-    if existing:
-        if getUser("Name", name) != None:
-            logging.error("Error validating user %s Name in use",name)
-            return False
-        #Email already in use
-        elif authType != "None" and getUser("Email", email) != None: 
-            logging.error("Error validating user %s Email in use",name)
-            return False
+    if name != oldname and getUser("Name", name) != None:
+        logging.error("Error validating user %s Name in use",name)
+        return False
+    #Email already in use
+    elif authType != "None" and email != oldemail and getUser("Email", email) != None: 
+        logging.error("Error validating user %s Email in use",name)
+        return False
     
     #Form data is correct
     return True
-
-
-def zipUserKeys(user):
-    """
-        creates a zip file with the client's key/cert pair
-
-        user : the filename of the client
-    """
-    #create the users key/cert pair
-    args = [
-        "dist",
-        user,
-    ]
-    callScript('userman',args)
-    #subprocess.call(shlex.split('user_dist.sh {}'.format(user)))
-
 
 def checkExpiredKeys():
     """
@@ -357,6 +293,30 @@ def checkExpiredKeys():
                     user["Keys"],
                     ]
                 callScript('userman',args)
+
+def remakeUserkey(user):
+    """
+        Recreates a user's key/cert pair
+
+        user : the name of the user
+
+        Return True if succesful else False
+    """
+    #Get the location of the user's keys
+    keys = getUser("Name",user)["Keys"]
+
+    #Delete user's key
+    args = [
+        "del",
+        keys,
+    ]
+    callScript('userman',args)
+    
+    #Create new keys
+    args[0] = "add"
+    callScript('userman',args)
+
+    return True
 
 
 def createUserFilename(name):
@@ -386,22 +346,28 @@ def createUserFilename(name):
     return userFilen
 
 
-def confirmLogin(email, password):
+def confirmLogin(user, password):
     """
         Confirms if the entered login credentials are correct
     
-        email: user's email address
+        user: user's username or email address
         password: user's associated password
         
-        Returns : True if both email is found in the database and associated password matches. 
+        Returns : True if both email/username is found in the database and associated password matches. 
                   False if either condition fails
     """
-    if confirmUser(email):
-        user = getUser("Email",email)
+    passHash = None
 
-        if sha256_crypt.verify(password, user['Password']):
-            return True
-        
+    if confirmUser(user):
+        entry = getUser("Email",user)
+        #Check if the entered user was a username instead of an email    
+        if entry:
+            passHash = entry['Password']
+        else:
+            passHash = getUser("Name",user)['Password']
+    
+    if passHash and sha256_crypt.verify(password,passHash):
+        return True
     else:
         return False
 
@@ -414,7 +380,9 @@ def confirmClient(email):
         
         Returns : True if client, else false
     """
-    user = getUser("Email",email)
+    user = getUser("Email", email)
+    if not user:
+        user = getUser("Name", email)
 
     if user['Account_Type'] == "Client":
         return True
@@ -422,17 +390,17 @@ def confirmClient(email):
         return False
 
 
-def confirmUser(email):
+def confirmUser(user):
     """
         Confirms if the user exists in the database
     
-        email : user's email address
-        
+        user : the email or username to check       
+ 
         Returns : True if exists, else False
     """
-    user = getUser("Email",email)
-
-    if user is not None:
+    if getUser("Email",user):
+        return True
+    elif getUser("Name",user):
         return True
     else:
         return False
@@ -450,7 +418,12 @@ def getAllGroups():
     db = Database(filename = filen)
     groups = db.retrieve("groups")
     db.close()
-    return groups
+    
+    #Force a list if there is only 1 node
+    if isinstance(groups,dict):   
+        groups = [groups]
+    
+    return groups if groups else []
 
 
 def getGroup(group):
@@ -492,13 +465,14 @@ def getUsersInGroup(group):
     return users
 
 
-def createGroup(name, internalNetwork, externalNetwork, **kwargs):
+def createGroup(name, internalNetwork, externalNetwork, node = -1, **kwargs):
     """
         Adds a database record of a group and creates the firewall rule for the group
 
         name : New group's name
         internalNetwork : Network address space of the interal network using slash notation (Eg. 10.8.1.0/24)
-        ExternalNetwork : Network address space of the External network using slash notation (Eg. 192.168.1.0/24)
+        externalNetwork : Network address space of the External network using slash notation (Eg. 192.168.1.0/24)
+        node : The node the group should made on. -1 on single node system
 
         Keyword args:
         genUsers : Boolean to determine if users should be made for the group
@@ -506,35 +480,57 @@ def createGroup(name, internalNetwork, externalNetwork, **kwargs):
     """
     #Create database entry
     db = Database(filename = filen)
-    group = {"Name" : name, "Internal" : internalNetwork, "External" : externalNetwork, "Used_Octets" : ""}
-
-    #Add route to the server config if not already added
-    addRouteToConfig(internalNetwork)
+    group = {"Name" : name, "Internal" : internalNetwork, "External" : externalNetwork, "Used_Octets" : "", "Node" : node}
 
     #Setup IPTables rule
     rule = ipDictToString({"Table": "","Chain": "FORWARD","Input": "tun0","Output": "", "Protocol": "","Source" : internalNetwork,"Source_Port": "", "Destination": externalNetwork,"Destination_Port": "","State": "","Action": "ACCEPT"})
     
-    #Check if the rule already exists
-    check = db.retrieve("firewall",{"Rule":rule})  
-    if check != None:
-        group["Rule"] = check["ID"]
+    #If on a different node, add group on that node
+    url = "self"
+    if node != -1 and getNode("ID",node) != None:
+        url = getNode("ID",node)["Address"]
+
+    if url != "self":
+        print("adding group to node")
+        #Add group on remote node
+        res = nodePost(url+"/addgroup/",{"internal" : group["Internal"]}) 
+        if not res or not res["result"]:
+            logging.error("Error creating group %s: Node returned a empty or false result",name)
+            return False 
+
+        #Add group iptables rule to remote node
+        res = nodePost(url+"/addrule/",{"rule" : rule})
+        if not res:
+            logging.error("Error creating group rule for %s: Node returned a empty or false result",name)
+            return False 
+        else:
+            group["Rule"] = res["Rule"] 
+
     else:
-        addIPRule(rule)
-        group["Rule"] = db.retrieve("firewall",{"Rule":rule})["ID"]
-    
-    print(group["Rule"])
-    
+        #Add route to the server config if not already added
+        addRouteToConfig(internalNetwork)
+        
+        #Check if the rule already exists
+        check = db.retrieve("firewall",{"Rule":rule})  
+        if check != None:
+            group["Rule"] = check["ID"]
+        else:
+            addIPRule(rule)
+            group["Rule"] = db.retrieve("firewall",{"Rule":rule})["ID"]
+        
+    print(group)
     #Add group to the database
     db.insert("groups",group)
 
     #If specified, create users for the group
     if kwargs.get("genUsers",False):
+        
         grp = db.retrieve("groups",group)["ID"]
         
         for i in range(kwargs.get("numUsers")):
             #Create new user
             username = "{}_{}".format(name,i+1)
-            createUser(username, "Client", "None", group = grp)
+            createUser(username, "Client", "None", group = grp, node = node)
             
             #Get new user ID and add user to the group
             user = getUser("Name",username)["ID"]
@@ -554,41 +550,105 @@ def updateGroup(ID, group):
     db = Database(filename = filen)
     oldGroup = getGroup(ID)
 
+    #Error check
+    if "Node" in group and oldGroup["Node"] != group["Node"]:
+        return False
+
     #Checks a new IPTables rule is required 
     if ("Internal" in group and group["Internal"] != oldGroup["Internal"]) or ("External" in group and group["External"] != oldGroup["External"]):
         
-        #Update IPTables rule
-        rule = ipStringToDict(getRule(oldGroup["Rule"]))
-        if "Internal" in group:
-            rule["Source"] = group["Internal"]
+        #Get all the users in the group to eventually update thier client configurations
+        users = getUsersInGroup(ID)
+        
+        #If on a remote note 
+        if oldGroup["Node"] != -1 and getNode("ID", oldGroup["Node"])["Address"] != "self":
+            url = getNode("ID", oldGroup["Node"])["Address"]
+
+            #Update IPTables rule
+            res = nodePost(url+"/getrule/",{"key" : "ID", "value" : oldGroup["Rule"]})
+            if not res and not res["result"]:
+                logging.error("Error getting group %s rule from remote node: Node returned a empty or false result", oldGroup["Name"])
+                return False 
+            else:
+                rule = res["rule"]["Rule"]
             
-        if "External" in group:
-            rule["Destination"] = group["External"]
 
-        updateIPRule(oldGroup["Rule"],ipDictToString(rule))
+            if "Internal" in group:
+                rule["Source"] = group["Internal"]
+                
+            if "External" in group:
+                rule["Destination"] = group["External"]
 
-        #Update server route in server config
-        if "Internal" in group and group["Internal"] != oldGroup["Internal"]: 
-            updateRouteInConfig(oldGroup["Internal"],group["Internal"])
+            res = nodePost(url+"/updaterule/",{"ID" : oldGroup["Rule"], "rule" : ipDictToString(rule)}) 
+            if not res or not res["result"]:
+                logging.error("Error updating group rule for group  %s: Node returned a empty or false result", oldGroup["Name"])
+                return False 
+ 
+            #Update server route in server config
+            if "Internal" in group and group["Internal"] != oldGroup["Internal"]: 
+                res = nodePost(url+"/updategroup/",{"oldInternal" : oldGroup["Internal"], "newInternal" : group["Internal"]}) 
+                if not res or not res["result"]:
+                    logging.error("Error updating group %s: Node returned a empty or false result", oldGroup["Name"])
+                    return False 
+            
+            #Update all the user's client configs
+            for user in users:
+                #Get the current client config for the user
+                res = nodeGet(url+"/getconfig/"+user["Keys"])
+                if not res or not res["config"]:
+                    logging.error("Error getting config file for user %s: Node returned a empty or false result", user["Name"])
+                    return False 
+                else:
+                    config = res["config"]
+                    internal = "{}.{}".format(rule["Source"].split(".0/")[0],config[0].split(".")[-1])
+                    external = "{}.{}".format(rule["Source"].split(".0/")[0],config[1].split(".")[-1])
+                    
+                res = nodePost(url+"/addtogroup/",{"user" : user["Keys"], "internal" : internal, "external" : external})
+                if not res or not res["result"]:
+                    logging.error("Error adding user group %s: Node returned a empty or false result", oldGroup["Name"])
+                    return False 
 
-        #Update all the user's client configs
-        for user in getUsersInGroup(ID):
-            #Get the current client config for the user
-            config = getUserClientConfig(user["Keys"])
-            if config != None:
-                internal = "{}.{}".format(rule["Source"].split(".0/")[0],config[0].split(".")[-1])
-                external = "{}.{}".format(rule["Source"].split(".0/")[0],config[1].split(".")[-1])
+        #Else edit locally
+        else:
+            #Update IPTables rule
+            rule = getRule("ID", oldGroup["Rule"])["Rule"]
+            if "Internal" in group:
+                rule["Source"] = group["Internal"]
+                
+            if "External" in group:
+                rule["Destination"] = group["External"]
+
+            updateIPRule(oldGroup["Rule"],ipDictToString(rule))
+
+            #Update server route in server config
+            if "Internal" in group and group["Internal"] != oldGroup["Internal"]: 
+                updateRouteInConfig(oldGroup["Internal"],group["Internal"])
+
+            #Update all the user's client configs
+            for user in users:
+                #Get the current client config for the user
+                config = getUserClientConfig(user["Keys"])
+                if config != None:
+                    internal = "{}.{}".format(rule["Source"].split(".0/")[0],config[0].split(".")[-1])
+                    external = "{}.{}".format(rule["Source"].split(".0/")[0],config[1].split(".")[-1])
+                    
                 updateUserClientConfig(user["Keys"],internal,external)
 
     #Removed ID and Rule fields
-    del group["ID"]
-    del group["Rule"]
-    del group["Users"]
+    if "ID" in group:
+        del group["ID"]
+    
+    if "Rule" in group:
+        del group["Rule"]
+    
+    if "Users" in group:
+        del group["Users"]
  
     #Update Group entry
     db.update("groups",group,("ID",ID))
     db.close()
 
+    return True
 
 def deleteGroup(ID,deleteUsers = False):
     """
@@ -601,11 +661,31 @@ def deleteGroup(ID,deleteUsers = False):
 
     group = getGroup(ID)
 
-    #Delete the IPTables rule
-    removeIPRule(group["Rule"])
-    
-    #Remove route from server config
-    deleteRouteInConfig(group["Internal"])
+    #Get all users in the group 
+
+    #If on a remote note 
+    if group["Node"] != -1 and getNode("ID", group["Node"])["Address"] != "self":
+        url = getNode("ID", group["Node"])["Address"] 
+
+        #Delete the IPTables rule
+        res = nodePost(url+"/deleterule/", {"ID" : group["Rule"]})
+        if not res or not res["result"]:
+            logging.error("Error deleting group rule for group %s: Node returned a empty or false result",ID)
+            return False 
+        
+        #Remove route from server config
+        res = nodePost(url+"/deletegroup/", {"internal" : group["Internal"]})
+        if not res or not res["result"]:
+            logging.error("Error deleting group %s: Node returned a empty or false result",ID)
+            return False 
+     
+    #Else local
+    else:
+        #Delete the IPTables rule
+        removeIPRule(group["Rule"])
+        
+        #Remove route from server config
+        deleteRouteInConfig(group["Internal"])
 
     #Delete group entry
     db.delete("groups",{"ID" : ID})
@@ -617,6 +697,8 @@ def deleteGroup(ID,deleteUsers = False):
             deleteUser(user["ID"])        
         else:
             deleteUserFromGroup(user["ID"])
+
+    return True
 
 
 def addUserToGroup(user, group):
@@ -650,11 +732,20 @@ def addUserToGroup(user, group):
 
     #Setup client config file
     usr = getUser("ID",user)
-    updateUserClientConfig(usr["Keys"],internal,external)
+    
+    if grp["Node"] != -1 and getNode("ID", grp["Node"])["Address"] != "self":
+        url = getNode("ID", grp["Node"])["Address"] 
+        res = nodePost(url+"/addtogroup/",{"user" : usr["Keys"],"internal" : internal, "external" :external})
+        if not res or not res["result"]:
+            logging.error("Error adding user %s to group %s: Node returned a empty or false result",usr["Name"],grp["Name"])
+            return False 
+    else:
+        updateUserClientConfig(usr["Keys"],internal,external)
+
 
     #Update the group's entry to show the used octets
     updateGroup(group,grp)
-
+    return True
 
 def getUserClientConfig(user):
     """
@@ -698,11 +789,21 @@ def deleteUserFromGroup(userID):
     user["Grp"] = -1
     updateUser(userID, user) 
     
-    #Remove the user's client config filei
-    args = [
-        os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user["Keys"]),
-    ]
-    callScript('rm',args)
+    #Remove the user's client config file
+    if user["Node"] != -1 and getNode("ID", user["Node"])["Address"] != "self":
+        url = getNode("ID", user["Node"])["Address"] 
+        res= nodePost(url+"/removefromgroup/",{"user" : user["Keys"]})        
+        if not res or not res["result"]:
+            logging.error("Error deleting user %s from group: Node returned a empty or false result",user["Name"])
+            return False 
+ 
+    else:
+        args = [
+            os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user["Keys"]),
+        ]
+        callScript('rm',args)
+    
+    return True
 
 
 def addRouteToConfig(network):
@@ -752,6 +853,7 @@ def updateRouteInConfig(oldNetwork,newNetwork):
     #Find the existing route in the file
     #If the route doesn't exist, add it to the config
     line = checkRouteExists(oldNetwork,getFormattedNetwork(oldNetwork)) 
+    print(line)
     if line == -1:
         addRouteToConfig(newNetwork)
     else:
@@ -764,7 +866,7 @@ def updateRouteInConfig(oldNetwork,newNetwork):
                 #Just remove the old network as the new one exists
                 config.remove(config[line])
             else:
-                config[line] = getFormattedNetwork(newNetwork)
+                config[line] = "route {}\n".format(getFormattedNetwork(newNetwork))
             
             #Rewrite config file
             f.seek(0)
@@ -792,13 +894,17 @@ def deleteRouteInConfig(network):
         filename = os.getenv(tag+'openvpn_server_config',base_config['openvpn_server_config']) 
         with open(filename,'r+') as f:
             config = f.readlines()
-            config.remove(config[line])
+            route = config[line]
 
             #Rewrite config file
             f.seek(0)
             for i in config:
-                i.strip()
-                f.write(i)
+                if i != route:
+                    i.strip()
+                    f.write(i)
+            
+            #Remove extra lines
+            f.truncate()
 
         #Restart openvpn to enact changes
         handleOpenvpn("restart")
@@ -820,8 +926,10 @@ def checkRouteExists(network,formattedNetwork):
     filename = os.getenv(tag+'openvpn_server_config',base_config['openvpn_server_config']) 
     with open(filename) as f:
         for num, line in enumerate(f,1):
-            if any([x for x in compare if x == line]):
-                return num
+            if any([x for x in compare if x == line.strip("\n")]):
+                #Return -1 to account for lines numbers starting at index 1 and lists starting at index 0
+                return num-1
+            
 
     #If reached here, the route is not in the file
     return -1
@@ -953,7 +1061,7 @@ def changePassword(name, userinput):
 
 def retrieveRequests():
     """
-        Fetchs all active admin requests from the database
+        Fetches all active admin requests from the database
 
         Returns : List of all admin requests
     """
@@ -963,18 +1071,40 @@ def retrieveRequests():
     return requests
 
 
-def acceptRequest(reqName):
+def retrieveRequest(requestID):
     """
-        Performs the accepted request
-    
-        reqName : The request to perform
+        Grabs a single request entry from the database
 
-        Returns : True if the request was succesfully performed. Else False
+        requestID : the ID of the request in the database
+        
+        Returns : the database entry of the request
     """
+    db = Database(filename = filen)
+    request = db.retrieve("notifications", {"ID" : requestID})
+    db.close()
+
+    return request
+
+
+def acceptRequest(request):
+    """
+        Performs the tasks associated with accepting a request
+    
+        request : the entry of the request in the database
+
+        Returns : True if the request was successfully accepted. Else False
+    """
+    db = Databases(filename = filen)
+    
+    if request["Request"] == 1:
+        if remakeUserKeys(user):
+            db.update("users", {"Key_Distributed": 0}, ("Name", user))      
+            db.delete("notifications",{"ID" : request["ID"]})
+
+    db.close()
     return True
 
-
-def declineRequest(reqName):#, reqReq):
+def declineRequest(request):
     """
         Deletes a request from the database without additional action
     
@@ -983,8 +1113,7 @@ def declineRequest(reqName):#, reqReq):
         Returns : True if the request was succesfully deleted. Else False
     """
     db = Database(filename = filen)
-    db.delete("notifications",{"Users":reqName})
-    #db.delete("notifications", "Request", reqReq)
+    db.delete("notifications",{"ID" : request["ID"]})
     db.close()
     return True
 
@@ -1143,15 +1272,21 @@ def getIptablesRules():
     return rules
 
 
-def getRule(ruleid):
+def getRule(key, value):
     """
         Gets the specified iptables rule from the database
 
-        Returns: the given rule
+        key : field to search by
+        value : value of the field to search for
+
+        Returns: the given rule or None if the rule doesn't exist
     """
     db = Database(filename=filen)
-    rule = db.retrieve('firewall',{"ID" : ruleid})
-    rule["Rule"] = ipStringToDict(rule["Rule"])
+    rule = db.retrieve('firewall',{key : value})
+    
+    if rule is not None:
+        rule["Rule"] = ipStringToDict(rule["Rule"])
+
     db.close()
     return rule
 
@@ -1162,6 +1297,7 @@ def ipDictToString(ip_dict):
         
         Returns : String of dictionary values
     """
+    print(ip_dict)
     table =""
     inputFace =""
     outputFace =""
@@ -1174,8 +1310,8 @@ def ipDictToString(ip_dict):
     action =""
     
     if len(ip_dict) == 2:
-        ipRules = " -A " + ip_dict['Chain']
-        ipRules = ipRules + " -j " + ip_dict['Action']
+        ipRules = " {} {}".format(ip_dict['Chain'], ip_dict['Action'])
+        #ipRules = ipRules + " -j " + ip_dict['Action']
     else:
         ipRules = ip_dict['Chain']
         
@@ -1285,12 +1421,15 @@ def ipStringToDict(ipString):
 
 def addIPRule(rule):
     """ 
-        Adds a new IPTables rule to the database
+        Adds a new IPTables rule to the database. Always a non policy rule
 
         rule : The string representation of the rule
     """
     db = Database(filename=filen)
-    db.insert("firewall", {"Rule": rule})
+    
+    if db.retrieve("firewall",{"Rule":rule}) == None: 
+        db.insert("firewall", {"Rule": rule, "Policy" : 0})
+    
     db.close()
 
     #Apply new rule
@@ -1298,7 +1437,7 @@ def addIPRule(rule):
 
 
 
-def updateIPRules(ID, value):
+def updateIPRule(ID, value):
     """ 
         Updates an IPTables rule entry in the database
 
@@ -1389,8 +1528,99 @@ def logDownload(startDate,endDate):
     #return the new filepath
     return newLogFile
 
+#
+# Multinode commands
+#
+
+def getNode(key, value):
+    """
+        Fetches a specific node from the database.
+        It is assumed that the system is in multinode mode, but if no nodes
+        are found, an None is returned
+
+        key : the field to search for (ID, Name, Address)
+        value : value to search for
+
+        Returns: A list of node dictonaries or none if no nodes 
+    """
+    db = Database(filename=filen)
+    nodes = db.retrieve('nodes',{key : value})
+    db.close()
+
+    return nodes
+
+def getAllNodes():
+    """
+        Gets all the nodes loaded into the database on startup.
+        It is assumed that the system is in multinode mode, but if no nodes
+        are found, an None is returned
+
+        Returns: A list of node dictonaries or none if no nodes 
+    """
+    db = Database(filename=filen)
+    nodes = db.retrieve('nodes')
+    db.close()
+
+    #Force a list if there is only 1 node
+    if isinstance(nodes,dict):   
+        nodes = [nodes]
+
+    return nodes if nodes else []
+
+def nodeGet(url):
+    """
+        Performs a get request to a node and returns JSON object
+
+        url : The url to peform a get request on
+
+        Returns dict of json response, else None
+    """
+    r = requests.get("http://"+url) 
+    
+    if r.status_code == 200:
+        return r.json()
+    else:
+        return None
 
 
+def nodeGetFile(url, path):
+    """
+        Performs a get request to download a file from a node
+
+        url : The url to peform a get request on
+        path : Full path of where to store the downloaded file 
+
+        Returns True if succesful, else False
+    """
+    r = requests.get("http://"+url, stream = True) 
+    
+    if r.status_code == 200:
+        #Attempt to write the downloaded file to disk. Should be cleaned up later
+        try:
+            with open(path, 'wb') as f:
+                for chunk in r:
+                    f.write(chunk)
+            return True
+        except:
+            return False
+    else:
+        return False
+
+def nodePost(url, data):
+    """
+        Performs a post request to a node and returns JSON object
+
+        url : The url to peform a get request on
+        data : Dictionary of data to post as json
+
+        Returns dict of json response, else None
+    """
+    r = requests.post("http://"+url,json=data)
+    
+    if r.status_code == 200:
+        return r.json()
+    else:
+        return None
 
 
 

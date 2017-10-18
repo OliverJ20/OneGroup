@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block body %}
-           <script type="text/javascript" src="{{ url_for('static', filename='logpage.js') }}"></script>
     <body>
         <div class="contentDiv">
             <div id="logSettings">
@@ -8,15 +7,18 @@
                 <div id="infoDiv">
                     <h2>Search</h2>
                     <form action="." name="timeStamp" id="timeBracket" onsubmit="validateForm()" method="POST">
-                        Date: <input id="dateStart" onkeyup="tableFilter()"><br>
+                        Date: <input id="dateStart" onkeyup="tableFilter()">
+                        <br  />
                         Activity: <input type="date" id="dateEnd" name="endDate" onkeyup="tableFilter()">
                     </form>
                 </div>
                 <div id="exportSettings">
                     <h2>Export Settings</h2>
                     <form action="/log_download/" name="settings" id="fileSettings" method="POST">
-                        Start: <input type="date" id="exportStart" name = "eStart"><br/>
-                        End: <input type="date" id="exportEnd" name = "eEnd"><br>
+                        Start: <input type="date" id="exportStart" name = "eStart">
+                        <br  />
+                        End: <input type="date" id="exportEnd" name = "eEnd">
+                        <br  />
                         <button type="submit" id="exportSubmit" name="logExport" value="Send">Export Logs</input>
                     </form>
                 </div>
@@ -37,7 +39,7 @@
             {% endif %}
 
         <div id="logTable" align="center" style="margin-top: 15%; overflow-y: scroll;">
-          <form>
+            <form>
 
             </form>
         </div>

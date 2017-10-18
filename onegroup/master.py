@@ -1,16 +1,17 @@
 #Imports
-import cherrypy 
 import random
 import string
 import re
 import os
 import logging
+import cherrypy
+import pygal
 
 from functools import wraps
-from paste.translogger import TransLogger
 from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
-from apscheduler.schedulers.background import BackgroundScheduler
+from paste.translogger import TransLogger
+from pygal.style import Style
 
 try:
     from onegroup.defaults import *
@@ -22,34 +23,6 @@ except:
 
 app = Flask(__name__)
 mail = Mail(app)
-sched = BackgroundScheduler()
-
-#app.config.from_object(__name__)
-
-# Load default config and override config from an environment variable
-#app.config.update(dict(
-#    SECRET_KEY='development_key',
-#))
-
-#app.config.update(
-#    DEBUG = True,
-#    MAIL_SERVER='smtp.gmail.com',
-#	MAIL_PORT=465,
-#	MAIL_USE_SSL=True,
-#	MAIL_USERNAME = 'capstoneonegroup@gmail.com',
-#	MAIL_PASSWORD = 'MaristCollege!'
-#)
-#mail = Mail(app)
-
-#Message mail structure
-# msg = Message (
-#     "can be some text",  <--- subject title
-#     sender = "capstoneonegroup@gmail.com",
-#     recipients= ['some email here'])
-#     msg.body = "some text here" <--- the body of the email here
-#     mail.send(msg)
-# )
-
 
 def login_required(f):
     """
@@ -63,7 +36,6 @@ def login_required(f):
     def login_decorator(*args, **kwargs):
         if not session.get('logged_in'):
             abort(401)
-            ##return redirect(url_for('login'))
         else:
             return f(*args, **kwargs)
     return login_decorator
@@ -161,9 +133,28 @@ def home():
             Displays confirmation message if creation is successful
             Flashes notification if user exists
     """
+
+    filename = log_dir + "openvpn-status.log"
+    logs = hl.getLog(filename)
     
-    users = hl.getUsers()
-    return render_template('index.html')
+    custom_style = Style(
+      background='transparent',
+      opacity='.7',
+      opacity_hover='.9',
+      transition='400ms ease-in',
+      colors=('#006e72', '#00979d'))
+
+
+    line_chart = pygal.Bar(fill=True, style=custom_style, width=800, height=400,spacing=50)
+    line_chart.title = 'VPN Usage'
+    line_chart.x_labels = ["Big Girl", "Dog Walker", "+1", "Don't Know", "Ernest"] 
+    line_chart.y_labels = [0,20,40,60,80,100]
+    line_chart.add('Bytes Sent',      [85.8, 84.6, 84.7, 74.5,   66])
+    line_chart.add('Bytes Recieved',  [14.2, 15.4, 15.3,  8.9,    9])
+    graph_data = line_chart.render_data_uri()
+    
+    nodes = hl.getAllNodes();
+    return render_template('index.html', graph_data=graph_data, nodes = nodes)
 
 
 @app.route('/password/', methods=['GET', 'POST'])
@@ -209,55 +200,54 @@ def retrieve_user_page():
     return render_template('users.html', dataR = requests, dataU = users, dataG = groups) 
 
 
-@app.route('/approve_req/', methods=['POST'])
+@app.route('/approve_req/<reqid>', methods=['POST'])
 @admin_required
-def approve_req():
+def approve_req(reqid):
     """
         Endpoint to handle the approval/denial of requests made to an admin
+
+        user : the user who created the request
+        request : type of request to be performed
         
         POST: If approve, perform the request. Else delete the request
     """
-    reqName = request.form['user']
-    reqStatus = request.form['request']
+    request = hl.retrieveRequest(reqid)
+    
     if request.method == 'POST':
         if request.form['reqOption'] == 'Approve':
-            print("Approve")
-            print(reqName)
-            print(reqStatus)
-            #hl.acceptRequest(reqName, reqReq)
+            hl.acceptRequest(request)
             return redirect('/users')
         elif request.form['reqOption'] == 'Decline':
-            print("Decline")
-            print(reqName)
-            print(reqStatus)
-            #hl.declineRequest(reqName)#, reqReq)
+            hl.declineRequest(request)
             return redirect('/users')
 
 
-@app.route('/delete_key/', methods=['POST'])
+@app.route('/delete_key/<uid>', methods=['POST'])
 @admin_required
-def delete_key():
+def delete_key(uid):
     """
         Endpoint to handle the deletion of a user
+
+        uid : ID of the user to delete
         
         POST: Redirect to the user management page
     """
-    ID = request.form['name']
     if request.method == 'POST':
-        hl.deleteUser(ID)
+        hl.deleteUser(uid)
         return redirect('/users')
 
-@app.route('/delete_group/', methods=['POST'])
+@app.route('/delete_group/<gid>', methods=['POST'])
 @admin_required
-def delete_group():
+def delete_group(gid):
     """
         Endpoint to handle the deletion of a group
+
+        gid : ID of the group to delete
         
         POST: Redirect to the user management page
     """
-    ID = request.form['name']
     if request.method == 'POST':
-        hl.deleteGroup(ID)
+        hl.deleteGroup(gid)
         return redirect('/users')
 
 @app.route('/logs/', methods=['GET', 'POST'])
@@ -291,15 +281,14 @@ def userkey(hash):
         return redirect(url_for('logout'))
 
 
-@app.route('/create_request/')
-def create_request():
+@app.route('/create_request/<request>/<name>')
+def create_request(request, name):
     """
         Endpoint to create a new admin notification
  
         GET: Creates a notification and emails the admins detailing the request
     """
-    name = session['name']
-    requestId = hl.createRequest(name, "Key Reset")
+    requestId = hl.createRequest(name, request)
     adminEmails = hl.getAdminEmails()
     #Send email to all admin accounts
     msg = """
@@ -336,7 +325,7 @@ def show_user_keys(username):
 
 @app.route('/iptables/<ruleid>', methods=['GET','POST'])
 @admin_required
-def edit_iptable(ruleid):
+def iptable_form(ruleid):
     """
         Form to edit an iptables rule
 
@@ -344,34 +333,93 @@ def edit_iptable(ruleid):
 
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
-    """
-    rule = hl.getRule(ruleid)
+    """ 
+    rule = hl.getRule("ID", ruleid)
+
+    nodes = hl.getAllNodes()
+    
     if request.method == 'POST':
-        if rule["Policy"] == 1:
-            ip_dict = {
-                "Chain" : request.form["Chain"],
-                "Action" : request.form["Action"]
-            }
+        if ruleid == "-2":
+            #set policy
+            session["Policy"] = request.form["ruleType1"]
+            return render_template('iptables_create.html', postback = 1, policy = session["Policy"], nodes = nodes)
+        elif ruleid != "-2":
+            if ruleid == "-1":           
+                ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
+                
+                #If on a remove node, send rule to node
+                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
+                    url = getNode("ID",int(request.form["node"]))["Address"] 
+                    nodePost(url+"/addrule/",{"rule" : ip_string}) 
+
+                else:    
+                    hl.addIPRule(ip_string)
+            else :
+                ip_string = hl.ipDictToString(getIPForm(rule["Policy"]))
+                
+                #If on a remove node, send rule to node
+                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
+                    url = getNode("ID",int(request.form["node"]))["Address"] 
+                    nodePost(url+"/modifyrule/",{"ID" : ruleid, "rule" : ip_string}) 
+
+                else:
+                    hl.updateIPRules(ruleid, ip_string)
+
+            return redirect(url_for('show_config'))
+
         else:
-            ip_dict = {
-                "Source" : request.form["source"],
-                "Source_Port" : request.form["sport"],
-                "Destination" : request.form["destination"],
-                "Destination_Port" : request.form["dport"],
-                "Table" : request.form["Table"],
-                "Chain" : request.form["Chain"],
-                "Input" : request.form["input"],
-                "Output" : request.form["output"],
-                "Protocol" : request.form["Protocol"],
-                "State" : request.form["State"],
-                "Action" : request.form["Action"]
-            }
-        ip_string = hl.ipDictToString(ip_dict)
-        hl.updateIPRules(ruleid, ip_string)
-        return redirect(url_for('show_config'))
+            abort(404)
 
-    return render_template('iptables.html', rule = rule['Rule'], Policy = rule['Policy'])
+    if ruleid == "-1":
+        return render_template('iptables_create.html', postback = -1, nodes = nodes)
 
+    print(rule)
+    return render_template('iptables_edit.html', rid = ruleid, rule = rule['Rule'], policy = rule['Policy'], nodes = nodes)
+
+
+def getIPForm(policy):
+    """
+        Gets all the form data from an iptables form
+
+        policy : Flag to determine if this is a policy rule or not
+
+        Returns dict of the inputed iptables rule
+    """ 
+    if int(policy) == 1:
+        ip_dict = {
+            "Chain" : request.form["Chain"],
+            "Action" : request.form["Action"]
+        }
+    else:
+        ip_dict = {
+            "Source" : request.form["source"],
+            "Source_Port" : request.form["sport"], 
+            "Destination" : request.form["destination"],       
+            "Destination_Port" : request.form["dport"],
+            "Table" : request.form["Table"],
+            "Chain" : request.form["Chain"],
+            "Input" : request.form["input"],
+            "Output" : request.form["output"],
+            "Protocol" : request.form["Protocol"],
+            "State" : request.form["State"],
+            "Action" : request.form["Action"]
+        }
+    
+    return ip_dict
+
+
+@app.route('/iptabledelete/<rid>')
+def iptables_delete(rid):
+    """
+        Deletes a given iptable rule from the database
+
+        rid : the id of the rule to edit
+
+        GET : deletes the given iptable rule
+    """
+    hl.removeIPRule(rid)
+    return redirect(url_for('confirm', confirmed = "IP Table Rule Deleted!"))
+    
 
 @app.route('/config/', methods=['GET'])
 @admin_required
@@ -393,6 +441,13 @@ def login():
         POST: If credentials are correct: redirect to the appropriate user page
               Else display error
     """
+    #Check if the user is already logged in
+    if session.get('logged_in'):
+        if session['type'] == 'Admin':
+            return redirect('/index')
+        else:
+            return redirect("/clients/" + session['name'])
+
     error = None
     if request.method == 'POST':
         email = request.form['email']
@@ -481,7 +536,7 @@ def forgotPassword():
                     Onegroup Admin Team
                 """.format(user["Name"],refLink)
 
-                emailMessage("Password Reset", user["Email"], msg)
+                emailMessage("Password Reset", [user["Email"]], msg)
                 return redirect(url_for('confirm', confirmed = 'Password reset email has been sent.'))
             else:
                 flash("User doesn't exists")
@@ -589,15 +644,19 @@ def filluserform(form):
 ##        //IF ADMIN account = Admin
 ##                //SHOW NAME, EMAIL, PASS
 
+    groups = hl.getAllGroups()
+    nodes = hl.getAllNodes()
+
     if request.method == 'POST':
         if form == "AC":
             #Store Account Type in session variable 
             if request.form['accountType1'] == "Client":
                 session['accountType'] = "Client"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "NULL")
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "NULL", groups = groups, nodes = nodes)
             elif request.form['accountType1'] == "Admin":
                 session['accountType'] = "Admin"
-                return render_template("userform_create_user.html", postback = 1, account = "Admin", auth = "Passphrase")
+                session['authType'] = "Passphrase"
+                return render_template("userform_create_user.html", postback = 1, account = "Admin", auth = "Passphrase", groups = groups, nodes = nodes)
             else:
                 abort(404)
              
@@ -605,15 +664,20 @@ def filluserform(form):
             #Store Auth Type in session variable
             if request.form['authType1'] == "Passphrase":
                 session['authType'] = "Passphrase"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Passphrase")
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Passphrase", groups = groups, nodes = nodes)
             elif request.form['authType1'] == "Email":
                 session['authType'] = "Email"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Email")
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "Email", groups = groups, nodes = nodes)
             elif request.form['authType1'] == "None":
                 session['authType'] = "None"
-                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "None")
+                return render_template("userform_create_user.html", postback = 1, account = "Client", auth = "None", groups = groups, nodes = nodes)
             else:
                 abort(404)
+
+        elif form == "ET":
+            user = session['user']
+            return render_template("userform_edit_user.html", postback = 1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], grp = user["Grp"], groups = groups, node = user["Node"])
+                
         elif form == "DE":
             #MAKE SURE ALL VALUE THAT ARE NOT PART OF REQUEST.FORM DO NOT THROW 400 BAD REQUEST ERROR
             name = request.form['name1']
@@ -625,40 +689,57 @@ def filluserform(form):
             session.pop('accountType', None)
             
             
-            if auth == "Passphrase" or auth == "Email":
+            if auth == "Passphrase":
                 pwd = randompassword() #Default Generation or Not
+                email = request.form['email1']
+            elif auth == "Email":
+                pwd = "" 
                 email = request.form['email1']
             else:
                 pwd = ""
                 email = ""
 
             if account == "Client":
-                group = request.form['groupId1']
+                group = int(request.form['groupId1'])
                 expiry = request.form['expiry1']
+                if 'node1' in request.form:
+                    node = int(request.form['node1'])
+                else:
+                    node = -1
             else:
                 group = -1
                 expiry = ""
-                
-            if createNewUser(name, account, auth, email, pwd, group, expiry):
-                return redirect(url_for('confirm', confirmed = 'New User Addition Confirmed!'))
+                node = -1 
+                        
+            if createNewUser(name, account, auth, email, pwd, group, expiry, node):
+                return redirect(url_for('confirm', confirmed = 'New User Created!'))
             else:
                 flash("User already exists")
                     
-        elif hl.getUser("ID", form) != None:
-            if hl.updateUser(form, str(request.form['name2']), str(request.form['email2']), str(request.form['authType2']), str(request.form['accountType2']), str(request.form['expiry2'])):
+        elif form == "EU":
+            user = {"Name" : request.form['name2'], "Email" : "", "Auth_Type" : session["user"]["Auth_Type"], "Account_Type" : session["user"]["Account_Type"], "Expiry" : request.form['expiry1'], "Grp" : int(request.form['groupId2'])}
+            
+            if 'email2' in request.form:
+                user["Email"] = request.form['email2']             
+            
+            if 'node2' in request.form:
+                user["Node"] = int(request.form['node2'])          
+
+            if hl.updateUser(session["user"]["ID"], user):
+                session.pop("user", None)
                 return redirect(url_for('confirm', confirmed = 'User Information Successfully Updated'))
             else:
                 flash("Cannot Update User Information")
         else: #Must be fake input
             abort(404)
 
-
     if form == "CU":
-        return render_template("userform_create_user.html", postback = -1, account = "NULL", auth = "NULL")
+        return render_template("userform_create_user.html", postback = -1, account = "NULL", auth = "NULL", groups = groups, nodes = nodes)
     elif hl.getUser("ID", form) != None:
             user = hl.getUser("ID", form)
-            #Should Group No. be updated -> Do the keys need to be redownloaded?
-            return render_template("userform_edit_user.html", username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"])
+            session['user'] = user
+            return render_template("userform_edit_user.html", postback = -1, authtype=user["Auth_Type"], accounttype=user["Account_Type"])
+            #return render_template("userform_edit_user.html", postback = -1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], grp = user["Grp"], nde = user["Node"], groups = groups, nodes = nodes)
     else: #Must be fake input
         abort(404)            
 
@@ -679,14 +760,18 @@ def fillgroupform(form):
         POST : Attempt to add data from form into database, if successful,
                 redirect to confirm endpoint or abort 404
     """
+
+    nodes = hl.getAllNodes()
+    
     if request.method == 'POST':
         if form == "CG":
             if createNewGroup():
-                return redirect(url_for('confirm', confirmed = 'New Group Addition Confirmed!'))
+                return redirect(url_for('confirm', confirmed = 'New Group Created!'))
             else:
                 abort(404)
         elif hl.getGroup(form) != None:
-            if hl.updateGroup(form, str(request.form['groupname2']), str(request.form['internal2']), str(request.form['external2'])):
+            group = {"Name" : str(request.form['groupname2']), "Internal" : str(request.form['internal2']), "External" : str(request.form['external2'])} 
+            if hl.updateGroup(form, group):
                 return redirect(url_for('confirm', confirmed = 'Group Information Successfully Updated'))
             else:
                 flash("Cannot Update Group Information")
@@ -694,10 +779,10 @@ def fillgroupform(form):
             abort(404)
     
     if form == "CG":
-        return render_template("userform_create_group.html")
+        return render_template("userform_create_group.html", nodes = nodes)
     elif hl.getGroup(form) != None:
         group = hl.getGroup(form)
-        return render_template("userform_edit_group.html", groupname=group["Name"], internal=group["Internal"], external=group["External"])
+        return render_template("userform_edit_group.html", groupname=group["Name"], internal=group["Internal"], external=group["External"], nodes = nodes)
     else: #Must be fake input
         abort(404)
         
@@ -714,15 +799,16 @@ def emailMessage(subjectTitle, recipientEmail, bodyMessage, attachmentName = Non
     """
     msg = Message(
         subjectTitle,
-        sender = os.getenv('email',base_config['email']), #"capstoneonegroup@gmail.com",
-        )
+        sender = os.getenv(tag+'email',base_config['email']) 
+    )
     for email in recipientEmail:             
         msg.add_recipient(email)
 
     msg.body = bodyMessage
 
     if attachmentName is not None and attachmentFilePath is not None:
-        mail.attach(attachmentName, attachmentFilePath, "application/zip")
+        with app.open_resource(attachmentFilePath) as fp:
+            msg.attach(attachmentName, "text/plain", fp.read())
 
     mail.send(msg)
 
@@ -736,11 +822,11 @@ def page_not_found(e):
         Returns : login template and flashes error message
     """
     flash("Error: Try Something Different This Time")
-    return render_template('login.html'), 404
+    return redirect(url_for('login'))
 
 
 #Function to create user and generate keys into a ZIP folder
-def createNewUser(name, account, auth, email, pwd, group, expiry):
+def createNewUser(name, account, auth, email, pwd, group, expiry, node):
     """
         Handles input of the new user form. 
 
@@ -750,16 +836,15 @@ def createNewUser(name, account, auth, email, pwd, group, expiry):
     """
     
     #Check if the user creation was succesful
-    if hl.createUser(name, account, auth, email = email, passwd = pwd, group = group, expiry = expiry):
+    if hl.createUser(name, account, auth, email = email, passwd = pwd, group = group, expiry = expiry, node = node):
         user = hl.getUser("Email", email)
-        hl.zipUserKeys(user['Keys'])
 
         if(auth == "Email"):
             subjectTitle = "OneGroup account keys"
             recipientEmail =[email]
             bodyMessage = "here are your keys"
-            attachmentName = "user keys"
-            filename = keys_dir + user['Keys'] + '.zip'
+            attachmentName = user['Keys'] + '.ovpn'
+            filename = "{}/{}".format(keys_dir,attachmentName)
             attachmentFilePath = filename
             emailMessage(subjectTitle, recipientEmail, bodyMessage,attachmentName, attachmentFilePath)
 
@@ -894,15 +979,16 @@ def getKeys(name = None):
         Returns : zip file of user's keys if found. Else returns example zip file
     """
     if name == None:
-        name =session.get('name')
+        name = session.get('name')
 
     keys = hl.getUser("Name",name)["Keys"]
     hl.keyDistributeFlag(name)
     #If on a production server, use actual path
     if os.path.isdir(keys_dir):
-        filename = keys_dir + keys + '.zip' 
-        if not os.path.exists(filename):
-            hl.zipUserKeys(keys) 
+        filename = keys_dir + keys + '.ovpn' 
+
+        #if not os.path.exists(filename):
+        #    hl.zipUserKeys(keys) 
 
         return send_file(filename)
     #Else use relative dev path
@@ -914,17 +1000,18 @@ def getKeys(name = None):
 @admin_required
 def adminGetUserKey(name):
     """
-        Returns a zip file of a specified user's key/cert pair for the Admin to download
+        Returns a config file of a specified user's key/cert pair for the Admin to download
 
         
-        Returns : zip file of user's keys if found. Else returns example zip file
+        Returns : config file of user's keys if found. Else returns example zip file
     """
     keys = hl.getUser("Name",name)["Keys"]
     #If on a production server, use actual path
     if os.path.isdir(keys_dir):
-        filename = keys_dir + keys + '.zip' 
-        if not os.path.exists(filename):
-            hl.zipUserKeys(keys) 
+        filename = keys_dir + keys + '.ovpn' 
+        #if not os.path.exists(filename):
+        #    hl.zipUserKeys(keys) 
+        
         return send_file(filename)
     #Else use relative dev path
     else:
@@ -938,9 +1025,6 @@ def setConfig(debug):
 
         debug : flag to turn on the flask debugging flag
     """
-    #load config 
-    hl.loadConfig()
-
     #Set debug flag
     if debug:
         app.config['DEBUG'] = True
@@ -952,43 +1036,25 @@ def setConfig(debug):
     else:
         app.config['SECRET_KEY'] = os.getenv(tag+'secret',base_config['secret']) 
 
+
     #Flask-mail config
     app.config['MAIL_SERVER'] = os.getenv(tag+'mail_server',base_config['mail_server'])
     app.config['MAIL_PORT'] = int(os.getenv(tag+'mail_port',base_config['mail_port'])) 
     app.config['MAIL_USE_SSL'] = True
-    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])  
-    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password'])  
+    app.config['MAIL_USERNAME'] = os.getenv(tag+'email',base_config['email'])    
+    app.config['MAIL_PASSWORD'] = os.getenv(tag+'password',base_config['password']) 
     mail = Mail(app)
 
-def setKeyExpiry():
-    """
-        Adds job to the scheduler and starts the scheduler
-    """
-    #Add key expiry job to run every hour
-    sched.add_job(hl.checkExpiredKeys,'cron',minute=0,id='key_expire_job')
-    
-    #Start scheduler
-    sched.start()
 
-
-#
-#Cherrypy server base
-#
 def run_server(development=False):
     """
         Initialises and runs the web server
         
         development : flag to run the Flask development server instead of the full Cherrypy server
     """
-    #Initalise database
-    hl.init_database()
-    
     #Set the configuration
     setConfig(development)
-
-    #Setup key expiry 
-    setKeyExpiry()
- 
+     
     #Run development server if in development mode
     if development:
         app.run(use_reloader=False)

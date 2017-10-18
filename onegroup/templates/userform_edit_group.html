@@ -1,13 +1,11 @@
 {% extends "layout.html" %}
-{% block header %}
-{% endblock %}
 {% block body %}
 <div id= "formDiv">        
     <div class="contentDiv">
         <div class= "bodydiv">
             <div class= "bodydiv" id= "formDiveft">
                 <h2>Enter Group Details</h2>
-                <form action="{{ url_for('home') }}" vname="groupEditForm" id="detailsLeft" method=post>
+                <form action="" vname="groupEditForm" id="detailsLeft" method=post>
                     <p>Group Name</p>
                     <input type="text" name="groupname2" required value="{{ groupname }}" maxlength="40" > </input>
 
@@ -16,6 +14,14 @@
 
                     <p>Group External Network Address</p>
                     <input type="text" name="external2" required value="{{ external }}" maxlength="40"> </input>
+
+                    <p>Assign Node</p>
+                    <select name="node2">
+                        <option value="-1" selected>No assigned node</option>
+                        {% for node in nodes %}
+                            <option value="{{ node["ID"] }}">{{ node["ID"] }}</option>
+                        {% endfor %}                    	
+                    </select>
 
                     <br></br>
                     <div class= "bodydiv" div id = "submitDiv">

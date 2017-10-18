@@ -40,22 +40,23 @@ create () {
     
     CERT_CONTENTS=`cat $OG_openvpn_keys/$CLIENT_CERT`;
     KEY_CONTENTS=`cat $OG_openvpn_keys/$CLIENT_KEY`;
-    CA_CERT=`cat $OG_openvpn_keys/ca.crt`
 
     #Create new config file and change key and cert sections
     cp $OG_openvpn_client_config $CLIENT_DIR/$CLIENT_CONF;
 
-    sudo sed -i -e 's,ca ca.crt,#ca ca.crt,g' $DIR/$CLIENT_CONF;
+    sudo sed -i -e 's,ca ca.crt,#ca ca.crt ,g' $CLIENT_DIR/$CLIENT_CONF;
     sudo sed -i -e 's,cert client.crt,#cert client.crt,g' $CLIENT_DIR/$CLIENT_CONF;
     sudo sed -i -e 's,key client.key,#key client.key,g' $CLIENT_DIR/$CLIENT_CONF;
 
     #Appends keys and certs to config file
-    printf "<ca>\n$CA_CERT\n</ca>\n" >> $CLIENT_DIR/$CLIENT_CONF 
     printf "<cert>\n$CERT_CONTENTS\n</cert>\n" >> $CLIENT_DIR/$CLIENT_CONF 
     printf "<key>\n$KEY_CONTENTS\n</key>\n" >> $CLIENT_DIR/$CLIENT_CONF 
 
     #create directory and move key/certs into it
     mv $OG_openvpn_keys/$CLIENT_CERT $OG_openvpn_keys/$CLIENT_KEY $OG_openvpn_keys/$CLIENT_CSR $CLIENT_DIR;
+
+    #Move config to the distrubed keys folder
+    cp $CLIENT_DIR/$CLIENT_CONF $HOME
 }
 
 delete () {
@@ -77,20 +78,6 @@ delete () {
     rm $OG_openvpn_keys/$1.crt -rf;
 }
 
-
-distribute () {
-    #Creates the zip files of a client's keys and certificates  
-    #Params: $1 The clients directory
-
-    CLIENT_DIR=$OG_openvpn_keys/$1;
-
-    #copy ca.crt to the user's dir
-    cp $OG_openvpn_keys/ca.crt $CLIENT_DIR;
-
-    #Compress client's key/certs
-    #cd $CLIENT_DIR
-    zip -r $HOME/$1.zip $CLIENT_DIR -j;
-}
 
 ###### MAIN ######
 

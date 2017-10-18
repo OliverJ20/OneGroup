@@ -16,11 +16,12 @@ class Database:
 
     def init(self):
         #Tables
-        self._db.execute('create table IF NOT EXISTS users (ID INTEGER PRIMARY KEY NOT NULL, Name text, Email text, Password text, Auth_Type text, Account_Type text, Keys text, Key_Distributed INTEGER, Grp INTEGER, Expiry text)')
-        self._db.execute('create table IF NOT EXISTS groups (ID INTEGER PRIMARY KEY NOT NULL, Name text, Internal text, External text, Used_Octets text, Rule INTEGER)')
+        self._db.execute('create table IF NOT EXISTS users (ID INTEGER PRIMARY KEY NOT NULL, Name text, Email text, Password text, Auth_Type text, Account_Type text, Keys text, Key_Distributed INTEGER, Grp INTEGER, Expiry text, Node INTEGER)')
+        self._db.execute('create table IF NOT EXISTS groups (ID INTEGER PRIMARY KEY NOT NULL, Name text, Internal text, External text, Used_Octets text, Rule INTEGER, Node INTEGER)')
         self._db.execute('create table IF NOT EXISTS codes (Code text PRIMARY KEY NOT NULL, Name text, Purpose text, Used INTEGER)')
         self._db.execute('create table IF NOT EXISTS notifications (ID INTEGER PRIMARY KEY NOT NULL, User text, Request text)')
         self._db.execute('create table IF NOT EXISTS firewall (ID INTEGER PRIMARY KEY NOT NULL, Rule text, Policy INTEGER)')
+        self._db.execute('create table IF NOT EXISTS nodes (ID INTEGER PRIMARY KEY NOT NULL, Name text, Address text)')
 
     def insert(self, table, row):
         keys = sorted(row.keys())
@@ -58,7 +59,6 @@ class Database:
 
     
     def update(self, table, row, ID):
-        print(table, row, ID)
         #Create set method
         setStr = ""
         for k in row:
@@ -78,14 +78,16 @@ class Database:
         self._db.execute(q, (ID[1],) )
         self._db.commit()
 
-    def delete(self, table, keypairs):
-        query = ''
-        for key in keypairs:
-            query += " {} = {} AND".format(key, keypairs[key])
+    def delete(self, table, keypairs = None):
+        query = '' 
+        if keypairs:
+            query = ' where'
+            for key in keypairs:
+                query += " {} = {} AND".format(key, keypairs[key])
 
-        query = query[:-4]
-        print(query)
-        self._db.execute('delete from {} where {}'.format(table, query))
+            query = query[:-4]
+
+        self._db.execute('delete from {}{}'.format(table, query))
         self._db.commit()
 
     def runSQL(self, sql):
