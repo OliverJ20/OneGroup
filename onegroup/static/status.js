@@ -2,8 +2,9 @@
 //  * SERVER STATUS - Created by Eliot on 8/6/2017.
 //  */
 
-var logVar = setInterval(addIndexInfo("self"), 1000);
-var statVar = setInterval( statusInfo("self"), 1000);
+var logVar = setInterval(addIndexInfo, 1000);
+var statVar = setInterval(statusInfo, 1000);
+var globalNode = "self";
 
 $(document).ready(function () {
   addInfo();    
@@ -30,30 +31,45 @@ $(document).ready(function () {
   }
 });
 
-function statusInfo(address)
+function statusInfo()
 {
-  var invalid1 = new RegExp("Open VPN CLIENT LIST");
-  var invalid2 = new RegExp("Updated");
-  var invalid3 = new RegExp("ROUTING TABLE");
-  var invalid4 = new RegExp("GLOBAL STATS");
-  var invalid5 = new RegExp("Max bcast");
-  var invalid6 = new RegExp("END");
+  console.log("Status Info: " + globalNode);
+
 
   var defAddress;
-  if (address === undefined) {
-    address = "self";
+  if (globalNode === undefined || globalNode == "" || globalNode == null ) {
+    defAddress = "self";
   }
-  if (address == "self"){
-    defAddress = "/log/general";
+  if (globalNode == "self"){
+    $.get("/log/status", function(data) {
+        console.log(data);
+        createStatusTable(data);
+    });
   }
   else{
-    defAddress = "http://" + address + "/log/general";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: "/connectnode/", 
+        data: JSON.stringify({"url" : globalNode + "/log/status", "method" : "GET"}), 
+        success: function (data) {
+          createStatusTable(data["data"]);
+        },
+        dataType: "json"
+    }); 
   }
-  
-$.get(defAddress, function (data)
-  {
+}
+
+function createStatusTable(data)
+{
     var LogInfo = data;
     var logStringArrays = new Array;
+    var invalid1 = new RegExp("Open VPN CLIENT LIST");
+    var invalid2 = new RegExp("Updated");
+    var invalid3 = new RegExp("ROUTING TABLE");
+    var invalid4 = new RegExp("GLOBAL STATS");
+    var invalid5 = new RegExp("Max bcast");
+    var invalid6 = new RegExp("END");
     for (var i = 0; i<LogInfo["logData"].length; i++)
       {
         var tempvar = LogInfo["logData"][i];
@@ -111,6 +127,7 @@ $.get(defAddress, function (data)
                             for (var j = 0; j < tableLength; j++) {
                               var info = $("<td />");
                               info.html(logStringArrays[counter][j]);
+                              console.log("info: " + info);
                               row.append(info);
                             }
                             counter++;
@@ -135,139 +152,166 @@ $.get(defAddress, function (data)
             var statusRouteTable = $("#statusRouteTable");
             statusRouteTable.html("");
             statusRouteTable.append(routingTable);
-
-  })
 }
 
 /**
 * LOGPAGE STATUS - Created by Olive & Eliot on 8/6/2017.
 */
 
-function addInfo(address)
+function addInfo()
 {
+  console.log("Log Info: " + globalNode);
+
+
   var defAddress;
-  if (address === undefined) {
-    address = "self";
+  if (globalNode === undefined || globalNode ==""||globalNode ==null) {
+    defAddress = "self";
   }
-  if (address == "self"){
-    defAddress = "/log/general";
+  if (globalNode == "self"){
+    $.get("/log/general", function(data) {
+        console.log(data);
+        createLogTable(data);
+    });
   }
   else{
-    defAddress = "http://" + address + "/log/general";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: "/connectnode/", 
+        data: JSON.stringify({"url" : globalNode + "/log/general", "method" : "GET"}), 
+        success: function (data) {
+          createLogTable(data["data"]);
+        },
+        dataType: "json"
+    }); 
   }
-  
-  console.log(defAddress);
-  console.log(defAddress.value);
-
-  $.get(defAddress.value, function (data)
-    {
-      var LogInfo = data;
-      var logStringArrays = new Array;
-      var d = new Date();
-      var n = d.getFullYear();
-      var limit = LogInfo["logData"].length;
-      
-      for (var i = limit; i> 0; i--)
-        {
-          var tempvar = LogInfo["logData"][i];
-          if(/2017/.test(tempvar)){
-          tempvar = tempvar.split(n);
-          tempvar[0] = tempvar[0] + n;
-          logStringArrays.push(tempvar);
-        }
-        else{
-          temparray= ["No Date", tempvar];
-          logStringArrays.push(temparray);
-        }
-        }
-              var table = $("<table />");
-              var infoLength = logStringArrays[0].length;
-
-              var row = $(table[0].insertRow(-1));
-              var header = $("<th />");
-              header.html("Date");
-              var header2 = $("<th />");
-              header2.html("Activity");
-              row.append(header);
-              row.append(header2);
-
-              //Add the data rows.
-              for (var i = 1; i < logStringArrays.length; i++) {
-                  row = $(table[0].insertRow(-1));
-                  for (var j = 0; j < infoLength; j++) {
-                      var info = $("<td />");
-                      info.html(logStringArrays[i][j]);
-                      row.append(info);
-                  }
-              }
-
-              var logTable = $("#logTable");
-              logTable.html("");
-              logTable.append(table);
-
-    })
 }
 
-function addIndexInfo(address)
+function createLogTable(data)
 {
+  var LogInfo = data;
+  var logStringArrays = new Array;
+  var d = new Date();
+  var n = d.getFullYear();
+  var limit = LogInfo["logData"].length;
+  
+  for (var i = limit; i> 0; i--)
+    {
+      var tempvar = LogInfo["logData"][i];
+      if(/2017/.test(tempvar)){
+      tempvar = tempvar.split(n);
+      tempvar[0] = tempvar[0] + n;
+      logStringArrays.push(tempvar);
+    }
+    else{
+      temparray= ["No Date", tempvar];
+      logStringArrays.push(temparray);
+    }
+    }
+          var table = $("<table />");
+          var infoLength = logStringArrays[0].length;
+
+          var row = $(table[0].insertRow(-1));
+          var header = $("<th />");
+          header.html("Date");
+          var header2 = $("<th />");
+          header2.html("Activity");
+          row.append(header);
+          row.append(header2);
+
+          //Add the data rows.
+          for (var i = 1; i < logStringArrays.length; i++) {
+              row = $(table[0].insertRow(-1));
+              for (var j = 0; j < infoLength; j++) {
+                  var info = $("<td />");
+                  info.html(logStringArrays[i][j]);
+                  row.append(info);
+              }
+          }
+
+          var logTable = $("#logTable");
+          logTable.html("");
+          logTable.append(table);
+}
+
+function addIndexInfo()
+{
+  console.log("Log Index Info: " + globalNode);
+
+
   var defAddress;
-  if (address === undefined) {
-    address = "self";
+  if (globalNode === undefined|| globalNode == ""||globalNode == null) {
+    defAddress = "self";
   }
-  if (address == "self"){
-    defAddress = "/log/general";
+  if (globalNode == "self"){
+    $.get("/log/general", function(data) {
+        console.log(data);
+        createLogTableShort(data);
+    });
   }
   else{
-    defAddress = "http://" + address + "/log/general";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: "/connectnode/", 
+        data: JSON.stringify({"url" : globalNode + "/log/general", "method" : "GET"}), 
+        success: function (data) {
+          createLogTableShort(data["data"]);
+        },
+        dataType: "json"
+    }); 
   }
+}
+
+function createLogTableShort(data)
+{
+  var LogInfo = data;
+  var logStringArrays = new Array;
+  var d = new Date();
+  var n = d.getFullYear();
+  var limit = LogInfo["logData"].length
   
-  $.get(defAddress, function (data)
+  for (var i = limit; i> limit - 11; i--)
     {
-      var LogInfo = data;
-      var logStringArrays = new Array;
-      var d = new Date();
-      var n = d.getFullYear();
-      var limit = LogInfo["logData"].length
-      
-      for (var i = limit; i> limit - 11; i--)
-        {
-          var tempvar = LogInfo["logData"][i];
-          if(/2017/.test(tempvar)){
-          tempvar = tempvar.split(n);
-          tempvar[0] = tempvar[0] + n;
-          logStringArrays.push(tempvar);
-        }
-        else{
-          temparray= ["No Date", tempvar];
-          logStringArrays.push(temparray);
-        }
-        }
-              var table = $("<table />");
-              var infoLength = logStringArrays[0].length;
+      var tempvar = LogInfo["logData"][i];
+      if(/2017/.test(tempvar)){
+      tempvar = tempvar.split(n);
+      tempvar[0] = tempvar[0] + n;
+      logStringArrays.push(tempvar);
+    }
+      else{
+        temparray= ["No Date", tempvar];
+        logStringArrays.push(temparray);
+      }
+    }
+          var table = $("<table />");
+          var infoLength = logStringArrays[0].length;
 
-              var row = $(table[0].insertRow(-1));
-              var header = $("<th />");
-              header.html("Date");
-              var header2 = $("<th />");
-              header2.html("Activity");
-              row.append(header);
-              row.append(header2);
+          var row = $(table[0].insertRow(-1));
+          var header = $("<th />");
+          header.html("Date");
+          var header2 = $("<th />");
+          header2.html("Activity");
+          row.append(header);
+          row.append(header2);
 
-              //Add the data rows.
-              for (var i = 1; i < logStringArrays.length; i++) {
-                  row = $(table[0].insertRow(-1));
-                  for (var j = 0; j < infoLength; j++) {
-                      var info = $("<td />");
-                      info.html(logStringArrays[i][j]);
-                      row.append(info);
-                  }
+          //Add the data rows.
+          for (var i = 1; i < logStringArrays.length; i++) {
+              row = $(table[0].insertRow(-1));
+              for (var j = 0; j < infoLength; j++) {
+                  var info = $("<td />");
+                  info.html(logStringArrays[i][j]);
+                  row.append(info);
               }
+          }
 
-              var logTableSmall = $("#logTableSmall");
-              logTableSmall.html("");
-              logTableSmall.append(table);
+          var logTableSmall = $("#logTableSmall");
+          logTableSmall.html("");
+          logTableSmall.append(table);
+}
 
-    })
+function hideButton(){
+ document.getElementById('testButton').style.display = "none";
 }
 
 function tableFilter() {
@@ -297,7 +341,12 @@ function tableFilter() {
 //  */
 
 function nodeChange(){
-  document.getElementById('currentNode').innerHTML = "Node: " + document.getElementById("item1").value;
+  console.log(globalNode);
+  var newNode = document.getElementById("node");
+  var nodeValue = newNode.options[newNode.selectedIndex].value;
+  console.log(nodeValue);
+  document.getElementById('currentNode').innerHTML = "Node: " + nodeValue;
+  globalNode = nodeValue;
   
 }
 
@@ -382,14 +431,13 @@ function checkForm() {
 }
 
 function enableServer() {
-x = document.getElementById("status");
-if(statusColour==1) {
-  x.style.color = 'red';
-  statusColour = 2;
-}
-else if(status!=1) {
-  x.style.color = 'green';
-  statusColour = 1;
-}
-
+  x = document.getElementById("status");
+  if(statusColour==1) {
+    x.style.color = 'red';
+    statusColour = 2;
+  }
+  else if(status!=1) {
+    x.style.color = 'green';
+    statusColour = 1;
+  }
 }

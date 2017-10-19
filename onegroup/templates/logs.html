@@ -12,6 +12,24 @@
                         Activity: <input type="date" id="dateEnd" name="endDate" onkeyup="tableFilter()">
                     </form>
                 </div>
+		<div>
+		<h2 id ="currentNode">Node: self</h2>
+                    <p>Select Node</p>
+                    <select name="nodeSelect" id="node" onchange="nodeChange(); addInfo();">
+                    <option value="self" selected> Self </option>
+                    {% if nodes != None %}
+                        {% if nodes[0] is mapping%}  
+                            {%for node in nodes%}
+                                    <option value="{{node["Address"]}}">{{node["Name"]}}</option>
+                            {% endfor %}
+                        {% endif %}
+                        {% if nodes[0] is not mapping %}   
+                            <option value="{{nodes["Address"]}}">{{nodes["Name"]}}</option>
+                        {% endif %}
+                    {% endif %}
+                    </select> 
+
+		</div>
                 <div id="exportSettings">
                     <h2>Export Settings</h2>
                     <form action="/log_download/" name="settings" id="fileSettings" method="POST">
