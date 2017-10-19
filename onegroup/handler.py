@@ -1068,6 +1068,11 @@ def retrieveRequests():
     db = Database(filename = filen)
     requests =  db.retrieve("notifications")
     db.close()
+    
+    #Ensure requests is a list
+    if isinstance(requests,dict):
+        requests = [requests]
+
     return requests
 
 

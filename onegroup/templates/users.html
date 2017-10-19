@@ -81,33 +81,20 @@
                       <th>Approval?</th>
                   </tr>
                     {% if dataR != None %}      
-                        {% if dataR is mapping %}                     
-                            {%for notifications in dataR %}
-                                <tr>
-                                    <td>{{notifications["User"]}}</td>
-                                    <td>{{notifications["Request"]}}</td>
-                                    <td>
-                                        <form action="{{ url_for('handle_req', reqid = notifications["ID"]) }}" vname="approveForm" method=post>
-                                            <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
-                                            <input type="submit" name="reqOption" value="Decline" class = "declineButton"></input>
-                                        </form>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% endif %}
-                        {% if dataR is not mapping %} 
+                        {%for notifications in dataR %}
                             <tr>
-                                <td>{{dataR["User"]}}</td>
-                                <td>{{dataR["Request"]}}</td>
+                                <td>{{notifications["User"]}}</td>
+                                <td>{{notifications["Request"]}}</td>
                                 <td>
-                                    <form action="{{ url_for('handle_req', reqid = dataR["ID"]) }}" vname="approveForm" method=post>
+                                    <!-- <form action="/handle_req/{{notifications["ID"]}}" method=post> -->
+                                    <form action="{{ url_for('handle_req', reqid = notifications["ID"]) }}" method=post>
                                         <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
                                         <input type="submit" name="reqOption" value="Decline" class = "declineButton"></input>
                                     </form>
                                 </td>
                             </tr>
-                        {% endif %}
-                {% endif %}
+                        {% endfor %}
+                    {% endif %}
                 </table>
 
                 <h2>Current Groups</h2>
@@ -119,8 +106,7 @@
                         <th>Options</th>
                     </tr>
                     {% if dataG != None %}
-                        {% if dataG[0] is mapping %}
-                            {%for members in dataG %}
+                        {%for members in dataG %}
                             <tr>
                                 <td>{{members['Name']}}</td>
                                 <td>{{members['Internal']}}</td>
@@ -134,23 +120,7 @@
                                     </form>
                                 </td>
                             </tr>
-                            {% endfor %}
-                        {% endif %}
-                        {% if dataG[0] is not mapping %}
-                        <tr>
-                            <td>{{dataG['Name']}}</td>
-                            <td>{{dataG['Internal']}}</td>
-                            <td>{{dataG['External']}}</td>
-                            <td>
-                                <a href="/groupform/{{dataG["ID"]}}">
-                                    <button class = "button-table">Edit</button>
-                                </a>
-                                <form action="{{ url_for('delete_group', gid = dataG["ID"]) }}" method=post>
-                                    <input type="submit" value="Delete" class = "declineButton"></input>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endif %}
+                        {% endfor %}
                     {% endif %}
                   </table>
             </div>

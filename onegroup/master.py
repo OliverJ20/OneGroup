@@ -211,15 +211,15 @@ def handle_req(reqid):
         
         POST: If approve, perform the request. Else delete the request
     """
-    request = hl.retrieveRequest(reqid)
+    req = hl.retrieveRequest(reqid)
     
     if request.method == 'POST':
         if request.form['reqOption'] == 'Approve':
             print("ACCEPT")
-            hl.acceptRequest(request)
+            hl.acceptRequest(req)
         elif request.form['reqOption'] == 'Decline':
             print("DECLINE")
-            hl.declineRequest(request)
+            hl.declineRequest(req)
         
         return redirect('/users')
 
