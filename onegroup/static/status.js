@@ -3,8 +3,8 @@
 //  */
 
 var globalNode = "self";
-var logVar = setInterval(addIndexInfo(globalNode), 1000);
-var statVar = setInterval( statusInfo(globalNode), 1000);
+var logVar = setInterval(addIndexInfo(), 1000);
+var statVar = setInterval( statusInfo(), 1000);
 
 $(document).ready(function () {
   addInfo();    
@@ -31,7 +31,7 @@ $(document).ready(function () {
   }
 });
 
-function statusInfo(address)
+function statusInfo()
 {
   var invalid1 = new RegExp("Open VPN CLIENT LIST");
   var invalid2 = new RegExp("Updated");
@@ -41,14 +41,14 @@ function statusInfo(address)
   var invalid6 = new RegExp("END");
 
   var defAddress;
-  if (address === undefined) {
-    address = "self";
+  if (globalNode === undefined) {
+    defAddress = "self";
   }
-  if (address == "self"){
+  if (globalNode == "self"){
     defAddress = "/log/status";
   }
   else{
-    defAddress = "http://" + address + "/log/status";
+    defAddress = "http://" + globalNode + "/log/status";
   }
   
 $.get(defAddress, function (data)
@@ -144,18 +144,17 @@ $.get(defAddress, function (data)
 * LOGPAGE STATUS - Created by Olive & Eliot on 8/6/2017.
 */
 
-function addInfo(address)
+function addInfo()
 {
   var defAddress;
-  if (address === undefined) {
-    address = "self";
+  if (globalNode === undefined) {
+    defAddress = "self";
   }
-  if (address == "self"){
+  if (globalNode == "self"){
     defAddress = "/log/general";
-    defAddress.value = "/log/general";
   }
   else{
-    defAddress = "http://" + address + "/log/general";
+    defAddress = "http://" + globalNode + "/log/general";
   }
   
   console.log(defAddress);
@@ -211,17 +210,17 @@ function addInfo(address)
     })
 }
 
-function addIndexInfo(address)
+function addIndexInfo()
 {
   var defAddress;
-  if (address === undefined) {
-    address = "self";
+  if (globalNode === undefined) {
+    defAddress = "self";
   }
-  if (address == "self"){
+  if (globalNode == "self"){
     defAddress = "/log/general";
   }
   else{
-    defAddress = "http://" + address + "/log/general";
+    defAddress = "http://" + globalNode + "/log/general";
   }
   
   $.get(defAddress, function (data)
