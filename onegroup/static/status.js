@@ -151,6 +151,7 @@ function addInfo(address)
   }
   if (address == "self"){
     defAddress = "/log/general";
+    defAddress.value = "/log/general";
   }
   else{
     defAddress = "http://" + address + "/log/general";
@@ -158,8 +159,9 @@ function addInfo(address)
   
   console.log(defAddress);
   console.log(defAddress.value);
-
-  $.get(defAddress.toString, function (data)
+  console.log(defAddress.toString);
+  
+  $.get(defAddress.value, function (data)
     {
       var LogInfo = data;
       var logStringArrays = new Array;
