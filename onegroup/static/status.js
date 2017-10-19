@@ -237,10 +237,10 @@ function addIndexInfo(address)
           tempvar[0] = tempvar[0] + n;
           logStringArrays.push(tempvar);
         }
-        else{
-          temparray= ["No Date", tempvar];
-          logStringArrays.push(temparray);
-        }
+          else{
+            temparray= ["No Date", tempvar];
+            logStringArrays.push(temparray);
+          }
         }
               var table = $("<table />");
               var infoLength = logStringArrays[0].length;
@@ -266,8 +266,8 @@ function addIndexInfo(address)
               var logTableSmall = $("#logTableSmall");
               logTableSmall.html("");
               logTableSmall.append(table);
-            }
-          }
+  })
+}
 
 function hideButton(){
  document.getElementById('testButton').style.display = "none";
