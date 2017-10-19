@@ -306,6 +306,9 @@ function createLogTableShort(data)
           }
 
           var logTableSmall = $("#logTableSmall");
+          while(logTableSmall.rows.length > 0) {
+            logTableSmall.deleteRow(0);
+          }
           logTableSmall.html("");
           logTableSmall.append(table);
 }
