@@ -2,8 +2,9 @@
 //  * SERVER STATUS - Created by Eliot on 8/6/2017.
 //  */
 
-var logVar = setInterval(addIndexInfo("self"), 1000);
-var statVar = setInterval( statusInfo("self"), 1000);
+var logVar = setInterval(addIndexInfo, 1000);
+var statVar = setInterval(statusInfo, 1000);
+var globalNode = "self";
 
 $(document).ready(function () {
   addInfo();    
@@ -30,8 +31,9 @@ $(document).ready(function () {
   }
 });
 
-function statusInfo(address)
+function statusInfo()
 {
+  console.log("Status Info: " + globalNode);
   var invalid1 = new RegExp("Open VPN CLIENT LIST");
   var invalid2 = new RegExp("Updated");
   var invalid3 = new RegExp("ROUTING TABLE");
@@ -40,14 +42,14 @@ function statusInfo(address)
   var invalid6 = new RegExp("END");
 
   var defAddress;
-  if (address === undefined) {
-    address = "self";
+  if (globalNode === undefined) {
+    defAddress = "self";
   }
-  if (address == "self"){
-    defAddress = "/log/general";
+  if (globalNode == "self"){
+    defAddress = "/log/status";
   }
   else{
-    defAddress = "http://" + address + "/log/general";
+    defAddress = "http://" + globalNode + "/log/status";
   }
   
 $.get(defAddress, function (data)
@@ -143,23 +145,24 @@ $.get(defAddress, function (data)
 * LOGPAGE STATUS - Created by Olive & Eliot on 8/6/2017.
 */
 
-function addInfo(address)
+function addInfo()
 {
   var defAddress;
-  if (address === undefined) {
-    address = "self";
+  if (globalNode === undefined) {
+    defAddress = "self";
   }
-  if (address == "self"){
+  if (globalNode == "self"){
     defAddress = "/log/general";
   }
   else{
-    defAddress = "http://" + address + "/log/general";
+    defAddress = "http://" + globalNode + "/log/general";
   }
   
   console.log(defAddress);
   console.log(defAddress.value);
+  console.log(defAddress.toString);
 
-  $.get(defAddress.value, function (data)
+  $.get(defAddress, function (data)
     {
       var LogInfo = data;
       var logStringArrays = new Array;
@@ -208,17 +211,18 @@ function addInfo(address)
     })
 }
 
-function addIndexInfo(address)
+function addIndexInfo()
 {
+  console.log("Index Info: " + globalNode);
   var defAddress;
-  if (address === undefined) {
-    address = "self";
+  if (globalNode === undefined) {
+    defAddress = "self";
   }
-  if (address == "self"){
+  if (globalNode == "self"){
     defAddress = "/log/general";
   }
   else{
-    defAddress = "http://" + address + "/log/general";
+    defAddress = "http://" + globalNode + "/log/general";
   }
   
   $.get(defAddress, function (data)
@@ -237,10 +241,10 @@ function addIndexInfo(address)
           tempvar[0] = tempvar[0] + n;
           logStringArrays.push(tempvar);
         }
-        else{
-          temparray= ["No Date", tempvar];
-          logStringArrays.push(temparray);
-        }
+          else{
+            temparray= ["No Date", tempvar];
+            logStringArrays.push(temparray);
+          }
         }
               var table = $("<table />");
               var infoLength = logStringArrays[0].length;
@@ -266,8 +270,11 @@ function addIndexInfo(address)
               var logTableSmall = $("#logTableSmall");
               logTableSmall.html("");
               logTableSmall.append(table);
+  })
+}
 
-    })
+function hideButton(){
+ document.getElementById('testButton').style.display = "none";
 }
 
 function tableFilter() {
@@ -297,7 +304,12 @@ function tableFilter() {
 //  */
 
 function nodeChange(){
-  document.getElementById('currentNode').innerHTML = "Node: " + document.getElementById("item1").value;
+  console.log(globalNode);
+  var newNode = document.getElementById("node");
+  var nodeValue = newNode.options[newNode.selectedIndex].value;
+  console.log(nodeValue);
+  document.getElementById('currentNode').innerHTML = "Node: " + nodeValue;
+  globalNode = nodeValue;
   
 }
 
@@ -382,14 +394,13 @@ function checkForm() {
 }
 
 function enableServer() {
-x = document.getElementById("status");
-if(statusColour==1) {
-  x.style.color = 'red';
-  statusColour = 2;
-}
-else if(status!=1) {
-  x.style.color = 'green';
-  statusColour = 1;
-}
-
+  x = document.getElementById("status");
+  if(statusColour==1) {
+    x.style.color = 'red';
+    statusColour = 2;
+  }
+  else if(status!=1) {
+    x.style.color = 'green';
+    statusColour = 1;
+  }
 }
