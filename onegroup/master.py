@@ -378,13 +378,13 @@ def iptable_form(nid, ruleid):
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
     """ 
-    if nid != -1 and hl.getNode("ID",nid)["Address"] != "self":
+    if nid != -1 and (hl.getNode("ID",nid) and hl.getNode("ID",nid)["Address"] != "self"):
         url = hl.getNode("ID",nid)["Address"] 
         res = hl.nodePost(url+"/getrule/",{"key" : "ID", "value" : ruleid}) 
         if "result" in res and res["result"]:
             rule = res["rule"]
     else:
-        rule = getRule("ID", ruleid)
+        rule = hl.getRule("ID", ruleid)
 
     nodes = hl.getAllNodes()
     
@@ -408,12 +408,12 @@ def iptable_form(nid, ruleid):
                 ip_string = hl.ipDictToString(getIPForm(rule["Policy"]))
                 
                 #If on a remove node, send rule to node
-                if nid != -1 and hl.getNode("ID",nid)["Address"] != "self":
+                if nid != -1 and (hl.getNode("ID",nid) and hl.getNode("ID",nid)["Address"] != "self"):
                     url = hl.getNode("ID",nid)["Address"] 
                     hl.nodePost(url+"/updaterule/",{"ID" : ruleid, "rule" : ip_string}) 
 
                 else:
-                    hl.updateIPRules(ruleid, ip_string)
+                    hl.updateIPRule(ruleid, ip_string)
 
             return redirect(url_for('show_config'))
 
@@ -468,12 +468,12 @@ def iptables_delete(nid, rid):
 
         GET : deletes the given iptable rule
     """
-    if nid != -1 and hl.getNode("ID", nid)["Address"] != "self":
+    if nid != -1 and (hl.getNode("ID",nid) and hl.getNode("ID",nid)["Address"] != "self"):
         url = hl.getNode("ID", nid)["Address"] 
         hl.nodePost(url+"/deleterule/",{"ID" : rid}) 
-
     else:
         hl.removeIPRule(rid)
+    
     return redirect(url_for('confirm', confirmed = "IP Table Rule Deleted!"))
     
 

@@ -6,8 +6,9 @@
                 {% if nodes != -1 %}
                     <form action="" method=post>
                         <select name="node1">
+                            {# <option value="" selected disabled>-- Select --</option> #}
                             {% for node in nodes %}
-                                <option value="{{ node["ID"] }}">{{ node["Name"] }}</option>
+                                <option value="{{ node["ID"] }}" {% if node["ID"] == nodeID['ID'] %}selected{% endif %}>{{ node["Name"] }}</option>
                             {% endfor %}                    	
                         </select>
 
