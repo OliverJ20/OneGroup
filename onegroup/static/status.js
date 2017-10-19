@@ -2,9 +2,9 @@
 //  * SERVER STATUS - Created by Eliot on 8/6/2017.
 //  */
 
-var globalNode = "self";
 var logVar = setInterval(addIndexInfo(), 1000);
-var statVar = setInterval( statusInfo(), 1000);
+var statVar = setInterval(statusInfo(), 1000);
+var globalNode = "self";
 
 $(document).ready(function () {
   addInfo();    
@@ -33,6 +33,7 @@ $(document).ready(function () {
 
 function statusInfo()
 {
+  console.log("Status Info");
   var invalid1 = new RegExp("Open VPN CLIENT LIST");
   var invalid2 = new RegExp("Updated");
   var invalid3 = new RegExp("ROUTING TABLE");
@@ -212,6 +213,7 @@ function addInfo()
 
 function addIndexInfo()
 {
+  console.log("Index Info");
   var defAddress;
   if (globalNode === undefined) {
     defAddress = "self";
