@@ -51,7 +51,7 @@ function statusInfo()
   else{
     defAddress = "http://" + globalNode + "/log/status";
   }
-  
+  console.log("Retrieving info from: " + defAddress);
 $.get(defAddress, function (data)
   {
     var LogInfo = data;
@@ -113,6 +113,7 @@ $.get(defAddress, function (data)
                             for (var j = 0; j < tableLength; j++) {
                               var info = $("<td />");
                               info.html(logStringArrays[counter][j]);
+                              console.log("info: " + info);
                               row.append(info);
                             }
                             counter++;
@@ -158,10 +159,7 @@ function addInfo()
     defAddress = "http://" + globalNode + "/log/general";
   }
   
-  console.log(defAddress);
-  console.log(defAddress.value);
-  console.log(defAddress.toString);
-
+  console.log("Retrieving info from: " + defAddress);
   $.get(defAddress, function (data)
     {
       var LogInfo = data;
@@ -225,6 +223,7 @@ function addIndexInfo()
     defAddress = "http://" + globalNode + "/log/general";
   }
   
+  console.log("Retrieving info from: " + defAddress);
   $.get(defAddress, function (data)
     {
       var LogInfo = data;
