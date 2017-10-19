@@ -37,7 +37,7 @@ function statusInfo()
 
 
   var defAddress;
-  if (globalNode === undefined) {
+  if (globalNode === undefined || globalNode == "" || globalNode == null ) {
     defAddress = "self";
   }
   if (globalNode == "self"){
@@ -164,7 +164,7 @@ function addInfo()
 
 
   var defAddress;
-  if (globalNode === undefined) {
+  if (globalNode === undefined || globalNode ==""||globalNode ==null) {
     defAddress = "self";
   }
   if (globalNode == "self"){
@@ -240,7 +240,7 @@ function addIndexInfo()
 
 
   var defAddress;
-  if (globalNode === undefined) {
+  if (globalNode === undefined|| globalNode == ""||globalNode == null) {
     defAddress = "self";
   }
   if (globalNode == "self"){
