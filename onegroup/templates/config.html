@@ -8,7 +8,7 @@
                         <select name="node1">
                             <option value="-1" selected>No assigned node</option>
                             {% for node in nodes %}
-                                <option value="{{ node["ID"] }}">{{ node["ID"] }}</option>
+                                <option value="{{ node["ID"] }}">{{ node["Name"] }}</option>
                             {% endfor %}                    	
                         </select>
 
@@ -51,7 +51,7 @@
                                     <a href="/iptables/{{rule['ID']}}">
                                         <button class="button-wide">EDIT</button>
                                     </a>
-                                    <a href="{{ url_for( 'iptables_delete', rid = rule['ID']) }}">
+                                    <a href="{{ url_for( 'iptables_delete', nid = nodeID, rid = rule['ID']) }}">
                                         <button class="declineButton">DELETE</button>
                                     </a>
                                 </td>

@@ -411,9 +411,9 @@ def getIPForm(policy):
     return ip_dict
 
 
-@app.route('/iptabledelete/<rid>')
+@app.route('/iptabledelete/<nid>/<rid>')
 @admin_required
-def iptables_delete(rid):
+def iptables_delete(nid, rid):
     """
         Deletes a given iptable rule from the database
 
@@ -421,7 +421,12 @@ def iptables_delete(rid):
 
         GET : deletes the given iptable rule
     """
-    hl.removeIPRule(rid)
+    if nid != -1 and getNode("ID", nid)["Address"] != "self":
+        url = getNode("ID", nid)["Address"] 
+        nodePost(url+"/deleterule/",{"ID" : ruleid}) 
+
+    else:
+        hl.removeIPRule(rid)
     return redirect(url_for('confirm', confirmed = "IP Table Rule Deleted!"))
     
 
@@ -448,7 +453,7 @@ def show_config():
                 node = hl.nodeGet(nodeReq["Address"]+"/getrules/")["rules"]
             
             if node:
-                return render_template('config.html', firewall = node, nodes = nodes, nodeID = nodeID)
+                return render_template('config.html', firewall = node, nodes = nodes, nodeID = hl.getNode("ID", nodeID)["Name"])
             else:
                 flash("Error: cannot retrieve iptable rules from node")
 
