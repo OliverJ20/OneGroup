@@ -34,28 +34,42 @@ $(document).ready(function () {
 function statusInfo()
 {
   console.log("Status Info: " + globalNode);
-  var invalid1 = new RegExp("Open VPN CLIENT LIST");
-  var invalid2 = new RegExp("Updated");
-  var invalid3 = new RegExp("ROUTING TABLE");
-  var invalid4 = new RegExp("GLOBAL STATS");
-  var invalid5 = new RegExp("Max bcast");
-  var invalid6 = new RegExp("END");
+
 
   var defAddress;
   if (globalNode === undefined) {
     defAddress = "self";
   }
   if (globalNode == "self"){
-    defAddress = "/log/status";
+    $.get("/log/status", function(data) {
+        console.log(data);
+        createTable(data);
+    });
   }
   else{
-    defAddress = "http://" + globalNode + "/log/status";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: "/connectnode/", 
+        data: JSON.stringify({"url" : globalNode + "/log/status", "method" : "GET"}), 
+        success: function (data) {
+            createTable(data["data"]);
+        },
+        dataType: "json"
+    }); 
   }
-  console.log("Retrieving info from: " + defAddress);
-$.get(defAddress, function (data)
-  {
+}
+
+function createTable(data)
+{
     var LogInfo = data;
     var logStringArrays = new Array;
+    var invalid1 = new RegExp("Open VPN CLIENT LIST");
+    var invalid2 = new RegExp("Updated");
+    var invalid3 = new RegExp("ROUTING TABLE");
+    var invalid4 = new RegExp("GLOBAL STATS");
+    var invalid5 = new RegExp("Max bcast");
+    var invalid6 = new RegExp("END");
     for (var i = 0; i<LogInfo["logData"].length; i++)
       {
         var tempvar = LogInfo["logData"][i];
@@ -138,8 +152,6 @@ $.get(defAddress, function (data)
             var statusRouteTable = $("#statusRouteTable");
             statusRouteTable.html("");
             statusRouteTable.append(routingTable);
-
-  })
 }
 
 /**

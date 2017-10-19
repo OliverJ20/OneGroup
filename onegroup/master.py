@@ -101,6 +101,45 @@ def render():
     """Endpoint placeholder to redirect to the login page"""
     return redirect(url_for('login'))
 
+@app.route('/connectnode/', methods=['POST'])
+@admin_required
+def connectnode():
+    """
+        Peforms a request for data from a remote node
+
+        method : GET or POST
+        url : url to the node
+        data : data to pass to the node
+
+        Returns : json object response from the node
+    """
+    content = request.get_json()
+    print(content)
+        
+    #Check request method
+    if content["method"] == "GET":
+        res = hl.nodeGet(content["url"])
+    elif content["method"] == "GET":
+        res = hl.nodePost(content["url"], content["data"])
+
+    #Error check
+    if res:
+        if ('result' in res and res['result']) or 'result' not in res:
+            try:
+                res.pop("result")
+            except:
+                pass
+            
+            result = {"result" : True, "data" : res} 
+        else:
+            result = {"result" : False} 
+    else:
+        result = {"result" : False} 
+                        
+    #Return response
+    return(jsonify(result)) 
+
+
 
 @app.route("/log_download/", methods = ['GET', 'POST'])
 def log_download():
