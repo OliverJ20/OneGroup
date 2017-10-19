@@ -43,7 +43,7 @@ function statusInfo()
   if (globalNode == "self"){
     $.get("/log/status", function(data) {
         console.log(data);
-        createTable(data);
+        createStatusTable(data);
     });
   }
   else{
@@ -53,14 +53,14 @@ function statusInfo()
         url: "/connectnode/", 
         data: JSON.stringify({"url" : globalNode + "/log/status", "method" : "GET"}), 
         success: function (data) {
-            createTable(data["data"]);
+          createStatusTable(data["data"]);
         },
         dataType: "json"
     }); 
   }
 }
 
-function createTable(data)
+function createStatusTable(data)
 {
     var LogInfo = data;
     var logStringArrays = new Array;
@@ -160,128 +160,154 @@ function createTable(data)
 
 function addInfo()
 {
+  console.log("Log Info: " + globalNode);
+
+
   var defAddress;
   if (globalNode === undefined) {
     defAddress = "self";
   }
   if (globalNode == "self"){
-    defAddress = "/log/general";
+    $.get("/log/general", function(data) {
+        console.log(data);
+        createLogTable(data);
+    });
   }
   else{
-    defAddress = "http://" + globalNode + "/log/general";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: "/connectnode/", 
+        data: JSON.stringify({"url" : globalNode + "/log/general", "method" : "GET"}), 
+        success: function (data) {
+          createLogTable(data["data"]);
+        },
+        dataType: "json"
+    }); 
   }
+}
+
+function createLogTable(data)
+{
+  var LogInfo = data;
+  var logStringArrays = new Array;
+  var d = new Date();
+  var n = d.getFullYear();
+  var limit = LogInfo["logData"].length;
   
-  console.log("Retrieving info from: " + defAddress);
-  $.get(defAddress, function (data)
+  for (var i = limit; i> 0; i--)
     {
-      var LogInfo = data;
-      var logStringArrays = new Array;
-      var d = new Date();
-      var n = d.getFullYear();
-      var limit = LogInfo["logData"].length;
-      
-      for (var i = limit; i> 0; i--)
-        {
-          var tempvar = LogInfo["logData"][i];
-          if(/2017/.test(tempvar)){
-          tempvar = tempvar.split(n);
-          tempvar[0] = tempvar[0] + n;
-          logStringArrays.push(tempvar);
-        }
-        else{
-          temparray= ["No Date", tempvar];
-          logStringArrays.push(temparray);
-        }
-        }
-              var table = $("<table />");
-              var infoLength = logStringArrays[0].length;
+      var tempvar = LogInfo["logData"][i];
+      if(/2017/.test(tempvar)){
+      tempvar = tempvar.split(n);
+      tempvar[0] = tempvar[0] + n;
+      logStringArrays.push(tempvar);
+    }
+    else{
+      temparray= ["No Date", tempvar];
+      logStringArrays.push(temparray);
+    }
+    }
+          var table = $("<table />");
+          var infoLength = logStringArrays[0].length;
 
-              var row = $(table[0].insertRow(-1));
-              var header = $("<th />");
-              header.html("Date");
-              var header2 = $("<th />");
-              header2.html("Activity");
-              row.append(header);
-              row.append(header2);
+          var row = $(table[0].insertRow(-1));
+          var header = $("<th />");
+          header.html("Date");
+          var header2 = $("<th />");
+          header2.html("Activity");
+          row.append(header);
+          row.append(header2);
 
-              //Add the data rows.
-              for (var i = 1; i < logStringArrays.length; i++) {
-                  row = $(table[0].insertRow(-1));
-                  for (var j = 0; j < infoLength; j++) {
-                      var info = $("<td />");
-                      info.html(logStringArrays[i][j]);
-                      row.append(info);
-                  }
+          //Add the data rows.
+          for (var i = 1; i < logStringArrays.length; i++) {
+              row = $(table[0].insertRow(-1));
+              for (var j = 0; j < infoLength; j++) {
+                  var info = $("<td />");
+                  info.html(logStringArrays[i][j]);
+                  row.append(info);
               }
+          }
 
-              var logTable = $("#logTable");
-              logTable.html("");
-              logTable.append(table);
-
-    })
+          var logTable = $("#logTable");
+          logTable.html("");
+          logTable.append(table);
 }
 
 function addIndexInfo()
 {
-  console.log("Index Info: " + globalNode);
+  console.log("Log Index Info: " + globalNode);
+
+
   var defAddress;
   if (globalNode === undefined) {
     defAddress = "self";
   }
   if (globalNode == "self"){
-    defAddress = "/log/general";
+    $.get("/log/general", function(data) {
+        console.log(data);
+        createLogTableShort(data);
+    });
   }
   else{
-    defAddress = "http://" + globalNode + "/log/general";
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: "/connectnode/", 
+        data: JSON.stringify({"url" : globalNode + "/log/general", "method" : "GET"}), 
+        success: function (data) {
+          createLogTableShort(data["data"]);
+        },
+        dataType: "json"
+    }); 
   }
+}
+
+function createLogTableShort(data)
+{
+  var LogInfo = data;
+  var logStringArrays = new Array;
+  var d = new Date();
+  var n = d.getFullYear();
+  var limit = LogInfo["logData"].length
   
-  console.log("Retrieving info from: " + defAddress);
-  $.get(defAddress, function (data)
+  for (var i = limit; i> limit - 11; i--)
     {
-      var LogInfo = data;
-      var logStringArrays = new Array;
-      var d = new Date();
-      var n = d.getFullYear();
-      var limit = LogInfo["logData"].length
-      
-      for (var i = limit; i> limit - 11; i--)
-        {
-          var tempvar = LogInfo["logData"][i];
-          if(/2017/.test(tempvar)){
-          tempvar = tempvar.split(n);
-          tempvar[0] = tempvar[0] + n;
-          logStringArrays.push(tempvar);
-        }
-          else{
-            temparray= ["No Date", tempvar];
-            logStringArrays.push(temparray);
-          }
-        }
-              var table = $("<table />");
-              var infoLength = logStringArrays[0].length;
+      var tempvar = LogInfo["logData"][i];
+      if(/2017/.test(tempvar)){
+      tempvar = tempvar.split(n);
+      tempvar[0] = tempvar[0] + n;
+      logStringArrays.push(tempvar);
+    }
+      else{
+        temparray= ["No Date", tempvar];
+        logStringArrays.push(temparray);
+      }
+    }
+          var table = $("<table />");
+          var infoLength = logStringArrays[0].length;
 
-              var row = $(table[0].insertRow(-1));
-              var header = $("<th />");
-              header.html("Date");
-              var header2 = $("<th />");
-              header2.html("Activity");
-              row.append(header);
-              row.append(header2);
+          var row = $(table[0].insertRow(-1));
+          var header = $("<th />");
+          header.html("Date");
+          var header2 = $("<th />");
+          header2.html("Activity");
+          row.append(header);
+          row.append(header2);
 
-              //Add the data rows.
-              for (var i = 1; i < logStringArrays.length; i++) {
-                  row = $(table[0].insertRow(-1));
-                  for (var j = 0; j < infoLength; j++) {
-                      var info = $("<td />");
-                      info.html(logStringArrays[i][j]);
-                      row.append(info);
-                  }
+          //Add the data rows.
+          for (var i = 1; i < logStringArrays.length; i++) {
+              row = $(table[0].insertRow(-1));
+              for (var j = 0; j < infoLength; j++) {
+                  var info = $("<td />");
+                  info.html(logStringArrays[i][j]);
+                  row.append(info);
               }
+          }
 
-              var logTableSmall = $("#logTableSmall");
-              logTableSmall.html("");
-              logTableSmall.append(table);
-  })
+          var logTableSmall = $("#logTableSmall");
+          logTableSmall.html("");
+          logTableSmall.append(table);
 }
 
 function hideButton(){
