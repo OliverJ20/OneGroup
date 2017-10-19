@@ -2,48 +2,63 @@
 {% block body %}
     <body>
         <div class="contentDiv" width="100%">
-
             <div class="bodydiv" id="SecPolicy">
-                <h2>Security Policy</h2>
-                <a href="{{ url_for('iptable_form',ruleid='-1') }}"><button> Add Rule</button></a>
-                <br  />
-		<table>
-                    <tr>
-                        <th>IP Table Policy Rules</th>
-                        <th>Rule Actions</th>
-                    </tr>
-                    {% for rule in firewall if rule['Policy'] == 1 %}
+                {% if nodes != -1 %}
+                    <form action="">
+                        <select name="node1">
+                            <option value="-1" selected>No assigned node</option>
+                            {% for node in nodes %}
+                                <option value="{{ node["ID"] }}">{{ node["ID"] }}</option>
+                            {% endfor %}                    	
+                        </select>
+
+                        <div class= "bodydiv" id = "submitDiv">
+                            <input type="submit" name="nodeSub1" value="Send"></input>
+                        </div> 
+                    </form>
+                {% endif %}
+		
+                {% if firewall != -1 %} 
+                    <h2>Security Policy {% if nodes != -1 %} for {{ nodeID }} {% endif %}</h2>
+                    <a href="{{ url_for('iptable_form',ruleid='-1') }}"><button> Add Rule</button></a>
+                    <br  />
+		    <table>
                         <tr>
-                            <td>iptables -P {{ rule['Rule'] }}</td>   
-                            <td style="align:right;width:100px">
-                                <a href="/iptables/{{rule['ID']}}">
-                                    <button class="button-wide">EDIT
-                                    </button>
-                                </a>
-                            </td>
-                        </tr> 
-                    {% endfor %} 
-                </table>
-		<br  />
-                <table>
-                    <tr>
-                        <th>IP Table Standard Rules</th>
-                        <th>Rule Actions</th>
-                    </tr>
-                    {% for rule in firewall if rule['Policy'] == 0 %}
-                        <tr>
-                            <td>iptables -P {{ rule['Rule'] }}</td>   
-                            <td style="align:right;width:100px">
-                                <a href="/iptables/{{rule['ID']}}">
-                                    <button class="button-wide">EDIT</button>
-                                </a>
-                                <a href="{{ url_for( 'iptables_delete', rid = rule['ID']) }}">
-                                    <button class="declineButton">DELETE</button>
-                                </a>
-                            </td>
+                            <th>IP Table Policy Rules</th>
+                            <th>Rule Actions</th>
                         </tr>
-                    {% endfor %} 
-                </table>
+                        {% for rule in firewall if rule['Policy'] == 1 %}
+                            <tr>
+                                <td>iptables -P {{ rule['Rule'] }}</td>   
+                                <td style="align:right;width:100px">
+                                    <a href="/iptables/{{rule['ID']}}">
+                                        <button class="button-wide">EDIT</button>
+                                    </a>
+                                </td>
+                            </tr> 
+                        {% endfor %} 
+                    </table>
+		    <br  />
+                    <table>
+                        <tr>
+                            <th>IP Table Standard Rules</th>
+                            <th>Rule Actions</th>
+                        </tr>
+                        {% for rule in firewall if rule['Policy'] == 0 %}
+                            <tr>
+                                <td>iptables -P {{ rule['Rule'] }}</td>   
+                                <td style="align:right;width:100px">
+                                    <a href="/iptables/{{rule['ID']}}">
+                                        <button class="button-wide">EDIT</button>
+                                    </a>
+                                    <a href="{{ url_for( 'iptables_delete', rid = rule['ID']) }}">
+                                        <button class="declineButton">DELETE</button>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %} 
+                    </table>
+                {% endif %}
             </div>
         </div>
     </body>

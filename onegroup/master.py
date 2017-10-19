@@ -425,15 +425,30 @@ def iptables_delete(rid):
     return redirect(url_for('confirm', confirmed = "IP Table Rule Deleted!"))
     
 
-@app.route('/config/', methods=['GET'])
+@app.route('/config/', methods=['GET', 'POST'])
 @admin_required
 def show_config():
     """
         VPN Server configuration page 
  
         GET: Displays the configuration page html
-    """
-    return render_template('config.html', firewall = hl.getIptablesRules())
+    """ 
+
+    #Is single or multi node?
+    nodes = hl.getAllNodes()
+    if nodes:
+        if request.method == "POST":
+            nodeID = request.form['node1']
+            nodeReq = hl.getNode("ID", nodeId)
+            node = nodeget(nodeReq["Address"]+"/getrules/")
+            if node:
+                return render_template('config.html', firewall = node["rules"], nodes = nodeID)
+            else:
+                flash("Error: cannot retrieve iptable rules from node")
+
+        return render_template('config.html', firewall = -1, nodes = nodes)
+    else:
+        return render_template('config.html', firewall = hl.getIptablesRules(), nodes = -1)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
