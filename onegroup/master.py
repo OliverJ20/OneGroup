@@ -101,6 +101,45 @@ def render():
     """Endpoint placeholder to redirect to the login page"""
     return redirect(url_for('login'))
 
+@app.route('/connectnode/', methods=['POST'])
+@admin_required
+def connectnode():
+    """
+        Peforms a request for data from a remote node
+
+        method : GET or POST
+        url : url to the node
+        data : data to pass to the node
+
+        Returns : json object response from the node
+    """
+    content = request.get_json()
+    print(content)
+        
+    #Check request method
+    if content["method"] == "GET":
+        res = hl.nodeGet(content["url"])
+    elif content["method"] == "GET":
+        res = hl.nodePost(content["url"], content["data"])
+
+    #Error check
+    if res:
+        if ('result' in res and res['result']) or 'result' not in res:
+            try:
+                res.pop("result")
+            except:
+                pass
+            
+            result = {"result" : True, "data" : res} 
+        else:
+            result = {"result" : False} 
+    else:
+        result = {"result" : False} 
+                        
+    #Return response
+    return(jsonify(result)) 
+
+
 
 @app.route("/log_download/", methods = ['GET', 'POST'])
 def log_download():
@@ -212,13 +251,11 @@ def handle_req(reqid):
         POST: If approve, perform the request. Else delete the request
     """
     req = hl.retrieveRequest(reqid)
-    
+         
     if request.method == 'POST':
         if request.form['reqOption'] == 'Approve':
-            print("ACCEPT")
             hl.acceptRequest(req)
         elif request.form['reqOption'] == 'Decline':
-            print("DECLINE")
             hl.declineRequest(req)
         
         return redirect('/users')
@@ -326,18 +363,25 @@ def show_user_keys(username):
     ##method to pull keys from database using username
 
 
-@app.route('/iptables/<ruleid>', methods=['GET','POST'])
+@app.route('/iptables/<nid>/<ruleid>', methods=['GET','POST'])
 @admin_required
-def iptable_form(ruleid):
+def iptable_form(nid, ruleid):
     """
         Form to edit an iptables rule
 
-        rule : the id of the rule to edit
+        nid : the id of the node or -1
+        ruleid : the id of the rule to edit
 
         GET: Display the iptables editor form html
         POST: Handles form data for a new iptables rule
     """ 
-    rule = hl.getRule("ID", ruleid)
+    if nid != -1 and hl.getNode("ID",nid)["Address"] != "self":
+        url = hl.getNode("ID",nid)["Address"] 
+        res = hl.nodePost(url+"/getrule/",{"key" : "ID", "value" : ruleid}) 
+        if "result" in res and res["result"]:
+            rule = res["rule"]
+    else:
+        rule = getRule("ID", ruleid)
 
     nodes = hl.getAllNodes()
     
@@ -351,9 +395,9 @@ def iptable_form(ruleid):
                 ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
                 
                 #If on a remove node, send rule to node
-                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
-                    url = getNode("ID",int(request.form["node"]))["Address"] 
-                    nodePost(url+"/addrule/",{"rule" : ip_string}) 
+                if int(request.form["node1"]) != -1 and hl.getNode("ID",int(request.form["node1"]))["Address"] != "self":
+                    url = hl.getNode("ID",int(request.form["node1"]))["Address"] 
+                    hl.nodePost(url+"/addrule/",{"rule" : ip_string}) 
 
                 else:    
                     hl.addIPRule(ip_string)
@@ -361,9 +405,9 @@ def iptable_form(ruleid):
                 ip_string = hl.ipDictToString(getIPForm(rule["Policy"]))
                 
                 #If on a remove node, send rule to node
-                if int(request.form["node"]) != -1 and getNode("ID",int(request.form["node"]))["Address"] != "self":
-                    url = getNode("ID",int(request.form["node"]))["Address"] 
-                    nodePost(url+"/modifyrule/",{"ID" : ruleid, "rule" : ip_string}) 
+                if nid != -1 and hl.getNode("ID",nid)["Address"] != "self":
+                    url = hl.getNode("ID",nid)["Address"] 
+                    hl.nodePost(url+"/updaterule/",{"ID" : ruleid, "rule" : ip_string}) 
 
                 else:
                     hl.updateIPRules(ruleid, ip_string)
@@ -377,7 +421,7 @@ def iptable_form(ruleid):
         return render_template('iptables_create.html', postback = -1, nodes = nodes)
 
     print(rule)
-    return render_template('iptables_edit.html', rid = ruleid, rule = rule['Rule'], policy = rule['Policy'], nodes = nodes)
+    return render_template('iptables_edit.html', nid = nid, rid = ruleid, rule = rule['Rule'], policy = rule['Policy'], nodes = nodes)
 
 
 def getIPForm(policy):
@@ -421,9 +465,9 @@ def iptables_delete(nid, rid):
 
         GET : deletes the given iptable rule
     """
-    if nid != -1 and getNode("ID", nid)["Address"] != "self":
-        url = getNode("ID", nid)["Address"] 
-        nodePost(url+"/deleterule/",{"ID" : ruleid}) 
+    if nid != -1 and hl.getNode("ID", nid)["Address"] != "self":
+        url = hl.getNode("ID", nid)["Address"] 
+        hl.nodePost(url+"/deleterule/",{"ID" : rid}) 
 
     else:
         hl.removeIPRule(rid)
@@ -453,7 +497,7 @@ def show_config():
                 node = hl.nodeGet(nodeReq["Address"]+"/getrules/")["rules"]
             
             if node:
-                return render_template('config.html', firewall = node, nodes = nodes, nodeID = hl.getNode("ID", nodeID)["Name"])
+                return render_template('config.html', firewall = node, nodes = nodes, nodeID = hl.getNode("ID", nodeID))
             else:
                 flash("Error: cannot retrieve iptable rules from node")
 

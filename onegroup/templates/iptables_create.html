@@ -3,7 +3,7 @@
 {% block body %}
     <body>	
         {% if postback < 0 %} 
-	        <form action="{{ url_for('iptable_form', ruleid = -2) }}" vname="ruleType" id="detailsLeft" method=post>
+	        <form action="{{ url_for('iptable_form', nid = -1, ruleid = -2) }}" vname="ruleType" id="detailsLeft" method=post>
 	            <h2>Rule Type</h2>
                     <select name="ruleType1">
 	                    <option disabled selected value> -- Select -- </option>
@@ -16,7 +16,7 @@
                 </div>
             </form>
         {% else %}	
-            <form action="{{ url_for('iptable_form', ruleid = -1) }}" vname="ipform" method=post>
+            <form action="{{ url_for('iptable_form', nid = -1, ruleid = -1) }}" vname="ipform" method=post>
                 <select value = "CHAIN" id = "Chain" name = "Chain" required>
                     <option disabled selected> -- Select -- </option>
                     <option value ="INPUT">INPUT</option>

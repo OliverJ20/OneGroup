@@ -19,8 +19,8 @@
                 {% endif %}
 		
                 {% if firewall != -1 %} 
-                    <h2>Security Policy {% if nodeID != -1 %} for {{ nodeID }} {% endif %}</h2>
-                    <a href="{{ url_for('iptable_form',ruleid='-1') }}"><button> Add Rule</button></a>
+                    <h2>Security Policy {% if nodeID != -1 %} for {{ nodeID['Name'] }} {% endif %}</h2>
+                    <a href="{{ url_for('iptable_form', nid = '-1', ruleid = '-1') }}"><button> Add Rule</button></a>
                     <br  />
 		    <table>
                         <tr>
@@ -31,7 +31,7 @@
                             <tr>
                                 <td>iptables -P {{ rule['Rule'] }}</td>   
                                 <td style="align:right;width:100px">
-                                    <a href="/iptables/{{rule['ID']}}">
+                                    <a href="/iptables/{% if nodes == -1 %}-1/{% else %}{{ nodeID['ID'] }}/{% endif %}{{rule['ID']}}">
                                         <button class="button-wide">EDIT</button>
                                     </a>
                                 </td>
@@ -48,10 +48,14 @@
                             <tr>
                                 <td>iptables -P {{ rule['Rule'] }}</td>   
                                 <td style="align:right;width:100px">
-                                    <a href="/iptables/{{rule['ID']}}">
+                                    <a href="/iptables/{% if nodes == -1 %}-1/{% else %}{{ nodeID['ID'] }}/{% endif %}{{rule['ID']}}">
                                         <button class="button-wide">EDIT</button>
                                     </a>
-                                    <a href="{{ url_for( 'iptables_delete', nid = nodeID, rid = rule['ID']) }}">
+                                    {% if nodes == -1 %}
+                                        <a href="{{ url_for( 'iptables_delete', nid = '-1', rid = rule['ID']) }}">
+                                    {% else %}
+                                        <a href="{{ url_for( 'iptables_delete', nid = nodeID['ID'], rid = rule['ID']) }}">
+                                    {% endif %}
                                         <button class="declineButton">DELETE</button>
                                     </a>
                                 </td>

@@ -216,7 +216,7 @@ def addRule():
     return jsonify({"Rule" : rule["ID"]})
 
 @app.route('/updaterule/', methods=['POST'])
-def modifyRule():
+def updateRule():
     """
         Updates an iptables rule on the system
 
