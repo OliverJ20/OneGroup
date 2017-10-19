@@ -2,8 +2,9 @@
 //  * SERVER STATUS - Created by Eliot on 8/6/2017.
 //  */
 
-var logVar = setInterval(addIndexInfo("self"), 1000);
-var statVar = setInterval( statusInfo("self"), 1000);
+var globalNode = "self";
+var logVar = setInterval(addIndexInfo(globalNode), 1000);
+var statVar = setInterval( statusInfo(globalNode), 1000);
 
 $(document).ready(function () {
   addInfo();    
@@ -302,7 +303,9 @@ function tableFilter() {
 //  */
 
 function nodeChange(){
-  document.getElementById('currentNode').innerHTML = "Node: " + document.getElementById("item1").value;
+  var newNode = document.getElementById("item1").value;
+  document.getElementById('currentNode').innerHTML = "Node: " + newNode;
+  globalNode = newNode;
   
 }
 
