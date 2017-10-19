@@ -87,7 +87,7 @@
                                     <td>{{notifications["User"]}}</td>
                                     <td>{{notifications["Request"]}}</td>
                                     <td>
-                                        <form action="{{ url_for('approve_req', reqid = notifications["ID"]) }}" vname="approveForm" method=post>
+                                        <form action="{{ url_for('handle_req', reqid = notifications["ID"]) }}" vname="approveForm" method=post>
                                             <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
                                             <input type="submit" name="reqOption" value="Decline" class = "declineButton"></input>
                                         </form>
@@ -100,7 +100,7 @@
                                 <td>{{dataR["User"]}}</td>
                                 <td>{{dataR["Request"]}}</td>
                                 <td>
-                                    <form action="{{ url_for('approve_req', reqid = dataR["ID"]) }}" vname="approveForm" method=post>
+                                    <form action="{{ url_for('handle_req', reqid = dataR["ID"]) }}" vname="approveForm" method=post>
                                         <input type="submit" name="reqOption" value="Approve" id = "approveButton"></input>
                                         <input type="submit" name="reqOption" value="Decline" class = "declineButton"></input>
                                     </form>

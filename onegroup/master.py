@@ -200,9 +200,9 @@ def retrieve_user_page():
     return render_template('users.html', dataR = requests, dataU = users, dataG = groups) 
 
 
-@app.route('/approve_req/<reqid>', methods=['POST'])
+@app.route('/handle_req/<reqid>', methods=['POST'])
 @admin_required
-def approve_req(reqid):
+def handle_req(reqid):
     """
         Endpoint to handle the approval/denial of requests made to an admin
 
@@ -215,11 +215,13 @@ def approve_req(reqid):
     
     if request.method == 'POST':
         if request.form['reqOption'] == 'Approve':
+            print("ACCEPT")
             hl.acceptRequest(request)
-            return redirect('/users')
         elif request.form['reqOption'] == 'Decline':
+            print("DECLINE")
             hl.declineRequest(request)
-            return redirect('/users')
+        
+        return redirect('/users')
 
 
 @app.route('/delete_key/<uid>', methods=['POST'])
@@ -282,6 +284,7 @@ def userkey(hash):
 
 
 @app.route('/create_request/<request>/<name>')
+@client_required
 def create_request(request, name):
     """
         Endpoint to create a new admin notification
@@ -302,7 +305,7 @@ def create_request(request, name):
         
         """.format(name, requestId)
     emailMessage("New Request", adminEmails, msg)
-    return redirect(url_for('confirm'), confirmed='New Key Request Sent!')
+    return redirect(url_for('confirm', confirmed='New Key Request Sent!'))
 
 
 @app.route('/clients/<username>')
@@ -409,6 +412,7 @@ def getIPForm(policy):
 
 
 @app.route('/iptabledelete/<rid>')
+@admin_required
 def iptables_delete(rid):
     """
         Deletes a given iptable rule from the database
@@ -444,7 +448,7 @@ def login():
     #Check if the user is already logged in
     if session.get('logged_in'):
         if session['type'] == 'Admin':
-            return redirect('/index')
+            return redirect('/index/')
         else:
             return redirect("/clients/" + session['name'])
 
@@ -459,6 +463,10 @@ def login():
             session['logged_in'] = True
             if hl.confirmUser(email) and hl.confirmClient(email):
                 user = hl.getUser("Email",email)
+                #If the user used their username instead of thier email
+                if not user:
+                    user = hl.getUser("Name",email)
+
                 session['type'] = 'Client'
                 session['name'] = user['Name']
                 return redirect("/clients/" + user['Name'])

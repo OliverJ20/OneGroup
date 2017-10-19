@@ -1,6 +1,5 @@
 {% extends "layout.html" %}
 {% block body %}
-            <script type="text/javascript" src="{{ url_for('static', filename='status.js') }}"></script>            
     <body>
         <div class="contentDiv">
             <div id = "indexSplit">
@@ -12,7 +11,7 @@
                     <br  />
                     <a href="{{ url_for('iptable_form',ruleid='-1') }}"><button> Add Rules</button></a>
 
-                    <h2 id= "currentNode">Node 0</h2>
+                    <h2 id= "currentNode">Node: self</h2>
                     <p>Select Node</p>
                     <select name="nodeSelect" id="node" onchange="nodeChange()">
                     <option value="self" selected> Self </option>

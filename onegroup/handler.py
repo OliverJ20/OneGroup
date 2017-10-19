@@ -1231,8 +1231,15 @@ def createRequest(username, requestType):
     """
     db = Database(filename=filen)
     db.insert("notifications", { "User" : username, "Request" : requestType })
+    requests = db.retrieve("notifications", { "User" : username, "Request" : requestType })
     db.close()
-    requestedId = db.retrieve("notifications", { "User" : username, "Request" : requestType })['ID']
+
+    #Check if multiple requests by this users
+    if isinstance(requests,list):
+        requestedId = requests[-1]['ID']
+    else:
+        requestedId = requests['ID']
+    
     return requestedId
     
     
@@ -1244,12 +1251,18 @@ def getAdminEmails():
     """
     db = Database(filename=filen)
 
-    emails = retrieve('users', {"Account_Type" : "Admin"})
+    admins = db.retrieve('users', {"Account_Type" : "Admin"})
 
     #get all emails where account_type is "Admin"
 
     db.close()
-    return [x["Email"] for x in emails]
+    
+    if isinstance(admins, dict):
+        emails = [admins['Email']]
+    else:
+        emails = [x["Email"] for x in admins]
+
+    return emails
 
 
 #
