@@ -160,8 +160,8 @@ function addInfo(address)
   console.log(defAddress);
   console.log(defAddress.value);
   console.log(defAddress.toString);
-  
-  $.get(defAddress.value, function (data)
+
+  $.get(defAddress, function (data)
     {
       var LogInfo = data;
       var logStringArrays = new Array;
