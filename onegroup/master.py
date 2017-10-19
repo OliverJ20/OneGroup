@@ -296,8 +296,11 @@ def show_logs():
         VPN log display page
         
         GET: Surves the log display html 
+    
     """
-    return render_template('logs.html')
+    nodes=hl.getAllNodes();
+
+    return render_template('logs.html',nodes = nodes)
 
 
 @app.route('/userkey/<hash>', methods=['GET'])
@@ -689,7 +692,7 @@ def logType(log):
         filename += "openvpn-status.log"
     else:
         abort(404)
-
+    
     return jsonify({"logData" : hl.getLog(filename)})
 
 
