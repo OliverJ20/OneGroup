@@ -146,16 +146,10 @@ function createStatusTable(data)
                           counter++;
             }
             var statusTable = $("#statusTable");
-            while(statusTable.rows.length > 0) {
-              statusTable.deleteRow(0);
-            }
             statusTable.html("");
             statusTable.append(table);
 
             var statusRouteTable = $("#statusRouteTable");
-            while(statusRouteTable.rows.length > 0) {
-              statusRouteTable.deleteRow(0);
-            }
             statusRouteTable.html("");
             statusRouteTable.append(routingTable);
 }
@@ -312,9 +306,6 @@ function createLogTableShort(data)
           }
 
           var logTableSmall = $("#logTableSmall");
-          while(logTableSmall.rows.length > 0) {
-            logTableSmall.deleteRow(0);
-          }
           logTableSmall.html("");
           logTableSmall.append(table);
 }
