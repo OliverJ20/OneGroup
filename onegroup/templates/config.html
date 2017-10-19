@@ -4,7 +4,7 @@
         <div class="contentDiv" width="100%">
             <div class="bodydiv" id="SecPolicy">
                 {% if nodes != -1 %}
-                    <form action="">
+                    <form action="" method=post>
                         <select name="node1">
                             <option value="-1" selected>No assigned node</option>
                             {% for node in nodes %}
@@ -19,7 +19,7 @@
                 {% endif %}
 		
                 {% if firewall != -1 %} 
-                    <h2>Security Policy {% if nodes != -1 %} for {{ nodeID }} {% endif %}</h2>
+                    <h2>Security Policy {% if nodeID != -1 %} for {{ nodeID }} {% endif %}</h2>
                     <a href="{{ url_for('iptable_form',ruleid='-1') }}"><button> Add Rule</button></a>
                     <br  />
 		    <table>
