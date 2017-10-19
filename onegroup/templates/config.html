@@ -6,7 +6,6 @@
                 {% if nodes != -1 %}
                     <form action="" method=post>
                         <select name="node1">
-                            <option value="-1" selected>No assigned node</option>
                             {% for node in nodes %}
                                 <option value="{{ node["ID"] }}">{{ node["Name"] }}</option>
                             {% endfor %}                    	

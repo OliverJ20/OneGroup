@@ -488,20 +488,22 @@ def show_config():
     if nodes:
         if request.method == "POST":
             nodeID = request.form['node1']
-            nodeReq = hl.getNode("ID", nodeID)
-            
-            if nodeReq["Address"] == "self":
-                node = hl.getIptablesRules()
-            else:
-                #TODO Error check
-                node = hl.nodeGet(nodeReq["Address"]+"/getrules/")["rules"]
-            
-            if node:
-                return render_template('config.html', firewall = node, nodes = nodes, nodeID = hl.getNode("ID", nodeID))
-            else:
-                flash("Error: cannot retrieve iptable rules from node")
 
-        return render_template('config.html', firewall = -1, nodes = nodes, nodeID = -1)
+        else:
+            nodeID = 1
+
+        nodeReq = hl.getNode("ID", nodeID)
+        
+        if nodeReq["Address"] == "self":
+            node = hl.getIptablesRules()
+        else:
+            #TODO Error check
+            node = hl.nodeGet(nodeReq["Address"]+"/getrules/")["rules"]
+        
+        if node:
+            return render_template('config.html', firewall = node, nodes = nodes, nodeID = hl.getNode("ID", nodeID))
+        else:
+            flash("Error: cannot retrieve iptable rules from node")
     else:
         return render_template('config.html', firewall = hl.getIptablesRules(), nodes = -1, nodeID = -1)
 
