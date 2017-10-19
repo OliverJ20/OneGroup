@@ -303,9 +303,12 @@ function tableFilter() {
 //  */
 
 function nodeChange(){
-  var newNode = document.getElementById("item1").value;
-  document.getElementById('currentNode').innerHTML = "Node: " + newNode;
-  globalNode = newNode;
+  console.log(globalNode);
+  var newNode = document.getElementById("node");
+  var nodeValue = newNode.options[newNode.selectedIndex].value;
+  console.log(nodeValue);
+  document.getElementById('currentNode').innerHTML = "Node: " + nodeValue;
+  globalNode = nodeValue;
   
 }
 
