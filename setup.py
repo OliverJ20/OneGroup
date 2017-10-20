@@ -7,9 +7,11 @@ import shlex
 
 DIR = "/usr/local/onegroup"
 SYSTEM = "/lib/systemd/system"
+BIN = "/usr/local/bin"
 ETC = "/etc/onegroup"
 SERVICE = "onegroup.service"
 CONFIG = "onegroup.conf"
+STARTUP = "onegroup.py"
 
 class PostDevelopCommand(develop):
     """Post-Installation for development mode"""
@@ -45,9 +47,14 @@ def postInstallProcedure():
     subprocess.call(shlex.split('systemctl {}'.format("daemon-reload")))
     subprocess.call(shlex.split('systemctl {} {}'.format("enable",SERVICE))) 
 
+    #Move startup script to /usr/bin/local
+    subprocess.call(shlex.split('mv {} {}'.format(STARTUP,BIN+"/onegroup")))
+    
+
+
 setup(
     name = 'OneGroup',
-    version='0.0.1',
+    version='0.5.0',
     description='Webclient for OpenVPN',
     long_description='OpenVPN management client for web',
     classifiers=[
