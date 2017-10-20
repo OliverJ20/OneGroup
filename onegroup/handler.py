@@ -63,6 +63,11 @@ def getUsers():
     db = Database(filename = filen)
     users = db.retrieve("users")
     db.close()
+    
+    #Handle single user
+    if isinstance(users,dict):
+        users = [users]
+
     return users
 
 

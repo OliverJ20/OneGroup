@@ -15,7 +15,7 @@
                     <th>Authentication</th>
                     <th>Connection Type</th>
                     <th>Group</th>
-                    <th>Node</th>
+		    {% if nodes %}<th>Node</th>{% endif %}
                     <th>Expiry</th>
                     <th>Options</th>
                     <th>Keys</th>
@@ -29,8 +29,8 @@
                                 <td>{{users["Auth_Type"]}}</td>
                                 <td>{{users["Account_Type"]}}</td>
                                 <td>{% if users["Grp"] != -1 %} {{users["Grp"]}} {% else %} None {% endif %}</td>
-                                <td>{% if users["Node"] != -1 %} {{users["Node"]}} {% else %} N/A {% endif %}</td>
-                                <td>{{users["Expiry"]}}</td>
+                                {% if nodes %}<td>{% if users["Node"] != -1 %} {{users["Node"]}} {% else %} N/A {% endif %}</td>{% endif %}
+                                <td>{% if users["Expiry"] != ""%} {{users["Expiry"]}} {% else %} None {% endif %}</td>
                                 <td>
                                     <a href="/userform/{{users["ID"]}}">
                                         <button class = "button-table">Edit</button>
@@ -44,28 +44,6 @@
                                 </td>
                             </tr>
                         {% endfor %}
-                    {% endif %}
-                    {% if dataU[0] is not mapping %}
-                        <tr>
-                            <td>{{dataU["Name"]}}</td>
-                            <td>{% if dataU["Email"] != "" %} {{dataU["Email"]}} {% else %} None {% endif %}</td>
-                            <td>{{dataU["Auth_Type"]}}</td>
-                            <td>{{dataU["Account_Type"]}}</td>
-                            <td>{% if dataU["Grp"] != "" %} {{dataU["Grp"]}} {% else %} None {% endif %}</td>
-                            <td>{% if dataU["Node"] != "" %} {{dataU["Node"]}} {% else %} N/A {% endif %}</td>
-                            <td>{{dataU["Expiry"]}}</td>
-                            <td>
-                                <a href="/userform/{{dataU["ID"]}}">
-                                    <button class = "button-table">Edit</button>
-                                </a>
-                                <form action="{{ url_for('delete_key', uid = dataU["ID"]) }}" method=post></input>
-                                    <input type="submit" value="Delete" class = "declineButton"></input>
-                                </form>
-                            </td>
-                            <td>
-                                <a href="/admin_key/{{dataU["Name"]}}" download> <button class = "button-table" id= "testButton">Download</button></a>
-                            </td>
-                        </tr>
                     {% endif %}
                 {% endif %}
               </table>
@@ -101,6 +79,7 @@
                 <table>
                     <tr>
                         <th>Name</th>
+                        {% if nodes %}<th>Node</th>{% endif %}
                         <th>Internal Network</th>
                         <th>External Network</th>
                         <th>Options</th>
@@ -109,6 +88,7 @@
                         {%for members in dataG %}
                             <tr>
                                 <td>{{members['Name']}}</td>
+                                {% if nodes %}<td>{% if members["Node"] != -1 %} {{members["Node"]}} {% else %} N/A {% endif %}</td>{% endif %}
                                 <td>{{members['Internal']}}</td>
                                 <td>{{members['External']}}</td>
                                 <td>
