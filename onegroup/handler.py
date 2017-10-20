@@ -199,6 +199,13 @@ def updateUser(ID, newuser):
         logging.error("Error updating user %s: Node has been changed", oldUser["Name"])
         return False
 
+    #If group change add user to new group
+    if newuser["Grp"] != oldUser["Grp"]:
+        if newuser["Grp"] == -1:
+            deleteUserFromGroup(ID) 
+        else:
+            addUserToGroup(ID,newuser["Grp"])
+
     #Remove id from newuser
     if "ID" in newuser:
         newuser.pop("ID")
@@ -277,7 +284,7 @@ def validateNewUser(name, accountType, authType, email, passwd, expiry, oldname 
 
 def checkExpiredKeys():
     """
-        Checks all the keys in the database to see if they have expired. If so, remove them
+        Checks all the keys in the database to see if they have expired. If so,remove them
     """
     now = datetime.now()
     for user in getUsers():
@@ -631,10 +638,14 @@ def updateGroup(ID, group):
                 #Get the current client config for the user
                 config = getUserClientConfig(user["Keys"])
                 if config != None:
-                    internal = "{}.{}".format(rule["Source"].split(".0/")[0],config[0].split(".")[-1])
-                    external = "{}.{}".format(rule["Source"].split(".0/")[0],config[1].split(".")[-1])
+                    base = rule["Source"].split("/")[0][:-2]
+                    internal = "{}.{}".format(base,config[0].split(".")[-1])
+                    external = "{}.{}".format(base,config[1].split(".")[-1])
                     
-                updateUserClientConfig(user["Keys"],internal,external)
+                    updateUserClientConfig(user["Keys"],internal,external)
+                else:
+                    addUserToGroup(user["ID"],ID)
+
 
     #Removed ID and Rule fields
     if "ID" in group:
@@ -714,8 +725,8 @@ def addUserToGroup(user, group):
     grp = getGroup(group)  
     used = grp["Used_Octets"].split()        
     
-    #Setup base addresse
-    base = grp["Internal"].split("/")[0].split(".0")[0]
+    #Setup base address
+    base = grp["Internal"].split("/")[0][:-2]
 
     #Determine endpoint pair to use
     if used == "":
@@ -758,10 +769,13 @@ def getUserClientConfig(user):
         Returns : String tuple (Internal,External) or None if the user has no config
     """
     ccf = os.getenv(tag+'openvpn_ccd',base_config['openvpn_ccd'])+"/{}".format(user)
-    with open(ccf,'r') as f:
-        config = f.readline().split()
-    
-    if len(config) != 3:
+    if os.path.exists(ccf): 
+        with open(ccf,'r') as f:
+            config = f.readline().split()
+        
+        if len(config) != 3:
+            return None
+    else:
         return None
 
     return (config[1],config[2])
@@ -786,10 +800,12 @@ def deleteUserFromGroup(userID):
 
         userID : The user's ID of the user to be removed to the group
     """
-    #Change user's Group entry in the database
+    #Change user's Group entry in the database 
+    #A check is made incase the user was removed from a group via updateUser to prevent recursion 
     user = getUser("ID",userID)
-    user["Grp"] = -1
-    updateUser(userID, user) 
+    if user["Grp"] != -1:
+        user["Grp"] = -1
+        updateUser(userID, user) 
     
     #Remove the user's client config file
     if user["Node"] != -1 and getNode("ID", user["Node"])["Address"] != "self":
@@ -950,6 +966,7 @@ def getFormattedNetwork(network):
         maskbit = address[1]
         address = address[0]
     else:
+        address = address[0]
         maskbit = 0
     
     #TODO Support more netmask other than /0 and /24

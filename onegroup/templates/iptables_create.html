@@ -84,14 +84,15 @@
                     <option value ="SNAT">SNAT</option>
                 </select>
 
-                <p>Assign Node</p>
-                <select name="node1">
-                    <option value="-1" selected>No assigned node</option>
-                        {% for node in nodes %}
-                            <option value="{{ node["ID"] }}">{{ node["ID"] }}</option>
-                        {% endfor %}                    	
-                </select>
-
+                {% if nodes %}
+                    <p>Assign Node</p>
+                    <select name="node1">
+                        <option value="-1" selected>No assigned node</option>
+                            {% for node in nodes %}
+                                <option value="{{ node["ID"] }}">{{ node["ID"] }}</option>
+                            {% endfor %}                    	
+                    </select>
+                {% endif %}
                 <div class= "bodydiv" id = "submitDiv">
                      <input type="submit" name="iptables1" value="Send"></input>
                 </div> 
