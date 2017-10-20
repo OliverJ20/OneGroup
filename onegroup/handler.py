@@ -58,7 +58,7 @@ def getUsers():
     """
         Fetchs all users from the database
 
-        Returns : List of all admin requests
+        Returns : List of all users
     """
     db = Database(filename = filen)
     users = db.retrieve("users")
@@ -158,7 +158,6 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
     user = {"Name" : name, "Email" : email, "Password": password, "Auth_Type" : authType, "Account_Type" : accountType, "Keys" : createUserFilename(name), "Key_Distributed" : 0, "Grp" : group, "Node" : node,"Expiry": expiry}
  
     #create the users key/cert pair
-    print("Node: {}".format(getNode("ID",node)))
     if node != -1 and getNode("ID",node)["Address"] != "self":
         url = getNode("ID",node)["Address"]
         
@@ -496,7 +495,6 @@ def createGroup(name, internalNetwork, externalNetwork, node = -1, **kwargs):
         url = getNode("ID",node)["Address"]
 
     if url != "self":
-        print("adding group to node")
         #Add group on remote node
         res = nodePost(url+"/addgroup/",{"internal" : group["Internal"]}) 
         if not res or not res["result"]:
@@ -523,7 +521,6 @@ def createGroup(name, internalNetwork, externalNetwork, node = -1, **kwargs):
             addIPRule(rule)
             group["Rule"] = db.retrieve("firewall",{"Rule":rule})["ID"]
         
-    print(group)
     #Add group to the database
     db.insert("groups",group)
 
@@ -858,7 +855,6 @@ def updateRouteInConfig(oldNetwork,newNetwork):
     #Find the existing route in the file
     #If the route doesn't exist, add it to the config
     line = checkRouteExists(oldNetwork,getFormattedNetwork(oldNetwork)) 
-    print(line)
     if line == -1:
         addRouteToConfig(newNetwork)
     else:
@@ -1071,7 +1067,7 @@ def retrieveRequests():
         Returns : List of all admin requests
     """
     db = Database(filename = filen)
-    requests =  db.retrieve("notifications")
+    requests = db.retrieve("notifications")
     db.close()
     
     #Ensure requests is a list
@@ -1104,11 +1100,11 @@ def acceptRequest(request):
 
         Returns : True if the request was successfully accepted. Else False
     """
-    db = Databases(filename = filen)
+    db = Database(filename = filen)
     
-    if request["Request"] == 1:
-        if remakeUserKeys(user):
-            db.update("users", {"Key_Distributed": 0}, ("Name", user))      
+    if int(request["Request"]) == 1:
+        if remakeUserkey(request["User"]):
+            db.update("users", {"Key_Distributed": 0}, ("Name", request["User"]))      
             db.delete("notifications",{"ID" : request["ID"]})
 
     db.close()
@@ -1320,7 +1316,6 @@ def ipDictToString(ip_dict):
         
         Returns : String of dictionary values
     """
-    print(ip_dict)
     table =""
     inputFace =""
     outputFace =""
@@ -1498,7 +1493,6 @@ def logDownload(startDate,endDate):
 
         Returns : The the filepath to the new logfile 
     """
-    print(log_dir)
     logs = getLog(log_dir+"openvpn.log")
     
     #Error check the logfile
@@ -1515,14 +1509,12 @@ def logDownload(startDate,endDate):
     started = False
     datematch = re.compile("[A-Za-z]{3} [A-Za-z]{3} [ 0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} [0-9]{4} ")
     for row in logs:
-        print(row)
         match = datematch.match(row)
         if match == None:    
             datestr = ""
         else:
             datestr = str(match.group()[:-1])
         
-        print(datestr)
         #Handle no date specified
         if len(datestr) == 0:
             #Date is set to before the starting date to fail the first if condition

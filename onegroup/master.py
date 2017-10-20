@@ -114,7 +114,6 @@ def connectnode():
         Returns : json object response from the node
     """
     content = request.get_json()
-    print(content)
         
     #Check request method
     if content["method"] == "GET":
@@ -150,10 +149,7 @@ def log_download():
     matchStartDate= re.search(year_month_day, startDate);
     matchEndDate= re.search(year_month_day, endDate);
     if(matchStartDate and matchEndDate):
-        print(startDate)
-        print(endDate)
         logDir = hl.logDownload(startDate,endDate)
-        print(logDir)
         return send_file(logDir)
     else:
         flash("Please Use Valid Date Format: YYYY-MM-DD")
@@ -410,7 +406,6 @@ def iptable_form(nid, ruleid):
     if ruleid == "-1":
         return render_template('iptables_create.html', postback = -1, nodes = nodes)
 
-    print(rule)
     return render_template('iptables_edit.html', nid = nid, rid = ruleid, rule = rule['Rule'], policy = rule['Policy'], nodes = nodes)
 
 
@@ -547,7 +542,6 @@ def logout():
         GET: Clears the user's cookies and returns to the login page
     """
     session.clear()
-    print(session)
     return redirect(url_for('login'))
 
 
@@ -561,7 +555,6 @@ def confirm():
     """
     if request.method == 'POST':
         user_type = session.get('type', None)
-        print(user_type)
         if user_type == 'Admin':
             return redirect('/index')
         elif user_type == 'Client':
@@ -937,7 +930,6 @@ def createNewGroup():
         returns : True if group created, False otherwise
     """
     if request.method == 'POST':
-        print("MADE IT")
         groupname = request.form['groupname1']
         internal = request.form['internal1']
         external = request.form['external1']
@@ -949,7 +941,6 @@ def createNewGroup():
 
         if int(userNo) == 0:
             if hl.createGroup(groupname, internal, external):
-                print("MADE IT HERE TOO")
                 return True
         elif int(userNo) > 0:
             if hl.createGroup(groupname, internal, external, genUsers=True, numUsers=int(userNo)):
