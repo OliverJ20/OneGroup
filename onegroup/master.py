@@ -482,9 +482,12 @@ def show_config():
         if nodeReq["Address"] == "self":
             node = hl.getIptablesRules()
         else:
-            #TODO Error check
-            node = hl.nodeGet(nodeReq["Address"]+"/getrules/")["rules"]
-        
+            res = hl.nodeGet(nodeReq["Address"]+"/getrules/")
+            if 'result' in res and res['result']:
+                node = res["rules"]         
+            else:
+                node = None
+
         if node:
             return render_template('config.html', firewall = node, nodes = nodes, nodeID = hl.getNode("ID", nodeID))
         else:
@@ -739,7 +742,7 @@ def filluserform(form):
 
         elif form == "ET":
             user = session['user']
-            return render_template("userform_edit_user.html", postback = 1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], grp = user["Grp"], groups = groups, node = user["Node"])
+            return render_template("userform_edit_user.html", postback = 1, username=user["Name"], email=user["Email"], authtype=user["Auth_Type"], accounttype=user["Account_Type"], expire=user["Expiry"], grp = user["Grp"], groups = groups, node = user["Node"])
                 
         elif form == "DE":
             #MAKE SURE ALL VALUE THAT ARE NOT PART OF REQUEST.FORM DO NOT THROW 400 BAD REQUEST ERROR

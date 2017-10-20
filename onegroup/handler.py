@@ -199,13 +199,6 @@ def updateUser(ID, newuser):
         logging.error("Error updating user %s: Node has been changed", oldUser["Name"])
         return False
 
-    #If group change add user to new group
-    if newuser["Grp"] != oldUser["Grp"]:
-        if newuser["Grp"] == -1:
-            deleteUserFromGroup(ID) 
-        else:
-            addUserToGroup(ID,newuser["Grp"])
-
     #Remove id from newuser
     if "ID" in newuser:
         newuser.pop("ID")
@@ -219,6 +212,14 @@ def updateUser(ID, newuser):
         return False
 
     db.close()
+
+    #If group change add user to new group
+    if newuser["Grp"] != oldUser["Grp"]:
+        if newuser["Grp"] == -1:
+            deleteUserFromGroup(ID) 
+        else:
+            addUserToGroup(ID,newuser["Grp"])
+
     return True
 
 def validateNewUser(name, accountType, authType, email, passwd, expiry, oldname = "", oldemail = ""):

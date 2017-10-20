@@ -129,7 +129,7 @@ def setKeyExpiry():
         Adds job to the scheduler and starts the scheduler
     """
     #Add key expiry job to run every hour
-    sched.add_job(checkExpiredKeys,'cron',minute=0,id='key_expire_job')
+    sched.add_job(checkExpiredKeys,'cron',second=0, id='key_expire_job')
     
     #Start scheduler
     sched.start()
