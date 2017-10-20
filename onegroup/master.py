@@ -381,7 +381,7 @@ def iptable_form(nid, ruleid):
                 ip_string = hl.ipDictToString(getIPForm(session["Policy"]))
                 
                 #If on a remove node, send rule to node
-                if int(request.form["node1"]) != -1 and hl.getNode("ID",int(request.form["node1"]))["Address"] != "self":
+                if ("node1" in request.form and int(request.form["node1"]) != -1) and hl.getNode("ID",int(request.form["node1"]))["Address"] != "self":
                     url = hl.getNode("ID",int(request.form["node1"]))["Address"] 
                     hl.nodePost(url+"/addrule/",{"rule" : ip_string}) 
 

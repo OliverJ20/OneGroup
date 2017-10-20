@@ -8,6 +8,7 @@
                 width="150" height="75"/>
             <!--find if keys downloaded!-->
             <!--if keys are not downloaded!-->
+            <br  \> 
             {% if distributed == false %} <!--if username.HasKeys!-->
             <div id="loginDiv">
                    <h3> Download Key</h3>
@@ -16,9 +17,13 @@
                    <br  />
                </div>
             {% else %}
-                <a href = "{{ url_for('logout') }}">Log Out</a>
+                <br  \>
                 <a href = "{{ url_for('create_request', request = 1, name = username) }}"><button>Lost Certificate? Request New Keys</button></a>
             {% endif %}
+            <br  \>
+            <br  \>
+            <a href = "{{ url_for('logout') }}"><button>Log Out</button></a>
+            <br  \>
             <a href = "/password"> <h3> Reset Password </h3></a>
         </div>
     </center>

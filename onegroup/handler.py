@@ -1344,10 +1344,14 @@ def ipDictToString(ip_dict):
     port =""
     state =""
     action =""
-    
+   
+    #if policy 
     if len(ip_dict) == 2:
         ipRules = " {} {}".format(ip_dict['Chain'], ip_dict['Action'])
-        #ipRules = ipRules + " -j " + ip_dict['Action']
+        
+        #Pre and post routing policy
+        if ip_dict["Chain"] == "PREROUTING" or ip_dict["Chain"] == "POSTROUTING": 
+            ipRules += " -t nat"
     else:
         ipRules = ip_dict['Chain']
         
