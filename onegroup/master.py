@@ -149,7 +149,18 @@ def log_download():
     matchStartDate= re.search(year_month_day, startDate);
     matchEndDate= re.search(year_month_day, endDate);
     if(matchStartDate and matchEndDate):
-        logDir = hl.logDownload(startDate,endDate)
+        #If remote node, get log from that node
+        if 'nodeSelect' in request.form and request.form['nodeSelect'] != "self":
+            url = "http://{}/logdownload/".format(request.form['nodeSelect'])
+            now = datetime.now().strftime("%d%m%Y_%H%M%S")
+            logDir = os.getenv(tag+'working_dir',working_dir)+"/openvpn_remote_{}.log".format(now)
+            if not hl.nodeGetFile(url,logDir):
+                return abort(404)
+
+        #Else use local node
+        else:
+            logDir = hl.logDownload(startDate,endDate)
+
         return send_file(logDir)
     else:
         flash("Please Use Valid Date Format: YYYY-MM-DD")
@@ -297,8 +308,8 @@ def userkey(hash):
         GET: If the keys have already been download: flash error message and logout
              Else: Offer keys to be downloaded
     """
-    name = session['name']
-    flagCheck = hl.checkDistributeFlag(name)
+    user = getUser("Name",session['name'])
+    flagCheck = hl.checkDistributeFlag(user["Name"])
     if flagCheck == False:
         return getKeys()
     elif flagCheck == True:
