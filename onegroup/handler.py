@@ -166,6 +166,10 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
             logging.error("Error creating user %s: Node returned a empty or false result",name)
             return False
 
+        #Copy the user's ovpn file to the master node
+        if not nodeGetFile(url+"/getkey/{}".format(user["Keys"]), keys_dir+user["Keys"]+".ovpn"):
+            logging.error("Error moving user %s keys to master node: Node returned a false result or error in writing file",name)
+            return False
     else:
         args = [
             "add",
