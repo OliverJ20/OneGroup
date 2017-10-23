@@ -303,6 +303,16 @@ def checkExpiredKeys():
             #Check setting to determine if the user should be deleted on key expiration 
             if os.getenv(tag+'delete_on_expire',base_config['delete_on_expire']).lower() == "true":
                 deleteUser(user["ID"])
+            #Else check if the user is on a remote node
+            elif user["Node"] != -1 and getNode("ID", user["Node"])["Address"] != "self":
+                url = getNode("ID",user["Node"])["Address"]  
+                res = nodePost(url+"/deletekey/",{"user" : user["Keys"]}) 
+                    
+                if not res or not res["result"]:
+                    logging.error("Error revoking expired user %s: Node returned a empty or false result",name)
+                    return False
+                
+            #Else revoke keys locally
             else:
                 args = [
                     "del",
