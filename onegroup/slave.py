@@ -37,7 +37,7 @@ def getUserKey(name):
     """
     #Check if keys exist
     if os.path.isdir(keys_dir):
-        filename = keys_dir + keys + '.ovpn' 
+        filename = keys_dir + name + '.ovpn' 
         
         return send_file(filename)
     #Else abort 404    

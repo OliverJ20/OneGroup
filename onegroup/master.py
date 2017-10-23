@@ -6,6 +6,7 @@ import os
 import logging
 import cherrypy
 import pygal
+from datetime import datetime, timedelta
 
 from functools import wraps
 from flask_mail import Message, Mail
@@ -151,17 +152,23 @@ def log_download():
     if(matchStartDate and matchEndDate):
         #If remote node, get log from that node
         if 'nodeSelect' in request.form and request.form['nodeSelect'] != "self":
-            url = "http://{}/logdownload/".format(request.form['nodeSelect'])
+            url = "{}/logdownload/".format(request.form['nodeSelect'])
             now = datetime.now().strftime("%d%m%Y_%H%M%S")
             logDir = os.getenv(tag+'working_dir',working_dir)+"/openvpn_remote_{}.log".format(now)
-            if not hl.nodeGetFile(url,logDir):
-                return abort(404)
+            
+            print(matchStartDate.group(0), matchEndDate.group(0))
+            data = {"startdate" : matchStartDate.group(0), "enddate" : matchEndDate.group(0)}
+
+            if not hl.nodeGetFile(url,logDir, data):
+                flash("Error getting log file from remote node")
+                return redirect(url_for('show_logs'))
+
 
         #Else use local node
         else:
             logDir = hl.logDownload(startDate,endDate)
 
-        return send_file(logDir)
+        return send_file(logDir, as_attachment=True)
     else:
         flash("Please Use Valid Date Format: YYYY-MM-DD")
         return render_template('logs.html')
@@ -308,7 +315,7 @@ def userkey(hash):
         GET: If the keys have already been download: flash error message and logout
              Else: Offer keys to be downloaded
     """
-    user = getUser("Name",session['name'])
+    user = hl.getUser("Name",session['name'])
     flagCheck = hl.checkDistributeFlag(user["Name"])
     if flagCheck == False:
         return getKeys()
@@ -1070,10 +1077,10 @@ def getKeys(name = None):
         #if not os.path.exists(filename):
         #    hl.zipUserKeys(keys) 
 
-        return send_file(filename)
+        return send_file(filename, as_attachment=True)
     #Else use relative dev path
     else:
-        return send_file('static\\Test_client1.zip')
+        return send_file('static\\Test_client1.zip', as_attachment=True)
 
 
 @app.route('/admin_key/<name>', methods=['GET','POST'])
@@ -1092,10 +1099,10 @@ def adminGetUserKey(name):
         #if not os.path.exists(filename):
         #    hl.zipUserKeys(keys) 
         
-        return send_file(filename)
+        return send_file(filename, as_attachment=True)
     #Else use relative dev path
     else:
-        return send_file('static\\Test_client1.zip')
+        return send_file('static\\Test_client1.zip', as_attachment=True)
 
 
 def setConfig(debug):

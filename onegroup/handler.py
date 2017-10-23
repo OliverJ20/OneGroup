@@ -307,7 +307,7 @@ def checkExpiredKeys():
                 args = [
                     "del",
                     user["Keys"],
-                    ]
+                ]
                 callScript('userman',args)
 
 def remakeUserkey(user):
@@ -319,18 +319,41 @@ def remakeUserkey(user):
         Return True if succesful else False
     """
     #Get the location of the user's keys
-    keys = getUser("Name",user)["Keys"]
+    user = getUser("Name",user)
+    keys = user["Keys"]
 
-    #Delete user's key
-    args = [
-        "del",
-        keys,
-    ]
-    callScript('userman',args)
-    
-    #Create new keys
-    args[0] = "add"
-    callScript('userman',args)
+    #Check if on a remote node
+    if user["Node"] != -1 and getNode("ID", user["Node"])["Address"] != "Self":
+        url = getNode("ID",user["Node"])["Address"]  
+        
+        #Delete user's key
+        res = nodePost(url+"/deletekey/",{"user" : keys})     
+        if not res or not res["result"]:
+            logging.error("Error remaking key for user %s: Node returned a empty or false result", user["Name"])
+            return False
+
+        #Create and fetch new key
+        res = nodePost(url+"/createkey/",{"user" : keys})
+        if not res or not res["result"]:
+            logging.error("Error remaking key for user %s: Node returned a empty or false result", user["Name"])
+            return False
+
+        #Copy the user's ovpn file to the master node
+        if not nodeGetFile(url+"/getkey/{}".format(user["Keys"]), keys_dir+ keys +".ovpn"):
+            logging.error("Error creating user %s: Node returned a empty or false result", user["Name"])
+            return False
+        
+    else:
+        #Delete user's key
+        args = [
+            "del",
+            keys,
+        ]
+        callScript('userman',args)
+        
+        #Create new keys
+        args[0] = "add"
+        callScript('userman',args)
 
     return True
 
@@ -1624,16 +1647,17 @@ def nodeGet(url):
         return None
 
 
-def nodeGetFile(url, path):
+def nodeGetFile(url, path, data = None):
     """
         Performs a get request to download a file from a node
 
         url : The url to peform a get request on
         path : Full path of where to store the downloaded file 
+        data : Optional json data
 
         Returns True if succesful, else False
     """
-    r = requests.get("http://"+url, stream = True) 
+    r = requests.get("http://"+url, json=data, stream = True) 
     
     if r.status_code == 200:
         #Attempt to write the downloaded file to disk. Should be cleaned up later
