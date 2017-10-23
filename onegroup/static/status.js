@@ -4,7 +4,21 @@
 
 var logVar = setInterval(addIndexInfo, 1000);
 var statVar = setInterval(statusInfo, 1000);
+var graphVar = setInterval(createGraph, 1000);
 var globalNode = "self";
+
+var graphdata = [
+  {User: "Test1", ByteS: 8167},
+  {User: "Test2", ByteS: 1492},
+  {User: "Test3", ByteS: 2780},
+  {User: "Test4", ByteS: 4253},
+  {User: "JAMES", ByteS: 2702},
+  {User: "Test6", ByteS: 2288},
+  {User: "Test7", ByteS: 2022},
+  {User: "Test8", ByteS: 6094},
+  {User: "Test9", ByteS: 6973},
+  {User: "Test10", ByteS: 00153}
+];
 
 $(document).ready(function () {
   addInfo();    
@@ -33,6 +47,7 @@ $(document).ready(function () {
 
 function statusInfo()
 {
+
   console.log("Status Info: " + globalNode);
 
 
@@ -62,6 +77,7 @@ function statusInfo()
 
 function createStatusTable(data)
 {
+    graphdata = [];
     var LogInfo = data;
     var logStringArrays = new Array;
     var invalid1 = new RegExp("Open VPN CLIENT LIST");
@@ -124,6 +140,7 @@ function createStatusTable(data)
                           while(invalid3.test(logStringArrays[counter]) == false){
                             var tableLength = logStringArrays[counter].length;
                             row = $(table[0].insertRow(-1));
+                            graphdata.append({"User" : logStringArrays[counter][0],"Bytes Sent" : logStringArrays[counter][2]});
                             for (var j = 0; j < tableLength; j++) {
                               var info = $("<td />");
                               info.html(logStringArrays[counter][j]);
@@ -145,13 +162,18 @@ function createStatusTable(data)
                           }
                           counter++;
             }
-            var statusTable = $("#statusTable");
-            statusTable.html("");
-            statusTable.append(table);
+            var html = table.html();
+            $("#statusTable").html(html);
 
-            var statusRouteTable = $("#statusRouteTable");
+            /*var statusTable = $("#statusTable");
+            statusTable.html("");
+            statusTable.append(table);*/
+
+            var statusHtml = routingTable.html();
+            $("#statusRouteTable").html(routingTable);
+            /*var statusRouteTable = $("#statusRouteTable");
             statusRouteTable.html("");
-            statusRouteTable.append(routingTable);
+            statusRouteTable.append(routingTable);*/
 }
 
 /**
@@ -229,9 +251,12 @@ function createLogTable(data)
               }
           }
 
-          var logTable = $("#logTable");
+          var html = table.html();
+          $("#logTable").html(html);
+
+         /* var logTable = $("#logTable");
           logTable.html("");
-          logTable.append(table);
+          logTable.append(table);*/
 }
 
 function addIndexInfo()
@@ -305,9 +330,12 @@ function createLogTableShort(data)
               }
           }
 
-          var logTableSmall = $("#logTableSmall");
+          var html = table.html();
+          $("#logTableSmall").html(html);
+          
+          /*var logTableSmall = $("#logTableSmall");
           logTableSmall.html("");
-          logTableSmall.append(table);
+          logTableSmall.append(table);*/
 }
 
 function hideButton(){
@@ -348,6 +376,68 @@ function nodeChange(){
   document.getElementById('currentNode').innerHTML = "Node: " + nodeValue;
   globalNode = nodeValue;
   
+}
+
+function getDataInformation(){
+return graphdata;
+}
+
+function createGraph(){  
+  d3.select("#indexSplitRight").selectAll("svg").remove();
+  var margin = { top: 40, right: 20, bottom: 30, left: 40 },
+    width = 800 - margin.left - margin.right,
+    height = 200 - margin.top - margin.bottom;
+
+  var formatPercent = d3.format(".0");
+
+  var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+  var y = d3.scale.linear()
+    .range([height, 0]);
+
+  var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickFormat(formatPercent);
+
+  var svg = d3.select("#indexSplitRight").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var data = getDataInformation();
+
+  x.domain(data.map(function (d) { return d.User; }));
+  y.domain([0, d3.max(data, function (d) { return d.ByteS; })]);
+
+  svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+  svg.append("g")
+    .attr("class", "y axis")
+    .call(yAxis)
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("y", -12)
+    .style("text-anchor", "end")
+    .text("Bytes Sent");
+
+  svg.selectAll(".bar")
+    .data(data)
+    .enter().append("rect")
+    .attr("class", "bar")
+    .attr("x", function (d) { return x(d.User); })
+    .attr("width", x.rangeBand())
+    .attr("y", function (d) { return y(d.ByteS); })
+    .attr("height", function (d) { return height - y(d.ByteS); })
 }
 
 

@@ -1,5 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
     <body>
         <div class="contentDiv">
             <div id = "indexSplit">
@@ -23,7 +25,6 @@
         
                 </div>
                 <div id = "indexSplitRight">
-                        <embed type = "image/svg+xml" src ={{graph_data|safe}} style='max-width:1000px'/>
                 </div>
             </div>
 
