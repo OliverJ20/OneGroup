@@ -324,7 +324,6 @@ def remakeUserkey(user):
 
     #Check if on a remote node
     if user["Node"] != -1 and getNode("ID", user["Node"])["Address"] != "self":
-        print("Remote Node")
         url = getNode("ID",user["Node"])["Address"]  
         
         #Delete user's key
@@ -345,7 +344,6 @@ def remakeUserkey(user):
             return False
         
     else:
-        print("Locate Node")
         #Delete user's key
         args = [
             "del",

@@ -935,7 +935,7 @@ def createNewGroup():
         external = request.form['external1']
         userNo = request.form['usersNo1']
         if 'node1' in request.form:
-            node = request.form['node1']
+            node = int(request.form['node1'])
         else:
             node = -1
 
