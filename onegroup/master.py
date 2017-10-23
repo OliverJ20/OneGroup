@@ -5,14 +5,12 @@ import re
 import os
 import logging
 import cherrypy
-import pygal
 from datetime import datetime, timedelta
 
 from functools import wraps
 from flask_mail import Message, Mail
 from flask import Flask, render_template, redirect, url_for, request, session, abort, send_file, flash, jsonify
 from paste.translogger import TransLogger
-from pygal.style import Style
 
 try:
     from onegroup.defaults import *
@@ -186,28 +184,9 @@ def home():
             Displays confirmation message if creation is successful
             Flashes notification if user exists
     """
-
-    filename = log_dir + "openvpn-status.log"
-    logs = hl.getLog(filename)
-    
-    custom_style = Style(
-      background='transparent',
-      opacity='.7',
-      opacity_hover='.9',
-      transition='400ms ease-in',
-      colors=('#006e72', '#00979d'))
-
-
-    line_chart = pygal.Bar(fill=True, style=custom_style, width=800, height=400,spacing=50)
-    line_chart.title = 'VPN Usage'
-    line_chart.x_labels = ["Big Girl", "Dog Walker", "+1", "Don't Know", "Ernest"] 
-    line_chart.y_labels = [0,20,40,60,80,100]
-    line_chart.add('Bytes Sent',      [85.8, 84.6, 84.7, 74.5,   66])
-    line_chart.add('Bytes Recieved',  [14.2, 15.4, 15.3,  8.9,    9])
-    graph_data = line_chart.render_data_uri()
     
     nodes = hl.getAllNodes();
-    return render_template('index.html', graph_data=graph_data, nodes = nodes)
+    return render_template('index.html', nodes = nodes)
 
 
 @app.route('/password/', methods=['GET', 'POST'])

@@ -77,8 +77,7 @@ setup(
         'passlib',
         'paste',
         'apscheduler',
-        'requests',
-        'pygal'
+        'requests'
     ],
     scripts=[
         'onegroup/scripts/userman',
