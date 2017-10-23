@@ -166,6 +166,10 @@ def createUser(name, accountType, authType, email = '', passwd = '', group = -1,
             logging.error("Error creating user %s: Node returned a empty or false result",name)
             return False
 
+        #Copy the user's ovpn file to the master node
+        if not nodeGetFile(url+"/getkey/{}".format(user["Keys"]), keys_dir+user["Keys"]+".ovpn"):
+            logging.error("Error moving user %s keys to master node: Node returned a false result or error in writing file",name)
+            return False
     else:
         args = [
             "add",
@@ -303,7 +307,7 @@ def checkExpiredKeys():
                 args = [
                     "del",
                     user["Keys"],
-                    ]
+                ]
                 callScript('userman',args)
 
 def remakeUserkey(user):
@@ -315,18 +319,41 @@ def remakeUserkey(user):
         Return True if succesful else False
     """
     #Get the location of the user's keys
-    keys = getUser("Name",user)["Keys"]
+    user = getUser("Name",user)
+    keys = user["Keys"]
 
-    #Delete user's key
-    args = [
-        "del",
-        keys,
-    ]
-    callScript('userman',args)
-    
-    #Create new keys
-    args[0] = "add"
-    callScript('userman',args)
+    #Check if on a remote node
+    if user["Node"] != -1 and getNode("ID", user["Node"])["Address"] != "Self":
+        url = getNode("ID",user["Node"])["Address"]  
+        
+        #Delete user's key
+        res = nodePost(url+"/deletekey/",{"user" : keys})     
+        if not res or not res["result"]:
+            logging.error("Error remaking key for user %s: Node returned a empty or false result", user["Name"])
+            return False
+
+        #Create and fetch new key
+        res = nodePost(url+"/createkey/",{"user" : keys})
+        if not res or not res["result"]:
+            logging.error("Error remaking key for user %s: Node returned a empty or false result", user["Name"])
+            return False
+
+        #Copy the user's ovpn file to the master node
+        if not nodeGetFile(url+"/getkey/{}".format(user["Keys"]), keys_dir+ keys +".ovpn"):
+            logging.error("Error creating user %s: Node returned a empty or false result", user["Name"])
+            return False
+        
+    else:
+        #Delete user's key
+        args = [
+            "del",
+            keys,
+        ]
+        callScript('userman',args)
+        
+        #Create new keys
+        args[0] = "add"
+        callScript('userman',args)
 
     return True
 
@@ -1612,7 +1639,7 @@ def nodeGet(url):
 
         Returns dict of json response, else None
     """
-    r = requests.get("http://"+url) 
+    r = requests.get(formUrl(url), verify = checkVerify()) 
     
     if r.status_code == 200:
         return r.json()
@@ -1620,16 +1647,17 @@ def nodeGet(url):
         return None
 
 
-def nodeGetFile(url, path):
+def nodeGetFile(url, path, data = None):
     """
         Performs a get request to download a file from a node
 
         url : The url to peform a get request on
         path : Full path of where to store the downloaded file 
+        data : Optional json data
 
         Returns True if succesful, else False
     """
-    r = requests.get("http://"+url, stream = True) 
+    r = requests.get(formUrl(url), json=data, stream = True, verify = checkVerify()) 
     
     if r.status_code == 200:
         #Attempt to write the downloaded file to disk. Should be cleaned up later
@@ -1652,12 +1680,42 @@ def nodePost(url, data):
 
         Returns dict of json response, else None
     """
-    r = requests.post("http://"+url,json=data)
+    r = requests.post(formUrl(url), json=data, verify = checkVerify())
     
     if r.status_code == 200:
         return r.json()
     else:
         return None
 
+def formUrl(req):
+    """
+        Takes given node URL and creates a properly formed url
+
+        req : the requested node address and endpoint
+
+        Returns str of formated url
+    """
+
+    #Check for HTTPS
+    address = req.split("/")[0]
+    adr = address.split(":")
+    
+    #HTTPS
+    if len(adr) == 2 and int(adr[1]) == 443:  
+        url = "https://{}/{}".format(adr[0],'/'.join(req.split("/")[1:]))
+    #HTTP
+    else:
+        url = "http://"+req
+
+    return url
+
+def checkVerify():
+    """
+        Checks to see if SSL Certificates should be verified when doing multinode communications
+
+
+        Returns True if certifcations should be verified, else false
+    """
+    return os.getenv(tag+'node_ssl_verify',base_config['node_ssl_verify']).lower() == "true"
 
 
