@@ -54,7 +54,7 @@ def postInstallProcedure():
 
 setup(
     name = 'OneGroup',
-    version='0.5.0',
+    version='1.0.0',
     description='Webclient for OpenVPN',
     long_description='OpenVPN management client for web',
     classifiers=[

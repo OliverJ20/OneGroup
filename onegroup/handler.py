@@ -1639,7 +1639,7 @@ def nodeGet(url):
 
         Returns dict of json response, else None
     """
-    r = requests.get("http://"+url) 
+    r = requests.get(formUrl(url), verify = checkVerify()) 
     
     if r.status_code == 200:
         return r.json()
@@ -1657,7 +1657,7 @@ def nodeGetFile(url, path, data = None):
 
         Returns True if succesful, else False
     """
-    r = requests.get("http://"+url, json=data, stream = True) 
+    r = requests.get(formUrl(url), json=data, stream = True, verify = checkVerify()) 
     
     if r.status_code == 200:
         #Attempt to write the downloaded file to disk. Should be cleaned up later
@@ -1680,12 +1680,42 @@ def nodePost(url, data):
 
         Returns dict of json response, else None
     """
-    r = requests.post("http://"+url,json=data)
+    r = requests.post(formUrl(url), json=data, verify = checkVerify())
     
     if r.status_code == 200:
         return r.json()
     else:
         return None
 
+def formUrl(req):
+    """
+        Takes given node URL and creates a properly formed url
+
+        req : the requested node address and endpoint
+
+        Returns str of formated url
+    """
+
+    #Check for HTTPS
+    address = req.split("/")[0]
+    adr = address.split(":")
+    
+    #HTTPS
+    if len(adr) == 2 and int(adr[1]) == 443:  
+        url = "https://{}/{}".format(adr[0],'/'.join(req.split("/")[1:]))
+    #HTTP
+    else:
+        url = "http://"+req
+
+    return url
+
+def checkVerify():
+    """
+        Checks to see if SSL Certificates should be verified when doing multinode communications
+
+
+        Returns True if certifcations should be verified, else false
+    """
+    return os.getenv(tag+'node_ssl_verify',base_config['node_ssl_verify']).lower() == "true"
 
 
