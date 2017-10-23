@@ -87,10 +87,9 @@
                 {% if nodes %}
                     <p>Assign Node</p>
                     <select name="node1">
-                        <option value="-1" selected>No assigned node</option>
-                            {% for node in nodes %}
-                                <option value="{{ node["ID"] }}">{{ node["ID"] }}</option>
-                            {% endfor %}                    	
+                        {% for node in nodes %}
+                            <option value="{{ node["ID"] }}">{{ node["Name"] }}</option>
+                        {% endfor %}                    	
                     </select>
                 {% endif %}
                 <div class= "bodydiv" id = "submitDiv">
