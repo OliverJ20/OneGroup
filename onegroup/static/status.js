@@ -423,8 +423,8 @@ function getDataInformation(){
 
 function createGraph(){  
   d3.select("#indexSplitRight").selectAll("svg").remove();
-  var margin = { top: 40, right: 20, bottom: 30, left: 80 },
-    width = 1000 - margin.left - margin.right,
+  var margin = { top: 40, right: 20, bottom: 30, left: 50 },
+    width = 900 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
 
   var newFormat = d3.format(".0");
@@ -445,7 +445,7 @@ function createGraph(){
     .tickFormat(newFormat);
 
   var svg = d3.select("#indexSplitRight").append("svg")
-    .attr("width", width + margin.left + margin.right + 800)
+    .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");

@@ -298,7 +298,7 @@ def checkExpiredKeys():
             continue
 
         #If expired, delete the keys
-        expire = datetime.strptime(user["Expiry"],"%Y-%m-%d:%H%M")   
+        expire = datetime.strptime(user["Expiry"],"%Y-%m-%d:%H%M") 
         if expire < now:
             #Check setting to determine if the user should be deleted on key expiration 
             if os.getenv(tag+'delete_on_expire',base_config['delete_on_expire']).lower() == "true":
