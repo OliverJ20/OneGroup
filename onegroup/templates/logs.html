@@ -12,7 +12,7 @@
                         Activity: <input type="date" id="dateEnd" name="endDate" onkeyup="tableFilter()">
                     </form>
                 </div>
-            <div>
+		<div>
                 <div id="exportSettings">
                     <form action="/log_download/" name="settings" id="fileSettings" method="POST">
                         {% if nodes %}
@@ -31,17 +31,6 @@
                         End: <input type="date" id="exportEnd" name = "eEnd">
                         <br  />
                         <button type="submit" id="exportSubmit" name="logExport" value="Send">Export Logs</input>
-                            <div>
-                                {% if nodes %}
-                                    <h2 id ="currentNode">Node: self</h2>
-                                    <p>Select Node</p>
-                                    <select name="nodeSelect" id="node" onchange="nodeChange(); addInfo();">
-                                    {%for node in nodes%}
-                                            <option value="{{node["Address"]}}">{{node["Name"]}}</option>
-                                        {% endfor %}
-                                    </select> 
-                                {% endif %}
-                                </div>
                     </form>
                 </div>
             </div>

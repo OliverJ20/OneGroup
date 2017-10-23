@@ -421,7 +421,7 @@ function getDataInformation(){
 
 function createGraph(){  
   d3.select("#indexSplitRight").selectAll("svg").remove();
-  var margin = { top: 40, right: 20, bottom: 30, left: 40 },
+  var margin = { top: 40, right: 20, bottom: 30, left: 80 },
     width = 1000 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
 
