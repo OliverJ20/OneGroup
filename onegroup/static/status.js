@@ -9,6 +9,7 @@ var globalNode = "self";
 var byteType = "received"
 
 var graphdataRec = [
+  /*TEST DATA
   {User: "Test1", ByteS: 8167},
   {User: "Test2", ByteS: 1492},
   {User: "Test3", ByteS: 2780},
@@ -18,10 +19,11 @@ var graphdataRec = [
   {User: "Test7", ByteS: 2022},
   {User: "Test8", ByteS: 6094},
   {User: "Test9", ByteS: 6973},
-  {User: "Test10", ByteS: 00153}
+  {User: "Test10", ByteS: 00153}*/
 ];
 
 var graphdataSen = [
+  /*TEST DATA
   {User: "Mr1", ByteS: 6767},
   {User: "Miss2", ByteS: 4192},
   {User: "f", ByteS: 7280},
@@ -31,7 +33,7 @@ var graphdataSen = [
   {User: "k", ByteS: 0222},
   {User: "l", ByteS: 2394},
   {User: "t", ByteS: 5173},
-  {User: "q", ByteS: 1153}
+  {User: "q", ByteS: 1153}*/
 ];
 
 $(document).ready(function () {
@@ -91,8 +93,8 @@ function statusInfo()
 
 function createStatusTable(data)
 {
-    //graphdataRec = [];
-    //graphdataSen = [];
+    graphdataRec = [];
+    graphdataSen = [];
     var LogInfo = data;
     var logStringArrays = new Array;
     var invalid1 = new RegExp("Open VPN CLIENT LIST");
