@@ -15,15 +15,11 @@
                     <p>Group External Network Address</p>
                     <input type="text" name="external2" required value="{{ external }}" maxlength="40"> </input>
 
-                    {% if nodes %}
-                        <p>Assign Node</p>
-                        <select name="node2">
-                            <option value="-1" selected>No assigned node</option>
-                            {% for node in nodes %}
-                                <option value="{{ node["ID"] }}">{{ node["ID"] }}</option>
-                            {% endfor %}                    	
-                        </select>
+                    {% if node != -1 %}
+                        <br  />
+                        <p>Assigned Node {{ node }}</p>
                     {% endif %}
+                    
                     <br></br>
                     <div class= "bodydiv" div id = "submitDiv">
                         <input type="submit" name="groupform2" value="Send"></input>

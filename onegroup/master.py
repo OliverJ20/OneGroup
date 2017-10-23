@@ -866,7 +866,7 @@ def fillgroupform(form):
         return render_template("userform_create_group.html", nodes = nodes)
     elif hl.getGroup(form) != None:
         group = hl.getGroup(form)
-        return render_template("userform_edit_group.html", groupname=group["Name"], internal=group["Internal"], external=group["External"], nodes = nodes)
+        return render_template("userform_edit_group.html", groupname=group["Name"], internal=group["Internal"], external=group["External"], node = group["Node"])
     else: #Must be fake input
         abort(404)
         
@@ -956,7 +956,7 @@ def createNewGroup():
         external = request.form['external1']
         userNo = request.form['usersNo1']
         if 'node1' in request.form:
-            node = request.form['external1']
+            node = request.form['node1']
         else:
             node = -1
 
