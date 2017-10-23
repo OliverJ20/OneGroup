@@ -940,10 +940,10 @@ def createNewGroup():
             node = -1
 
         if int(userNo) == 0:
-            if hl.createGroup(groupname, internal, external):
+            if hl.createGroup(groupname, internal, external, node):
                 return True
         elif int(userNo) > 0:
-            if hl.createGroup(groupname, internal, external, genUsers=True, numUsers=int(userNo)):
+            if hl.createGroup(groupname, internal, external, node, genUsers=True, numUsers=int(userNo)):
                 return True
 
         return False
