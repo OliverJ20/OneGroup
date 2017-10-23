@@ -6,8 +6,9 @@ var logVar = setInterval(addIndexInfo, 1000);
 var statVar = setInterval(statusInfo, 1000);
 var graphVar = setInterval(createGraph, 1000);
 var globalNode = "self";
+var byteType = "received"
 
-var graphdata = [
+var graphdataRec = [
   {User: "Test1", ByteS: 8167},
   {User: "Test2", ByteS: 1492},
   {User: "Test3", ByteS: 2780},
@@ -18,6 +19,19 @@ var graphdata = [
   {User: "Test8", ByteS: 6094},
   {User: "Test9", ByteS: 6973},
   {User: "Test10", ByteS: 00153}
+];
+
+var graphdataSen = [
+  {User: "Mr1", ByteS: 6767},
+  {User: "Miss2", ByteS: 4192},
+  {User: "f", ByteS: 7280},
+  {User: "g", ByteS: 2453},
+  {User: "h", ByteS: 7202},
+  {User: "j", ByteS: 4388},
+  {User: "k", ByteS: 0222},
+  {User: "l", ByteS: 2394},
+  {User: "t", ByteS: 5173},
+  {User: "q", ByteS: 1153}
 ];
 
 $(document).ready(function () {
@@ -77,7 +91,8 @@ function statusInfo()
 
 function createStatusTable(data)
 {
-    graphdata = [];
+    //graphdataRec = [];
+    //graphdataSen = [];
     var LogInfo = data;
     var logStringArrays = new Array;
     var invalid1 = new RegExp("Open VPN CLIENT LIST");
@@ -142,7 +157,8 @@ function createStatusTable(data)
                             row = $(table[0].insertRow(-1));
                             console.log(logStringArrays[counter][0]); 
                             console.log(logStringArrays[counter][2]); 
-                            graphdata.push({"User" : logStringArrays[counter][0],"ByteS" : parseInt(logStringArrays[counter][2])});
+                            graphdataRec.push({"User" : logStringArrays[counter][0],"ByteS" : parseInt(logStringArrays[counter][2])});
+                            graphdataSen.push({"User" : logStringArrays[counter][0],"ByteS" : parseInt(logStringArrays[counter][3])});
                             for (var j = 0; j < tableLength; j++) {
                               var info = $("<td />");
                               info.html(logStringArrays[counter][j]);
@@ -380,23 +396,42 @@ function nodeChange(){
   
 }
 
+function changeDataType(){
+  console.log("Working")
+  if(byteType == "received"){
+    byteType = "sent";
+    document.getElementById('currentActivity').innerHTML = "Bytes Sent";
+    return;
+  }
+  else{
+    byteType = "received";
+    document.getElementById('currentActivity').innerHTML = "Bytes Received";
+    return;
+  }
+}
+
 function getDataInformation(){
-return graphdata;
+  if(byteType == "received"){
+    return graphdataRec;
+  }
+  else{
+    return graphdataSen;
+  }
 }
 
 function createGraph(){  
   d3.select("#indexSplitRight").selectAll("svg").remove();
   var margin = { top: 40, right: 20, bottom: 30, left: 40 },
-    width = 800 - margin.left - margin.right,
+    width = 1000 - margin.left - margin.right,
     height = 200 - margin.top - margin.bottom;
 
-  var formatPercent = d3.format(".0");
+  var newFormat = d3.format(".0");
 
   var x = d3.scale.ordinal()
     .rangeRoundBands([0, width], 0.1); 
 
   var y = d3.scale.linear()
-    .range([height, 0]);
+    .range([height, 0], 0.1);
 
   var xAxis = d3.svg.axis()
     .scale(x)
@@ -405,10 +440,10 @@ function createGraph(){
   var yAxis = d3.svg.axis()
     .scale(y)
     .orient("left")
-    .tickFormat(formatPercent);
+    .tickFormat(newFormat);
 
   var svg = d3.select("#indexSplitRight").append("svg")
-    .attr("width", width + margin.left + margin.right)
+    .attr("width", width + margin.left + margin.right + 800)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -428,9 +463,6 @@ function createGraph(){
     .call(yAxis)
     .append("text")
     .attr("transform", "rotate(-90)")
-    .attr("y", -12)
-    .style("text-anchor", "end")
-    .text("Bytes Sent");
 
   svg.selectAll(".bar")
     .data(data)

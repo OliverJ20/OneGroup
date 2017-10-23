@@ -39,27 +39,6 @@ th    {
     color: #ffffff;
 }
 
-input    {
-    margin-bottom: 2%;
-}
-
-input[type="submit"]{
-    margin-top: 1%;
-    color: #ffffff;
-    background-color: #00979d;
-    font-weight: bolder;
-    border: none;
-    padding: 10px 20px;
-    font-size: 11px;
-    min-width: 76px;
-    margin-bottom: 2px;
-}
-
-input[type="submit"]:hover    {
-    color:#000000;
-    background-color: #ffffff;
-}
-
 button    {
     display:inline-block;
     color: #ffffff;
@@ -238,6 +217,10 @@ footer a{
  background-color: #37f925;
 }
 
+.declineButton:hover{
+    background-color: #911818 !important;
+  }
+
 .declineButton{
   display:inline-block;
   color: #ffffff;
@@ -245,7 +228,7 @@ footer a{
   border: none;
   padding: 10px 20px;
   font-size: 11px;
-  background-color: #db2727;
+  background-color: #db2727 !important; 
   width:100%;
 }
 
@@ -253,9 +236,6 @@ footer a{
   background-color: #1e8214;
 }
 
-#declineButton:hover{
-  background-color: #911818;
-}
 
 #hiddenInput{
   display: none;
@@ -424,6 +404,38 @@ body center .loginDiv {
     width: 75%;
 }
 
+#indexSplitRight img{
+    padding-top:2%;
+    margin-left: 4%;
+    float: left;
+}
+
+
+#indexSplitRight h2{
+    float:left;
+}
+
+input    {
+    margin-bottom: 2%;
+}
+
+input[type="submit"]{
+    margin-top: 1%;
+    color: #ffffff;
+    background-color: #00979d;
+    font-weight: bolder;
+    border: none;
+    padding: 10px 20px;
+    font-size: 11px;
+    min-width: 76px;
+    margin-bottom: 2px;
+}
+
+input[type="submit"]:hover    {
+    color:#000000;
+    background-color: #ffffff;
+}
+
 .axis path,
 .axis line {
   fill: none;
@@ -441,30 +453,4 @@ body center .loginDiv {
 
 .x.axis path {
   display: none;
-}
-
-.d3-tip {
-  line-height: 1;
-  font-weight: bold;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.8);
-  color: #fff;
-  border-radius: 2px;
-}
-
-.d3-tip:after {
-  box-sizing: border-box;
-  display: inline;
-  font-size: 10px;
-  width: 100%;
-  line-height: 1;
-  color: rgba(0, 0, 0, 0.8);
-  position: absolute;
-  text-align: center;
-}
-
-.d3-tip.n:after {
-  margin: -1px 0 0 0;
-  top: 100%;
-  left: 0;
 }
