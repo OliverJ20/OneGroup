@@ -19,18 +19,18 @@
                         <br  />
                         End: <input type="date" id="exportEnd" name = "eEnd">
                         <br  />
-                        <button type="submit" id="exportSubmit" name="logExport" value="Send">Export Logs</input>
+                        <button type="submit" id="exportSubmit" name="logExport" value="Send">Export Logs</button>
                             <div>
-                                    {% if nodes %}
-                                        <h2 id ="currentNode">Node: self</h2>
-                                        <p>Select Node</p>
-                                        <select name="nodeSelect" id="node" onchange="nodeChange(); addInfo();">
-                                        {%for node in nodes%}
-                                                <option value="{{node["Address"]}}">{{node["Name"]}}</option>
-                                            {% endfor %}
-                                        </select> 
-                                    {% endif %}
-                                    </div>
+                                {% if nodes %}
+                                    <h2 id ="currentNode">Node: self</h2>
+                                    <p>Select Node</p>
+                                    <select name="nodeSelect" id="node" onchange="nodeChange(); addInfo();">
+                                    {%for node in nodes%}
+                                            <option value="{{node["Address"]}}">{{node["Name"]}}</option>
+                                        {% endfor %}
+                                    </select> 
+                                {% endif %}
+                            </div>
                     </form>
                 </div>
             </div>
@@ -49,7 +49,7 @@
             </div>
             {% endif %}
 
-        <div id="logTable" align="center" style="margin-top: 15%; overflow-y: scroll;">
+        <div id="logTable" align="center" style="margin-top: 210px; overflow-y: scroll;">
             <form>
 
             </form>
