@@ -140,7 +140,9 @@ function createStatusTable(data)
                           while(invalid3.test(logStringArrays[counter]) == false){
                             var tableLength = logStringArrays[counter].length;
                             row = $(table[0].insertRow(-1));
-                            graphdata.append({"User" : logStringArrays[counter][0],"Bytes Sent" : logStringArrays[counter][2]});
+                            console.log(logStringArrays[counter][0]); 
+                            console.log(logStringArrays[counter][2]); 
+                            graphdata.push({"User" : logStringArrays[counter][0],"ByteS" : parseInt(logStringArrays[counter][2])});
                             for (var j = 0; j < tableLength; j++) {
                               var info = $("<td />");
                               info.html(logStringArrays[counter][j]);
@@ -391,7 +393,7 @@ function createGraph(){
   var formatPercent = d3.format(".0");
 
   var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .1);
+    .rangeRoundBands([0, width], 0.1); 
 
   var y = d3.scale.linear()
     .range([height, 0]);
